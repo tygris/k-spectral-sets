@@ -17,7 +17,7 @@
 %10/12/21
 
 function [theta, tangent_angle] = tangent_theta(sigma_0, intersection, direction, om)
-    tangent_angle = sigma_prime(sigma_0, om);
+    [tangent_angle, theta_0] = sigma_prime(sigma_0, om);
     theta_intersection = mod(angle(intersection-sigma_0),2*pi);
     theta = min(direction*tangent_angle - direction*theta_intersection, direction*mod(theta_0+pi/2,2*pi) - direction*theta_intersection);
 end

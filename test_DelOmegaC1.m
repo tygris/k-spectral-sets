@@ -12,6 +12,8 @@ r2 = 50;
 sigA1 = 5.140983941301354 + 0.674237628644485i;
 sigA1_index = 60;
 
+% c1 = 5.5706
+
 %% Example 2
 % example 1 in Caswell and Neubert 1997 paper
 A2 = [-1.5622, 0.6685,0,0,0,0,0,0,0;

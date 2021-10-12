@@ -11,8 +11,8 @@
 %
 
 function theta = angle_between(x1, x2)
-    a1 = angle(x1);
-    a2 = angle(x2);
+    a1 = mod(angle(x1), 2*pi);
+    a2 = mod(angle(x2), 2*pi);
     theta = abs(a1 - a2);
 end
 

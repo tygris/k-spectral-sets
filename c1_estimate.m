@@ -24,10 +24,10 @@ function c1 = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
     %calculate the change in angle of the interior points of del_Om
     angle_step = angle_between(del_Om(2:end-2)-sigma_0, del_Om(3:end-1) - sigma_0);
     %calculate the change in angle for the two end points
-    angle_n = mod(angle(del_Om(end-1), 2*pi);
-    angle_n = abs(angle_n - sigma_0_prime);
-    angle_0 = mod(angle(del_Om(2)), 2*pi);
-    angle_0 = abs(mod(sigma_0_prime+pi, 2*pi)-angle_0);
+    angle_n = mod(angle(del_Om(end-1)-sigma_0), 2*pi);
+    angle_n = abs(angle_n - mod(sigma_0_prime+pi, 2*pi));
+    angle_0 = mod(angle(del_Om(2)-sigma_0), 2*pi);
+    angle_0 = abs(sigma_0_prime -angle_0);
     %sum up all of the changes in angle to estimate c1
-    c1 = sum(angle_step + angle_0 + angle_n);
+    c1 = sum(angle_step) + angle_0 + angle_n;
 end

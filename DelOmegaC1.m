@@ -82,18 +82,27 @@ xs = xs(index_xs);
 
 moveon = N;
 while moveon == 'N'
-    sigma0_index = input("What index of del\_Omega is sigma0 at?\n")
+    sigma_0_index = input("What index of del\_Omega is sigma0 at?\n")
     close
     figure()
     plot(del_Om,'MarkerIndices',1:5:length(del_Om))
     daspect([1,1,1])
     hold on
-    sigma0 = del_Om(sigma0_index);
-    plot(real(sigma0), imag(sigma0), 'mo')
+    sigma_0 = del_Om(sigma_0_index);
+    plot(real(sigma_0), imag(sigma_0), 'mo')
     moveon = input("Is this where you want sigma0? (Y/N)\n");
 end
 
-inters = []; %the relevant intersections for calculating c1
+sigma_0_prime = sigma_prime(sigma_0, om(del_om(sigma_0_index)));
+
+c1 = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
+
+return
+
+%% 4. Calculate the value of c1 by measuring the overall angle
+
+inters = [] %the relevant intersections for calculating c1
+
 %find the center of the arc that sigma_0 is on
 yn_arc = input("Is sigma0 located on an arclength of a removed circle? (Y/N)\n");
 check1 = 'N';
@@ -105,9 +114,9 @@ if yn_arc == 'Y'
         plot(real(del_Om), imag(del_Om))
         daspect([1,1,1])
         hold on
-        plot(real(sigma0), imag(sigma0), 'mo')
+        plot(real(sigma_0), imag(sigma_0), 'mo')
         plot(real(jj), imag(jj), 'ro')
-        plot(real([sigma0, jj]), imag([sigma0, jj]), '-')
+        plot(real([sigma_0, jj]), imag([sigma_0, jj]), '-')
         if check1 == 'N'
             check1 = input("Is this the center of the disk sigma_0 sits on? (Y/N)\n");
             if check1 == 'Y'
@@ -144,20 +153,11 @@ while check2 == 'Y' && count <= length(xs)
 end
 
 
-%% Calculate c1 the new way
 
-
-
-
-
-
-
-
-
-%% 4. Caclulate c1
+%% 5. Caclulate c1
 
 close
-num_overlap = scouting_sig(del_Om, sigma0, inters,1)
+num_overlap = scouting_sig(del_Om, sigma_0, inters,1)
 
 base_c1 = input("Is sigma_0 located on an annulus? (Y/N)\n");
 if base_c1 == Y
@@ -182,7 +182,7 @@ while check1 == 'Y'
         return
     end
     num_ignore = input("How many intersections with del_Omega are being ignored to avoid over-counting?\n");
-    thetaj = measure_theta(sigma0, del_Om, inters(vector1), direction, om_sigma, 100, num_ignore)
+    thetaj = measure_theta(sigma_0, del_Om, inters(vector1), direction, om_sigma, 100, num_ignore)
     factor = 2; %input("How many times is this angle contibuted, i.e. 1 or 2?\n");
     c1 = c1 + factor*thetaj;
     check1 = input("Are there any more angles to compute where you do not have both endpoints? (Y/N)\n");
@@ -192,7 +192,7 @@ check2 = input("Do you want to measure the angle between any intersections? (Y/N
 while check2 == 'Y'
     vector1 = input("What is the first intersection point you would like to measure the angle between?\n");
     vector2 = input("What is the second intersection point you would like to measure the angle between?\n");
-    thetaj = angle_between(inters(vector1), inters(vector2))
+    thetaj = angle_between(inters(vector1)-sigma_0, inters(vector2)-sigma_0)
     factor = 2; %input("How many times is this angle contibuted, i.e. 1 or 2?\n");
     c1 = c1 + factor*thetaj;
     check2 = input("Do you want to measure the angle between any more intersections? (Y/N)\n");

@@ -114,3 +114,60 @@ figure()
 plot(del_Omega)
 daspect([1,1,1])
 
+
+%% Script for debugging c1_estimate
+
+%deal with annuli...
+where_my_nans_at = find(isnan(del_Om));
+num_nans = length(where_my_nans_at);
+if num_nans > 0
+    display("The functionality to handle annuli has not been added yet. Check back later")
+    return
+end
+%re-order the boundary to start and end at sigma_0
+sigma_0 = del_Om(sigma_0_index);
+del_Om2 = [del_Om(sigma_0_index:end-1), del_Om(1:sigma_0_index)];
+
+%calculate the change in angle of the interior points of del_Om
+angle_step = angle_between(del_Om2(2:end-2)-sigma_0, del_Om2(3:end-1) - sigma_0);
+%calculate the change in angle for the two end points
+angle_n = mod(angle(del_Om2(end-1)-sigma_0), 2*pi);
+angle_n = abs(angle_n - mod(sigma_0_prime+pi, 2*pi));
+angle_0 = mod(angle(del_Om2(2)-sigma_0), 2*pi);
+angle_0 = abs(sigma_0_prime -angle_0);
+%sum up all of the changes in angle to estimate c1
+c1 = sum(angle_step) + angle_0 + angle_n
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
