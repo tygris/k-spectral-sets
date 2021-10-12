@@ -36,6 +36,7 @@ radii = [];
 xs = [];
 more = 'Y';
 del_Om = numRange;
+del_om = zeros(1,length(numRange));
 moveon = 0;
 while more == 'Y'
     om_new = input("Where would you like to remove a disk(s)?\n");
@@ -50,7 +51,7 @@ while more == 'Y'
     moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
     if moveon == 'Y'
         close
-        [del_Om, xs_new, radii_new] = define_del_Omega(del_Om, mat, om_new, res_num);
+        [del_Om, del_om, xs_new, radii_new] = define_del_Omega2(del_Om, del_om, mat, om_new, res_num);
         om = cat(2, om, om_new);
         radii = cat(2, radii, radii_new);
         xs = cat(2, xs, xs_new);
@@ -62,6 +63,7 @@ while more == 'Y'
         end
     end
 end
+
 
 %% 3. The user is asked to sort through the relevant intersections of del_Omega
 %     and to provide sigma_0 
