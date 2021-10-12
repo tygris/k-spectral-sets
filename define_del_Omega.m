@@ -1,4 +1,4 @@
-%[del_Omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, A, om, res, radius)
+%[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
 %function to define del_Omega once all of the disks have been removed
 %input, del_Omega_0, complex vector, the original boundary we are removing disks from.
 %       the first element of the vector needs to be the abscissa (angle
