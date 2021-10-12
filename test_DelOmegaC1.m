@@ -1,7 +1,8 @@
-%Natalie Wellen
-%9/27/21
-%
 %This script file holds example variables to run DelOmegaC1 with
+%
+%Natalie Wellen
+%10/12/21
+%
 
 %% Example 1
 A1 = [6 -1; 1 4];
@@ -9,6 +10,7 @@ omA1 = [6.000000000000000 + 0.000000000000000i,  5.630552667084522 - 0.776146464
 r1 = 200;
 r2 = 50;
 sigA1 = 5.140983941301354 + 0.674237628644485i;
+sigA1_index = 60;
 
 %% Example 2
 % example 1 in Caswell and Neubert 1997 paper

@@ -1,5 +1,5 @@
 %Natalie Wellen
-%9/27/21
+%10/12/21
 
 %Script that calculates the c1 boundary of a general del_Omega. 
 %The tasks accomplished are
@@ -51,7 +51,7 @@ while more == 'Y'
     moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
     if moveon == 'Y'
         close
-        [del_Om, del_om, xs_new, radii_new] = define_del_Omega2(del_Om, del_om, mat, om_new, res_num);
+        [del_Om, del_om, xs_new, radii_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
         om = cat(2, om, om_new);
         radii = cat(2, radii, radii_new);
         xs = cat(2, xs, xs_new);
@@ -68,21 +68,34 @@ end
 %% 3. The user is asked to sort through the relevant intersections of del_Omega
 %     and to provide sigma_0 
 
+%first use del_omega to remove intersections that cannot be relevant to the
+%boundary
+index_om = unique(del_om);
+if index_om(1) == 0
+    index_om = index_om(2:end);
+end
+%find the indices for the corresponding intersection locations
+index_xs = sort([2*index_om-1, 2*index_om]);
+
+om = om(index_om);
+xs = xs(index_xs);
+
 moveon = N;
 while moveon == 'N'
-    sigma_0 = input("Where is sigma_0?\n")
+    sigma0_index = input("What index of del\_Omega is sigma0 at?\n")
     close
     figure()
     plot(del_Om,'MarkerIndices',1:5:length(del_Om))
     daspect([1,1,1])
     hold on
-    plot(real(sigma_0), imag(sigma_0), 'mo')
-    moveon = input("Is this where you want sigma_0? (Y/N)\n");
+    sigma0 = del_Om(sigma0_index);
+    plot(real(sigma0), imag(sigma0), 'mo')
+    moveon = input("Is this where you want sigma0? (Y/N)\n");
 end
 
 inters = []; %the relevant intersections for calculating c1
 %find the center of the arc that sigma_0 is on
-yn_arc = input("Is sigma_0 located on an arclength of a removed circle? (Y/N)\n");
+yn_arc = input("Is sigma0 located on an arclength of a removed circle? (Y/N)\n");
 check1 = 'N';
 check2 = 'Y';
 if yn_arc == 'Y'
@@ -92,9 +105,9 @@ if yn_arc == 'Y'
         plot(real(del_Om), imag(del_Om))
         daspect([1,1,1])
         hold on
-        plot(real(sigma_0), imag(sigma_0), 'mo')
+        plot(real(sigma0), imag(sigma0), 'mo')
         plot(real(jj), imag(jj), 'ro')
-        plot(real([sigma_0, jj]), imag([sigma_0, jj]), '-')
+        plot(real([sigma0, jj]), imag([sigma0, jj]), '-')
         if check1 == 'N'
             check1 = input("Is this the center of the disk sigma_0 sits on? (Y/N)\n");
             if check1 == 'Y'
@@ -130,10 +143,21 @@ while check2 == 'Y' && count <= length(xs)
     count = count+1;
 end
 
+
+%% Calculate c1 the new way
+
+
+
+
+
+
+
+
+
 %% 4. Caclulate c1
 
 close
-num_overlap = scouting_sig(del_Om, sigma_0, inters,1)
+num_overlap = scouting_sig(del_Om, sigma0, inters,1)
 
 base_c1 = input("Is sigma_0 located on an annulus? (Y/N)\n");
 if base_c1 == Y
@@ -158,7 +182,7 @@ while check1 == 'Y'
         return
     end
     num_ignore = input("How many intersections with del_Omega are being ignored to avoid over-counting?\n");
-    thetaj = measure_theta(sigma_0, del_Om, inters(vector1), direction, om_sigma, 100, num_ignore)
+    thetaj = measure_theta(sigma0, del_Om, inters(vector1), direction, om_sigma, 100, num_ignore)
     factor = 2; %input("How many times is this angle contibuted, i.e. 1 or 2?\n");
     c1 = c1 + factor*thetaj;
     check1 = input("Are there any more angles to compute where you do not have both endpoints? (Y/N)\n");
