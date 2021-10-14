@@ -2,10 +2,22 @@
 % in other words one does not need to know om, and it can be on the fov bnd
 %
 %[sigmap] = frankenstein(sigma, del_Om, del_om, om, Wvec, Wvec_prime)
-% input,
-%
+% input, sigma, complex value, the location on the boundary of del_Om being
+%        analyzed
+% input, del_Om, complex vector, the boundary of the spectral set
+% input, del_om, integer vector, vector the same length of del_Om that
+%        indicates if the boundary point originates from the fov or a
+%        removed disk
+% input, om, the list of centers of removed disks in the order they were
+%        removed
+% input, Wvec, complex vector, the boundary of the numerical range
+% input, Wvec_prime, complex vector, the value of the derivative of Wvec at
+%        the corresponding vector index
+% output, sigmap, double, the angle in radians of the derivative of sigma
+%         along del_Om
+ 
 %Natalie Wellen
-%10/13/21
+%10/14/21
 
 function [sigmap] = frankenstein(sigma, del_Om, del_om, om, Wvec, Wvec_prime)
     %check if sigma is on the arc of a removed disk or on the numerical range
@@ -16,6 +28,6 @@ function [sigmap] = frankenstein(sigma, del_Om, del_om, om, Wvec, Wvec_prime)
         windex = find(abs(real(sigma)-real(Wvec))<= eps & abs(imag(sigma)-imag(Wvec))<= eps);
         sigmap = mod(angle(Wvec_prime(windex)),2*pi);
     else
-        sigmap = sigma_prime(sigma, om(location));
+        [sigmap, theta_0] = sigma_prime(sigma, om(location));
     end
 end
