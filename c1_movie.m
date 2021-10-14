@@ -10,10 +10,10 @@
 % input, radii, optional double vector, contains the list of radii of disks
 %        removed corresponding to the centers in om
 % ouput, plot of changing values of sigma_0 and the corresponding value of c1
-%
+
 %Natalie Wellen
-%10/13/21
-function [Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, om, radii)
+%10/14/21
+function [M,Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, om, radii)
     %find the numerical range
     fovA = fov(A); %chebfun of the field of values
     L = arcLength(fovA);
@@ -35,11 +35,24 @@ function [Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, 
     kk = length(moving_sig);
     moving_sig_prime = zeros(1, kk);
     moving_sig_c1 = zeros(1,kk);
+    xLimits = get(gca,'XLim'); yLimits = get(gca,'YLim');
+    midx = (xLimits(2)-xLimits(1))/2+xLimits(1); midy = (yLimits(2)-yLimits(1))/2+yLimits(1); 
     for jj = 1:kk
         moving_sig_prime(jj) = frankenstein(moving_sig(jj), del_Om, del_om, om, Wvec, Wprimevec); 
         %also calc c1 at the same time
         moving_sig_c1(jj) = c1_estimate(2+(jj-1)*skip, moving_sig_prime(jj), del_Om);
+        %create movie figure and then close it after saving
+        figure()
+        plot(del_Om)
+        daspect([1,1,1])
+        hold on
+        plot(moving_sig(jj), 'o')
+        text(midx, midy, sprintf('c1=%.3f', moving_sig_c1(jj)))
+        M(jj) = getframe();
+        close
     end
     %plot the movie showing the location of sigma and the value of c1
-    
+    %first I need to plot and store the figures with getframe
+    %then I can call the function movie on that vector of frames
+    movie(M,1,2)
 end

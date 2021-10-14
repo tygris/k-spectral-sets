@@ -6,7 +6,7 @@
 % input, del_Om, complex vector, the countour of the boundary of our
 %        spectral set del_Omega in the counter-clockwise direction
 % output, c1, double, estimate of the spectral constant 
-%
+
 %Natalie Wellen
 %10/12/21
 
@@ -31,3 +31,6 @@ function c1 = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
     %sum up all of the changes in angle to estimate c1
     c1 = sum(angle_step) + angle_0 + angle_n;
 end
+
+
+%need to debug, especially for points on the fov

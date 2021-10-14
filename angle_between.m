@@ -5,7 +5,7 @@
 %input, x2, a complex number indicating the second vector input
 %       both x1 and x2 are the original vectors minus their shared end-point
 %output, theta, real number of the angle between x1 and x2 in radians
-%
+
 %Natalie Wellen
 %10/12/21
 %
