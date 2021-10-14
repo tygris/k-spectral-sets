@@ -2,7 +2,7 @@
 % discretized points along the boundary of del_Omega
 % input, sigma_0_index, integer, the index of del_Omega for the starting point
 %        of estimating c1
-% input, sigma_0_prime, the derivative of del_Omega at sigma_0_prime
+% input, sigma_0_prime, the angle of the derivative of del_Omega at sigma_0_prime
 % input, del_Om, complex vector, the countour of the boundary of our
 %        spectral set del_Omega in the counter-clockwise direction
 % output, c1, double, estimate of the spectral constant 

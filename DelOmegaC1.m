@@ -51,7 +51,7 @@ while more == 'Y'
     moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
     if moveon == 'Y'
         close
-        [del_Om, del_om, xs_new, radii_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
+        [del_Om, del_om, xs_new, radii_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);k
         om = cat(2, om, om_new);
         radii = cat(2, radii, radii_new);
         xs = cat(2, xs, xs_new);
