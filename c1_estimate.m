@@ -10,7 +10,7 @@
 %Natalie Wellen
 %10/12/21
 
-function c1 = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
+function [c1, del_Om, angle_step, angle_step1] = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
     %deal with annuli...
     where_my_nans_at = find(isnan(del_Om));
     num_nans = length(where_my_nans_at);
@@ -23,13 +23,15 @@ function c1 = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
     del_Om = [del_Om(sigma_0_index:end-1), del_Om(1:sigma_0_index)];
     %calculate the change in angle of the interior points of del_Om
     angle_step = angle_between(del_Om(2:end-2)-sigma_0, del_Om(3:end-1) - sigma_0);
+    %all of the angle steps will be less than pi
+    angle_step1 = min([angle_step; abs(2*pi-angle_step)]);
     %calculate the change in angle for the two end points
     angle_n = mod(angle(del_Om(end-1)-sigma_0), 2*pi);
     angle_n = min(abs(angle_n - mod(sigma_0_prime+pi, 2*pi)), abs(sigma_0_prime -angle_n));
     angle_0 = mod(angle(del_Om(2)-sigma_0), 2*pi);
     angle_0 = min(abs(angle_0 - mod(sigma_0_prime+pi, 2*pi)), abs(sigma_0_prime -angle_0));
     %sum up all of the changes in angle to estimate c1
-    c1 = sum(angle_step) + angle_0 + angle_n;
+    c1 = sum(angle_step1) + angle_0 + angle_n;
 end
 
 

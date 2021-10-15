@@ -16,6 +16,12 @@ function theta = angle_between(x1, x2)
     theta = abs(a1 - a2);
 end
 
+%this is a problem child, leading to errors in my c1_estimate code -_-
+
+
+
+
+
 %In the future I want to make a different function that calls
 %angle_between() to ensure we are not double counting angles by comparing
 %to the tangent value

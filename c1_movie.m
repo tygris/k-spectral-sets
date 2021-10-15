@@ -27,7 +27,7 @@ function [M,Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res
         [del_Om, del_om, xs_new, radii_new] = define_del_Omega(Wvec, del_om, A, om, res);
     end
     %choose the points that will be a part of the movie
-    skip = 10;
+    skip = 5;
     moving_sig = del_Om(2:skip:end-1);
     %find the corresponding derivatives at each of these points
     Wprime = diff(fovA);
@@ -49,10 +49,11 @@ function [M,Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res
         plot(moving_sig(jj), 'o')
         text(midx, midy, sprintf('c1=%.3f', moving_sig_c1(jj)))
         M(jj) = getframe();
-        close
+        %close
     end
     %plot the movie showing the location of sigma and the value of c1
     %first I need to plot and store the figures with getframe
     %then I can call the function movie on that vector of frames
+    close all
     movie(M,1,2)
 end
