@@ -12,7 +12,7 @@
 % ouput, plot of changing values of sigma_0 and the corresponding value of c1
 
 %Natalie Wellen
-%10/14/21
+%10/18/21
 function [M,Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, om, radii)
     %find the numerical range
     fovA = fov(A); %chebfun of the field of values
@@ -46,8 +46,12 @@ function [M,Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res
         plot(del_Om)
         daspect([1,1,1])
         hold on
-        plot(moving_sig(jj), 'o')
-        text(midx, midy, sprintf('c1=%.3f', moving_sig_c1(jj)))
+        goo = plot(moving_sig(jj), 'o')
+        %delete goo, but build dummy objects outside of loop, then reassign each time
+        %may also be able to just update the x and y coordinates
+        %dont unwrap the loop
+        foo = text(midx, midy, sprintf('c1=%.3f', moving_sig_c1(jj)))
+        %should be able to just change the text attribute
         M(jj) = getframe();
         %close
     end
@@ -56,4 +60,5 @@ function [M,Wvec, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res
     %then I can call the function movie on that vector of frames
     close all
     movie(M,1,2)
+    %to gif
 end
