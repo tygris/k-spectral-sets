@@ -1,5 +1,5 @@
 %Natalie Wellen
-%9/27/21
+%10/12/21
 
 %Script that calculates the c1 boundary of a general del_Omega. 
 %The tasks accomplished are
@@ -36,6 +36,7 @@ radii = [];
 xs = [];
 more = 'Y';
 del_Om = numRange;
+del_om = zeros(1,length(numRange));
 moveon = 0;
 while more == 'Y'
     om_new = input("Where would you like to remove a disk(s)?\n");
@@ -50,7 +51,7 @@ while more == 'Y'
     moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
     if moveon == 'Y'
         close
-        [del_Om, xs_new, radii_new] = define_del_Omega(del_Om, mat, om_new, res_num);
+        [del_Om, del_om, xs_new, radii_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
         om = cat(2, om, om_new);
         radii = cat(2, radii, radii_new);
         xs = cat(2, xs, xs_new);
@@ -63,24 +64,47 @@ while more == 'Y'
     end
 end
 
+
 %% 3. The user is asked to sort through the relevant intersections of del_Omega
 %     and to provide sigma_0 
 
+%first use del_omega to remove intersections that cannot be relevant to the
+%boundary
+index_om = unique(del_om);
+if index_om(1) == 0
+    index_om = index_om(2:end);
+end
+%find the indices for the corresponding intersection locations
+index_xs = sort([2*index_om-1, 2*index_om]);
+
+om = om(index_om);
+xs = xs(index_xs);
+
 moveon = N;
 while moveon == 'N'
-    sigma_0 = input("Where is sigma_0?\n")
+    sigma_0_index = input("What index of del\_Omega is sigma0 at?\n")
     close
     figure()
     plot(del_Om,'MarkerIndices',1:5:length(del_Om))
     daspect([1,1,1])
     hold on
+    sigma_0 = del_Om(sigma_0_index);
     plot(real(sigma_0), imag(sigma_0), 'mo')
-    moveon = input("Is this where you want sigma_0? (Y/N)\n");
+    moveon = input("Is this where you want sigma0? (Y/N)\n");
 end
 
-inters = []; %the relevant intersections for calculating c1
+sigma_0_prime = sigma_prime(sigma_0, om(del_om(sigma_0_index)));
+
+c1 = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
+
+return
+
+%% 4. Calculate the value of c1 by measuring the overall angle
+
+inters = [] %the relevant intersections for calculating c1
+
 %find the center of the arc that sigma_0 is on
-yn_arc = input("Is sigma_0 located on an arclength of a removed circle? (Y/N)\n");
+yn_arc = input("Is sigma0 located on an arclength of a removed circle? (Y/N)\n");
 check1 = 'N';
 check2 = 'Y';
 if yn_arc == 'Y'
@@ -128,7 +152,9 @@ while check2 == 'Y' && count <= length(xs)
     count = count+1;
 end
 
-%% 4. Caclulate c1
+
+
+%% 5. Caclulate c1
 
 close
 num_overlap = scouting_sig(del_Om, sigma_0, inters,1)
@@ -166,7 +192,7 @@ check2 = input("Do you want to measure the angle between any intersections? (Y/N
 while check2 == 'Y'
     vector1 = input("What is the first intersection point you would like to measure the angle between?\n");
     vector2 = input("What is the second intersection point you would like to measure the angle between?\n");
-    thetaj = angle_between(inters(vector1), inters(vector2))
+    thetaj = angle_between(inters(vector1)-sigma_0, inters(vector2)-sigma_0)
     factor = 2; %input("How many times is this angle contibuted, i.e. 1 or 2?\n");
     c1 = c1 + factor*thetaj;
     check2 = input("Do you want to measure the angle between any more intersections? (Y/N)\n");
