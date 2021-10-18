@@ -1,7 +1,7 @@
-%This script file holds example variables to run DelOmegaC1 with
+%This script file holds example variables for the package
 %
 %Natalie Wellen
-%10/12/21
+%10/18/21
 %
 
 %% Example 1
@@ -11,8 +11,12 @@ r1 = 200;
 r2 = 50;
 sigA1 = 5.140983941301354 + 0.674237628644485i;
 sigA1_index = 60;
-
 % c1 = 5.5706
+
+%make a movie M1 of the estimated values of c1
+[M1, ms1, ms1_prime, ms1_c1] = c1_movie(A1, r1, 5, omA1);
+
+
 
 %% Example 2
 % example 1 in Caswell and Neubert 1997 paper
