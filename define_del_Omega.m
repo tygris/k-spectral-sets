@@ -31,7 +31,7 @@
 
 
 %Dependent on: remove_circ, circle, numerical_range
-function [del_Omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, A, om, res, radius)
+function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
     %Check that A is square
     [n,m] = size(A);
     if n ~= m
