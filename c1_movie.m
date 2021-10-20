@@ -13,15 +13,15 @@
 %        removed corresponding to the centers in om
 % ouput, plot of changing values of sigma_0 and the corresponding value of c1
 
-%Natalie Wellen
-%10/18/21
-function [M, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, skip, om, radii)
+function [M, del_Om, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, skip, om, radii)
     %find the numerical range
     fovA = fov(A); %chebfun of the field of values
     L = arcLength(fovA);
     dl = L/(res-1);
     Wvec = fovA([0:res]*dl);
     %remove the given disks from the numerical range
+%Natalie Wellen
+%10/18/21
     del_om = zeros(1, res);
     if exist('radii', 'var')
         [del_Om, del_om, xs_new, radii_new] = define_del_Omega(Wvec, del_om, A, om, res, radii);
@@ -62,7 +62,6 @@ function [M, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, ski
     %plot the movie showing the location of sigma and the value of c1
     %first I need to plot and store the figures with getframe
     %then I can call the function movie on that vector of frames
-    close all
     figure()
     movie(M,1,2)
     %to gif
