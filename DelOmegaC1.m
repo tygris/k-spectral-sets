@@ -65,8 +65,7 @@ while more == 'Y'
 end
 
 
-%% 3. The user is asked to sort through the relevant intersections of del_Omega
-%     and to provide sigma_0 
+%% 3. Calculate the value of c1 by measuring the overall angle 
 
 %first use del_omega to remove intersections that cannot be relevant to the
 %boundary
@@ -99,7 +98,8 @@ c1 = c1_estimate(sigma_0_index, sigma_0_prime, del_Om)
 
 return
 
-%% 4. Calculate the value of c1 by measuring the overall angle
+%% 4. The user is asked to sort through the relevant intersections of del_Omega
+%     and to provide sigma_0
 
 inters = [] %the relevant intersections for calculating c1
 
@@ -154,7 +154,10 @@ end
 
 
 
-%% 5. Caclulate c1
+%% 5. Caclulate c1 by measuring the total change in angle for each instance del_Om
+%      goes "backwards"
+%      If sigma_0 starts on an annulus then start with 2pi, if not then
+%      start with pi
 
 close
 num_overlap = scouting_sig(del_Om, sigma_0, inters,1)
