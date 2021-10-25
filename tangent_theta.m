@@ -12,7 +12,7 @@
 %         intersection from sigma_0
 % output, tangent_angle, real number, the angle with respect to sigma_0 of
 %         the tangent line at sigma_0
-%
+
 %Natalie Wellen
 %10/12/21
 

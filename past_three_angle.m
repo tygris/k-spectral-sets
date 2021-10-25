@@ -1,17 +1,19 @@
-%Natalie Wellen
-%9/23/21
-%
 %function to search for the first angle past three intersections with the
 %boundary, that has fewer intersections
-%input, sigma_0, complex number, starting point for measuring c1
-%input, del_om, complex vector, the contour of the spectral set
-%input, intersection, complex number, where the boundary derivative does
-%       not exist
-%input, direction, 1 or -1, 1= counter-clockwise direction, -1 = clockwise
-%input, res, (optional) integer, number of points on the search line  
-%input, num_ignore (optional), integer, the boundary crosses we do not want to
-%      pay attention to (i.e for an annulus versus outer boundary)
-%output, theta, real number, the angle sigma(s) overlappingly travels
+%
+%[theta] = past_three_angle(sigma_0, del_om, intersection, direction, res, num_ignore)
+% input, sigma_0, complex number, starting point for measuring c1
+% input, del_om, complex vector, the contour of the spectral set
+% input, intersection, complex number, where the boundary derivative does
+%        not exist
+% input, direction, 1 or -1, 1= counter-clockwise direction, -1 = clockwise
+% input, res, (optional) integer, number of points on the search line  
+% input, num_ignore (optional), integer, the boundary crosses we do not want to
+%       pay attention to (i.e for an annulus versus outer boundary)
+% output, theta, real number, the angle sigma(s) overlappingly travels
+
+%Natalie Wellen
+%10/25/21
 
 function theta = past_three_angle(sigma_0, del_om, intersection, direction, res, num_ignore)
     theta_search = [30,60,120,240,480,960];

@@ -1,22 +1,24 @@
-%Natalie Wellen
-%10/08/21
-%
 %This function creates two contour plots of the potnential radii of circles
 %that can be removed from the numerical range with bound -R/2pi or -R/pi on
 %the minimum eigenvalues of the operator mu
 %
-%Input A, square matrix that we are interested in examining the spectral
+%[epss, wOfPseudo] = spectral_set_choices(A, numRange, resolution)
+% input, A, square matrix that we are interested in examining the spectral
 %  set of 
-%Input numRange, complex vector, boundary of the numerical range of A
-%Input resolution, integer of 1 by 2 vector of integers, the number of 
-% points in the x and y direction used to define the grid for calculating
-% potential radii 
-%Output epss, matrix of points of the psuedospectral value of A at x+iy
-%(-R/2pi)
-%Output wOfPseudo, matrix of the numerical radius of inv(A - x+iyI)
-%(-R/pi)
-%Output, contour plot of epss with the numerical range outlined
-%Output, contour plot of wOfPseudo with the numerical range outlined
+% input, numRange, complex vector, boundary of the numerical range of A
+% input, resolution, integer of 1 by 2 vector of integers, the number of 
+%  points in the x and y direction used to define the grid for calculating
+%  potential radii 
+% output, epss, matrix of points of the psuedospectral value of A at x+iy
+%  (-R/2pi)
+% output wOfPseudo, matrix of the numerical radius of inv(A - x+iyI)
+%  (-R/pi)
+% output, contour plot of epss with the numerical range outlined
+% output, contour plot of wOfPseudo with the numerical range outlined
+
+%Natalie Wellen
+%10/25/21
+
 function [epss, wOfPseudo] = spectral_set_choices(A, numRange, resolution)
     %set boundaries of grid to calculate radii for
     xmin = min(real(numRange));

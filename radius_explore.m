@@ -1,14 +1,18 @@
-%Natalie Wellen
-%07/28/21
-%
 %This function calculates the 2-norm pseudospectral value of epsilon for a
 % rectangular region on the complex plane
-%Input A, square matrix
-%Input, region, [xmin xmax ymin ymax]
-%Input, resolution, [xres yres] or res which assumes it is the same along both axes
-%Output, epss, real matrix that has dimension xres by yres 
-%Output, wOfPseudo, real matrix of the raius of the numerical range for (A-omI)
-%Output, X
+%
+%[epss, wOfPseudo, X, Y] = radius_explore(A, region, resolution)
+% input A, square matrix
+% input, region, [xmin xmax ymin ymax]
+% input, resolution, [xres yres] or res which assumes it is the same along both axes
+% output, epss, real matrix that has dimension xres by yres 
+% output, wOfPseudo, real matrix of the raius of the numerical range for (A-omI)
+% output, X, the grid spacing on the real axis (for plotting)
+% output, Y, the grid spacing on the imaginary axis (for plotting)
+
+%Natalie Wellen
+%10/25/21
+
 function [epss, wOfPseudo, X, Y] = radius_explore(A, region, resolution)
     %check the dimension of A
     [m,n] = size(A);
