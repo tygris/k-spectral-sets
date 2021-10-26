@@ -14,3 +14,5 @@ sigma0_prime = -1i;
 %compare to previously tested plots
 A1num_range = numerical_range(A1, 100);
 spectral_set_choices(A1, A1num_range, 50);
+
+%define del_Om for testing
