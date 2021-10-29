@@ -47,6 +47,10 @@ figure(), plot(del_OmA1), daspect([1,1,1])
  
 k = calc_k(A1, del_OmA1, del_OmA1_prime, 1, 1, 1000)
 
+%% What happens when the numerical range is passed for calculating c2 (nothing removed)?
+
+[c2A1_2, minr_A1_2, A1_1or2_2] = calc_c2(A1, A1num_range, -1i*(del_OmA1 +1/2), 1, 1000)
+
  %% Find c2 for the complicated Panamanian Rainforest example from Neubert and Caswell
  
  

@@ -42,5 +42,6 @@ function [c1] = calc_c1(sigma_0_index, sigma_0_prime, del_Om)
     if angle_0 >= pi
         c1 = c1-2*pi;
     end
+    c1 = c1/pi; %constant out front of the integral
 end
 
