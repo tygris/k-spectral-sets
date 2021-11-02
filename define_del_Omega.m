@@ -1,17 +1,23 @@
 %[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
 %function to define del_Omega once all of the disks have been removed
-%input, del_Omega_0, complex vector, the original boundary we are removing disks from.
-%       the first element of the vector needs to be the abscissa (angle
-%       zero from the center)
+%input, del_Omega_0, cell array of complex vectors, the original boundary 
+%       we are removing disks from. The first element of each cell needs to 
+%       be angle zero of the simple closed curve with respect to its center.
 %input, del_omega_0, integer vector, 0 indicates the point is originally
 %       from the matrix numerical range, non-zero integers indicate which
 %       disk the arclength refers to in order of removal
 %input, A, square matrix being analyzed
 %input, om, complex vector, the center of the circles to be removed
 %input, res, integer, the number of points on the boundary of the circle
-%input, radius, double vector, optional argument for the radius of the circles to
-%       be removed. Must be the same length and in the same order as om
-%output, del_Omega, complex vector of the closed boundary of the spectral set
+%input, radius, double vector, optional argument for the radius of the circles 
+%       to be removed. Must be the same length and in the same order as om
+%output, del_Omega, cell array of complex vectors, the closed boundary of 
+%        the spectral set
+%        - each outer boundary is the first cell in a row, goes in the
+%        counter-clockwise direction from angle zero
+%        - the annuli are subsequent cells in the array, they go in the
+%        clockwise direction from angle zero
+%        - the union of all rows forms the spectral set
 %output, del_omega, integer vector of update to del_omega_0
 %output, intersections, complex matrix of the points part of del_Omega closest
 %       to the intersection disk jj and the rest of del_Omega
@@ -25,33 +31,59 @@
 %        corresponding column comntains NaNs
 %output, r_over_pi, binary vector, 1 means the min ev >= -R/pi, 0 means min
 %       ev >= -R/(2*pi). In the same order as om.
+%
+% Depends on:
+%   - inpolygon
+%   - numerical_range
+%   - remove_circle
+%   - circle
+%   - delOmega_flipper
+
+
 
 %Natalie Wellen
-%10/04/21
+%11/02/21
 
+%First, removing overlapping annuli 
+%Second, combine curves, where a removed disk interscts two or more distict simple curves
+%Third, removing a disk that splits a simple closed curve into two separate curves
 
-%Dependent on: remove_circ, circle, numerical_range
+%I also want to change the code to include the "intersections" in del_Omega
+%     I should then compare c1_estimate and measure_theta + angle_between
+%     again
+
 function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
     %Check that A is square
-    [n,m] = size(A);
-    if n ~= m
-        disp("A must be square")
-        return 
-    end
+    [m,n] = size(A);
+    assert(n==m,"A must be square")
     %make sure that om and radius match length if both are given
-    if exist('radius', 'var') && length(om) ~= length(radius)
-        disp("om and radius must have the same length")
-        return
+    if exist('radius', 'var') 
+        assert(length(om) == length(radius),...
+            "om and radius must have the same length")
     end
-    % ensure that del_Omega goes in the counter-clockwise direction
-    ii = find(real(del_Omega_0)==max(real(del_Omega_0)), 1, 'first'); %location of the abscissa
-    if (imag(del_Omega_0(ii)) - imag(del_Omega_0(ii+1))) > 0
-        del_Omega = flip(del_Omega_0);
-        del_omega = flip(del_omega_0);
-    else
-        del_Omega = del_Omega_0;
-        del_omega = del_omega_0;
+    % ensure that del_Omega and del_omega go in the correct directions
+    %  counter-clokwise in the first column and clockwise in other columns
+    [nrows, ncols] = size(del_Omega);
+    for jj = 1:nrows
+        del_Om_vec = cell2mat(del_Omega(jj,1));
+        del_om_vec = cell2mat(del_omega(jj,1));
+        [del_Om_vec, del_om_vec] = delOmega_flipper(del_Om_vec, del_om_vec, 1);
+        del_Omega{jj,1} = del_Om_vec; del_omega{jj,1} = del_om_vec;
+        for kk = 2:ncols
+            del_Om_vec = cell2mat(del_Omega(jj,kk));
+            del_om_vec = cell2mat(del_omega(jj,kk));
+            [del_Om_vec, del_om_vec] = delOmega_flipper(del_Om_vec, del_om_vec, 0);
+            del_Omega{jj,kk} = del_Om_vec; del_omega{jj,kk} = del_om_vec;
+        end
     end
+    
+    % !!!
+    % I am considering changing the "intersections" variable to be a list
+    % of indices that updates each time trhough the loop.
+    % Previously I was trying to keep track of which Omega led to which
+    % intersection point, but if I include the intersection points in the
+    % del_Omega, then del_om will tell me (or have NaN for no derivative...)
+    
     % define a for loop to remove all of the input circles.
     num_remove = length(om);
     r_over_pi = -1*ones(1,num_remove);
