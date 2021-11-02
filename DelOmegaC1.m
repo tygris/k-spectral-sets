@@ -152,6 +152,9 @@ while check2 == 'Y' && count <= length(xs)
     count = count+1;
 end
 
+%also include sigma_0_prime as relevant "intersection" points
+
+inters = cat(2, inters, [sigma_0+exp(1i*sigma_0_prime), sigma_0+exp(1i*(sigma_0_prime+pi))]);
 
 
 %% 5. Caclulate c1 by measuring the total change in angle for each instance del_Om
