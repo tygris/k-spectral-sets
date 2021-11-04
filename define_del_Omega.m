@@ -1,3 +1,6 @@
+%Function to define del_Omega once all of the disks have been removed
+% 10/26: Only 1 (non-overlapping) annulus can be removed, and it must be done last.
+%
 %[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
 %function to define del_Omega once all of the disks have been removed
 %input, del_Omega_0, cell array of complex vectors, the original boundary 
@@ -38,8 +41,6 @@
 %   - remove_circle
 %   - circle
 %   - delOmega_flipper
-
-
 
 %Natalie Wellen
 %11/02/21
