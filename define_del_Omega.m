@@ -1,36 +1,45 @@
-%[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
-%function to define del_Omega once all of the disks have been removed
-%input, del_Omega_0, complex vector, the original boundary we are removing disks from.
-%       the first element of the vector needs to be the abscissa (angle
-%       zero from the center)
-%input, del_omega_0, integer vector, 0 indicates the point is originally
-%       from the matrix numerical range, non-zero integers indicate which
-%       disk the arclength refers to in order of removal
-%input, A, square matrix being analyzed
-%input, om, complex vector, the center of the circles to be removed
-%input, res, integer, the number of points on the boundary of the circle
-%input, radius, double vector, optional argument for the radius of the circles to
-%       be removed. Must be the same length and in the same order as om
-%output, del_Omega, complex vector of the closed boundary of the spectral set
-%output, del_omega, integer vector of update to del_omega_0
-%output, intersections, complex matrix of the points part of del_Omega closest
-%       to the intersection disk jj and the rest of del_Omega
-%       -the first row is the intersection counter-clockwise closest to the
-%        abscissa
-%       -the second row is the intersection counter-clockwise furthest from
-%        the abscissa
-%       -each column is a separate disk removed in the same order as the
-%        input om
-%       -if the disk removed is an annulus without intersections, then the
-%        corresponding column comntains NaNs
-%output, r_over_pi, binary vector, 1 means the min ev >= -R/pi, 0 means min
-%       ev >= -R/(2*pi). In the same order as om.
+%{
+Function to define del_Omega once all of the disks have been removed
+10/26: Only 1 (non-overlapping) annulus can be removed, and it must be done last.
+
+[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
+input, del_Omega_0, complex vector, the original boundary we are removing disks from.
+      the first element of the vector needs to be the abscissa (angle
+      zero from the center)
+input, del_omega_0, integer vector, 0 indicates the point is originally
+      from the matrix numerical range, non-zero integers indicate which
+      disk the arclength refers to in order of removal
+input, A, square matrix being analyzed
+input, om, complex vector, the center of the circles to be removed
+input, res, integer, the number of points on the boundary of the circle
+input, radius, double vector, optional argument for the radius of the circles to
+      be removed. Must be the same length and in the same order as om
+output, del_Omega, complex vector of the closed boundary of the spectral set
+output, del_omega, integer vector of update to del_omega_0
+output, intersections, complex matrix of the points part of del_Omega closest
+      to the intersection disk jj and the rest of del_Omega
+      -the first row is the intersection counter-clockwise closest to the
+       abscissa
+      -the second row is the intersection counter-clockwise furthest from
+       the abscissa
+      -each column is a separate disk removed in the same order as the
+       input om
+      -if the disk removed is an annulus without intersections, then the
+       corresponding column comntains NaNs
+output, r_over_pi, binary vector, 1 means the min ev >= -R/pi, 0 means min
+      ev >= -R/(2*pi). In the same order as om.
+
+Dependent on:
+remove_circ()
+    circle()
+    r_of_A()
+    numerical_range()
+locate_intersections()
+%}
 
 %Natalie Wellen
 %10/04/21
 
-
-%Dependent on: remove_circ, circle, numerical_range
 function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
     %Check that A is square
     [n,m] = size(A);
