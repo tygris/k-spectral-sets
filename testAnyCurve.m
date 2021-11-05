@@ -111,7 +111,10 @@ plot(A2_eigs, zeros(1, 9),'x')
 
 c1A2 = calc_c1(1, -pi/2, del_OmA2)
 [c2A2, minr_A2, A2_1or2] = calc_c2(A2, nrA2, nrA2_prime, del_OmA2, del_OmA2_prime, .1, 1000)
- 
+
+k = c2A2 + sqrt(c1A2^2 + c2A2);                                                                                                                                                                                                                                                                                                                                                       
+spectral_upper_bound = exp(-delta)*k
+pseudospectral_upper_bound = 64.803447271835608 %see CaswellNeubert_PseudoExp.m in the pseudospectral_bounds package for calculation.
  
 %% Test curve creation for measuring arclength in calc_c2
 
