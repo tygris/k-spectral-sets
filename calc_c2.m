@@ -23,7 +23,7 @@ This function assumes that for overlapping disks, c2 is calculated by
 %} 
 
 %Natalie Wellen
-%10/29/21
+%11/04/21
 
 %Currently the negative of the minimum eigenvalue is being calculated instead
 % of c2
@@ -65,8 +65,7 @@ function [c2, mineig, L] = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_le
     end
     %calculate the arclength of gam1 using the absolute distance between
     %points
-    dz = abs(gam1(2:end) - gam1(1:end-1));
-    L = sum(dz);
+    L = measureArcLength(gam1, gam1_prime);
     
     %notice that we only need to calculate values of r along the
     %     intersection of gam1 and nr

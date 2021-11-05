@@ -1,7 +1,7 @@
 %Any-curve branch test file
 
 %Natalie Wellen
-%10/25/21
+%11/05/21
 
 %% Test findr 
 A1 = [.5 -1; 1 -1.5];
@@ -24,10 +24,31 @@ del_OmA1(vertical_index) = -1/4*ones(1,sum(vertical_index)) + 1i*imag(del_OmA1(v
 del_OmA1_prime(vertical_index) = -1i;
 figure(), plot(del_OmA1), daspect([1,1,1])
 
-[c2A1, minr_A1, A1_1or2] = calc_c2(A1, nrA1, nrA1_prime, del_OmA1, del_OmA1_prime, 1, 1000)
+[c2A1, mineigA1, LA1] = calc_c2(A1, nrA1, nrA1_prime, del_OmA1, del_OmA1_prime, 1, 1000)
  %for this example the minimum value of c2 happens on the real line (del_OmA1(1))
  
- % Calculate c1 for A1 and this reshaped boundary
+ %% compare the calculated arclength to the exact arclength
+ % to do this take advantage of the nr of A1 being a circle with radius 1
+ index = ismember(del_OmA1, nrA1);
+ temp = del_OmA1(index);
+ l1 = angle_between(temp(1) + 0.5, temp(end)+0.5);
+ l2 = abs(temp(1) - temp(end));
+ L_compare = l1 + l2;
+ accuracy_arclength = abs(LA1-L_compare)
+ relative_accuracy_arclength = accuracy_arclength/LA1
+ 
+ %% compare the calculated arclength to the exact arclength
+ % to do this take advantage of the nr of A1 being a circle with radius 1
+ index = ismember(del_OmA1, nrA1);
+ temp = del_OmA1(~index);
+ temp1 = max(imag(temp)); temp2 = min(imag(temp));
+ l1 = angle_between(0.25+1i*temp1, 1i*temp2+0.25);
+ l2 = abs(temp1 - temp2);
+ L_compare = l1 + l2;
+ accuracy_arclength = abs(LA1-L_compare)
+ relative_accuracy_arclength = accuracy_arclength/LA1
+ 
+ %% Calculate c1 for A1 and this reshaped boundary
  c1A1 = calc_c1(1, -pi/2, del_OmA1)
  c1A1 = calc_c1(1, 3*pi/2, del_OmA1)
  %UHOH!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
@@ -90,7 +111,10 @@ plot(A2_eigs, zeros(1, 9),'x')
 
 c1A2 = calc_c1(1, -pi/2, del_OmA2)
 [c2A2, minr_A2, A2_1or2] = calc_c2(A2, nrA2, nrA2_prime, del_OmA2, del_OmA2_prime, .1, 1000)
- 
+
+k = c2A2 + sqrt(c1A2^2 + c2A2);                                                                                                                                                                                                                                                                                                                                                       
+spectral_upper_bound = exp(-delta)*k
+pseudospectral_upper_bound = 64.803447271835608 %see CaswellNeubert_PseudoExp.m in the pseudospectral_bounds package for calculation.
  
 %% Test curve creation for measuring arclength in calc_c2
 
@@ -111,28 +135,35 @@ figure(), plot(out), daspect([1,1,1]), hold on
 plot(out(1:4), 'o')
 plot(in(1), 'o')
 
-%%
-in1 = ~ismember(nr, del_Om);
-in2 = ~ismember(del_Om, nr);
-if in1(1)
-    ind1 = in1 & imag(nr)>=0;
-    ind2 = in2 & imag(del_Om)>=0;
-    ind3 = in1 & imag(nr) < 0;
-    ind4 = in2 & imag(del_Om) < 0;
-    gam1 = cat(2, nr(ind1), flip(del_Om(ind2)), flip(del_Om(ind4)), nr(ind3), nr(1));
-%    gam1_prime = cat(2, nr_prime(ind1), flip(del_Om_prime(ind2)), flip(del_Om_prime(ind4)), nr_prime(ind3), nr_prime(1));
-    figure(), plot(gam1), hold on
-else
-    temp = nr(in1);
-    tempp = nr_prime(in1);
-    gam1 = cat(2, temp, flip(del_Om(in2)), temp(1));
-%    gam1_prime = cat(2, tempp, flip(del_Om_prime(in2)), tempp(1));
-    figure(), plot(gam1), hold on
+%% Check accuracy of measureArcLength
+
+% Start with measuring the arcLength of a circle
+accuracy = zeros(1,7);
+relative_accuracy = zeros(1,7);
+for ii = 1:7
+    circ = circle(1,0,10^ii);
+    L_temp = measureArcLength(circ, NaN);
+    accuracy(ii) = abs(2*pi-L_temp);
+    relative_accuracy(ii) = accuracy(ii)/2*pi;
 end
-%calculate the arclength of gam1 using the absolute distance between
-%points
-dz = abs(gam1(2:end) - gam1(1:end-1));
-L = sum(dz)
+accuracy, relative_accuracy
+
+
+
+
+                                   
+
+
+
+
+
+
+
+
+
+
+
+
 
  
  
