@@ -35,16 +35,17 @@ om = [];
 radii = [];
 xs = [];
 more = 'Y';
-del_Om = numRange;
-del_om = zeros(1,length(numRange));
+del_Om = {numRange};
+del_om = {zeros(1,length(numRange))};
 moveon = 0;
 while more == 'Y'
     om_new = input("Where would you like to remove a disk(s)?\n");
     if moveon ~= 0
         close
     end
+    del_Om_vec = cellmat2plot(del_Om,1);
     figure()
-    plot(real(del_Om), imag(del_Om))
+    plot(real(del_Om_vec), imag(del_Om_vec))
     daspect([1,1,1]);
     hold on
     plot(real(om_new), imag(om_new), 'mo');

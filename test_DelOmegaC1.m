@@ -14,7 +14,7 @@ sigA1_index = 60;
 % c1 = 5.5706
 
 %make a movie M1 of the estimated values of c1
-[M1, ms1, ms1_prime, ms1_c1] = c1_movie(A1, r1, 5, omA1);
+ %[M1, ms1, ms1_prime, ms1_c1] = c1_movie(A1, r1, 5, omA1);
 
 
 
