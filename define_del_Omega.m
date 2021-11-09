@@ -168,8 +168,8 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                             del_Om_vec = [del_Om_vec(1:first_0-1), flip(del_Omega_jj(~Gam_jj)), del_Om_vec(last_0+1:end)];
                             del_om_vec = [del_om_vec(1:first_0-1), flip(del_omega_jj(~Gam_jj)), del_om_vec(last_0+1:end)];
                         else
-                            del_Om_vec = [del_Om_vec(1:first_0), del_Omega_jj(1:first_jj-1), del_Omega(last_jj:end), del_Om_vec(last_0+1:end)];
-                            del_om_vec = [del_om_vec(1:first_0), del_omega_jj(1:first_jj-1), del_omega(last_jj:end), del_om_vec(last_0+1:end)];
+                            del_Om_vec = [del_Om_vec(1:first_0-1), flip(del_Omega_jj(1:first_jj)), flip(del_Omega_jj(last_jj:end)), del_Om_vec(last_0+1:end)];
+                            del_om_vec = [del_om_vec(1:first_0-1), flip(del_omega_jj(1:first_jj)), flip(del_omega_jj(last_jj:end)), del_om_vec(last_0+1:end)];
                         end
                     end
                     %save the updated simple closed curve
