@@ -85,6 +85,9 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
     % Previously I was trying to keep track of which Omega led to which
     % intersection point, but if I include the intersection points in the
     % del_Omega, then del_om will tell me (or have NaN for no derivative...)
+    %
+    %Honestly I think it is better to save the exact location and then
+    %  just use the find function when all is done...
     
     % define a for loop to remove all of the input circles.
     num_remove = length(om);
@@ -102,17 +105,18 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
         end
         %define the new vector to update del_omega with
         del_omega_jj = count_removed*ones(1,length(del_Omega_jj));
-        %make sure that del_Omega_jj are in counter-clockwise order
-        [del_Omega_jj, del_omega_jj] = delOmega_flipper(del_Omega_jj, del_omega_jj, 1);
+        %make sure that del_Omega_jj are in clockwise order
+        [del_Omega_jj, del_omega_jj] = delOmega_flipper(del_Omega_jj, del_omega_jj, 0);
         %Now that the disk being removed is defined, determine which simple
         %  closed curves the disk intersects and redefine those curves 
         for ii = 1:nrows %each row is a separate closed curve with it's own annuli
             track_intersect = zeros(1,ncols);
+            is_annulus = 0;
             next_col = ncols+1; %assume we need a new cell in the row for an annulus
             for kk = 1:ncols % each column after 1 is an annulus
                 del_Om_vec = cell2mat(del_Omega(ii,kk));
                 %if this cell is empty, it can be filled
-                if isempty(del_Om_vec)
+                if isempty(del_Om_vec) && next_col == ncols+1
                     next_col = kk;
                 end
                 del_om_vec = cell2mat(del_omega(ii,kk));
@@ -121,27 +125,18 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                 %find Gamma 0
                 Gam_0 = inpolygon(real(del_Om_vec), imag(del_Om_vec),real(del_Omega_jj), imag(del_Omega_jj));
                 
-                %Define the new del_Omega curve and the intersections 
-                %flip removed circle so it is in the clockwise direction
-                %(we want this for the outer boundary and annuli))
-                del_Omega_jj = flip(del_Omega_jj);
-                Gam_jj = flip(Gam_jj);
-                
                 %Does the disk intersect the curve?
                 if ismember(0, Gam_jj) && ismember(1, Gam_jj) 
                     track_intersect(kk) = 1;
+                    
                     %!!!!!!   Here is where to edit intersection process
                     %We need to find the points of intersection. Using where 
                     % Gam_0 first becomes a 1 as the estimate ensures
                     % we slightly overestimate the angle and maintain the upper bound.
                     [inter_new, first_0, last_0] = locate_intersections(Gam_0,del_Om_vec);
                     intersections = cat(2, intersections, inter_new); %row vector that only gets longer
-        
                     % combine Gam_jj and Gam_0 into a single curve 
                     bounds_jj = Gam_jj(1:end-1) - Gam_jj(2:end);
-                    
-                    % !!!!!! Here is where to change for part 3, when there
-                    % are more than two intersections on a single curve
                     first_jj = find(bounds_jj == -1,1,'first')+1;
                     last_jj = find(bounds_jj == 1,1, 'last');
                     
@@ -150,40 +145,111 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                         if last_0 < first_0
                             negatives = imag(del_Omega_jj) >= 0 & Gam_jj ==1;
                             start = find(del_Omega_jj == min(del_Omega_jj(negatives)));
-                            del_Om_vec = [del_Omega_jj(start:last_jj),del_Om_vec(~Gam_0), del_Omega_jj(first_jj:start)];
-                            del_om_vec = [del_omega_jj(start:last_jj),del_om_vec(~Gam_0), del_omega_jj(first_jj:start)];
+                            del_Om_vec = [del_Omega_jj(start:last_jj), ...
+                                del_Om_vec(last_0), del_Om_vec(~Gam_0), del_Om_vec(first_0),...
+                                del_Omega_jj(first_jj:start)];
+                            del_om_vec = [del_omega_jj(start:last_jj), ...
+                                del_om_vec(first_0), del_om_vec(~Gam_0), del_om_vec(last_0),...
+                                del_omega_jj(first_jj:start)];
                         elseif last_jj < first_jj
-                            del_Om_vec = [del_Om_vec(1:first_0-1), del_Omega_jj(first_jj:end), del_Omega_jj(1:last_jj), del_Omega(last_0+1:end)];
-                            del_om_vec = [del_om_vec(1:first_0-1), del_omega_jj(first_jj:end), del_omega_jj(1:last_jj), del_omega(last_0+1:end)];
+                            del_Om_vec = [del_Om_vec(1:first_0), del_Omega_jj(first_jj:end), del_Omega_jj(1:last_jj), del_Om_vec(last_0:end)];
+                            del_om_vec = [del_om_vec(1:first_0), del_om_vec(first_jj:end), del_om_vec(1:last_jj), del_om_vec(last_0:end)];
                         else
-                            del_Om_vec = [del_Om_vec(1:first_0-1), del_Omega_jj(Gam_jj), del_Om_vec(last_0+1:end)];
-                            del_om_vec = [del_om_vec(1:first_0-1), del_omega_jj(Gam_jj), del_om_vec(last_0+1:end)];
+                            del_Om_vec = [del_Om_vec(1:first_0), del_Omega_jj(Gam_jj), del_Om_vec(last_0:end)];
+                            del_om_vec = [del_om_vec(1:first_0), del_omega_jj(Gam_jj), del_om_vec(last_0:end)];
                         end
                     else
                     % define the new del_Omega with the removed half-disk
                         if last_0 < first_0
-                            del_Om_vec = [del_Omega_jj(1:first_jj),flip(del_Om_vec(~Gam_0)), del_Omega_jj(last_jj:end)];
-                            del_om_vec = [del_omega_jj(1:first_jj),flip(del_om_vec(~Gam_0)), del_omega_jj(last_jj:end)];
+                            del_Om_vec = [del_Omega_jj(1:first_jj),...
+                                 del_Om_vec(~Gam_0),...
+                                del_Omega_jj(last_jj:end)];
+                            del_om_vec = [del_omega_jj(1:first_jj),...
+                                 del_om_vec(~Gam_0),...
+                                del_omega_jj(last_jj:end)];
                         elseif last_jj < first_jj
-                            del_Om_vec = [del_Om_vec(1:first_0-1), flip(del_Omega_jj(~Gam_jj)), del_Om_vec(last_0+1:end)];
-                            del_om_vec = [del_om_vec(1:first_0-1), flip(del_omega_jj(~Gam_jj)), del_om_vec(last_0+1:end)];
+                            del_Om_vec = [del_Om_vec(1:first_0-1), del_Omega_jj(~Gam_jj), del_Om_vec(last_0+1:end)];
+                            del_om_vec = [del_om_vec(1:first_0-1), del_omega_jj(~Gam_jj), del_om_vec(last_0+1:end)];
                         else
-                            del_Om_vec = [del_Om_vec(1:first_0-1), flip(del_Omega_jj(1:first_jj)), flip(del_Omega_jj(last_jj:end)), del_Om_vec(last_0+1:end)];
-                            del_om_vec = [del_om_vec(1:first_0-1), flip(del_omega_jj(1:first_jj)), flip(del_omega_jj(last_jj:end)), del_om_vec(last_0+1:end)];
+                            del_Om_vec = [del_Om_vec(1:first_0-1),...
+                                del_Omega_jj(last_jj:end), del_Omega_jj(1:first_jj),...
+                                del_Om_vec(last_0+1:end)];
+                            del_om_vec = [del_om_vec(1:first_0-1),...
+                                del_omega_jj(last_jj:end), del_omega_jj(1:first_jj),...
+                                del_om_vec(last_0+1:end)];
                         end
                     end
                     %save the updated simple closed curve
                     del_Omega{ii, kk} = del_Om_vec; del_omega{ii,kk} = del_om_vec;
                 %check to see if the disk is an annulus in this row
                 elseif  kk==1 && min(Gam_jj) == 1
-                    track_intersect(kk) = -1;
+                    is_annulus = 1;
                 end
             end
             %check to see if the disk is an annulus
-            if sum(track_intersect) == -1
-                del_Omega{ii, next_col} = del_Omega_jj;
-                del_omega{ii, next_col} = del_omega_jj;
-            end
+           if is_annulus
+                [del_Omega{ii, next_col}, del_omega{ii, next_col}] = delOmega_flipper(del_Omega_jj, del_omega_jj, 0);
+                ncols = ncols+1;
+            %check to see if the removed disk intersects multiple simple
+            %closed curves
+            elseif sum(track_intersect) == 2 
+                ii = find(track_intersect == 1);
+                del_Om_vec1 = del_Omega{ii(1)}; del_om_vec1 = del_omega{ii(1)};
+                del_Om_vec2 = del_Omega{ii(2)}; del_om_vec2 = del_omega{ii(2)};
+                %first figure out which point(s) are part of both curves or
+                %
+                [Gam_1, ON] = inpolygon(real(del_Om_vec1), imag(del_Om_vec1), real(del_Om_vec2), imag(del_Om_vec2));
+                Gam_2 = inpolygon(real(del_Om_vec2), imag(del_Om_vec2), real(del_Om_vec1), imag(del_Om_vec1));
+                bounds_1 = Gam_1(1:end-1) - Gam_1(2:end);
+                first_1 = find(bounds_1 == -1,1,'first')+1;
+                last_1 = find(bounds_1 == 1,1, 'last');
+                bounds_2 = Gam_2(1:end-1) - Gam_2(2:end);
+                first_2 = find(bounds_2 == -1,1,'first')+1;
+                last_2 = find(bounds_2 == 1,1, 'last');
+                if track_intersect(1) == 1                    
+                    if first_1 > last_1
+                        negatives = imag(del_Om_vec2) >= 0 & Gam_2 ==1;
+                        start = find(del_Om_vec2 == min(del_Om_vec2(negatives)));
+                        del_Om_vec = [del_Om_vec2(start:last_2), ...
+                            del_Om_vec1(last_1), del_Om_vec1(~Gam_1), del_Om_vec1(first_1),...
+                            del_Om_vec2(first_2:start)];
+                        del_om_vec = [del_om_vec2(start:last_2), ...
+                            del_om_vec1(first_1), del_om_vec1(~Gam_1), del_om_vec1(last_1),...
+                            del_om_vec2(first_2:start)];
+                    elseif first_2 > last_2
+                        del_Om_vec = [del_Om_vec1(1:first_1), ...
+                            del_Om_vec2(first_2:end), del_Om_vec2(1:last_2), ...
+                            del_Om_vec1(last_1:end)];
+                        del_om_vec = [del_om_vec1(1:first_1), ...
+                            del_om_vec2(first_2:end), del_om_vec2(1:last_2), ...
+                            del_om_vec1(last_1:end)];
+                    else
+                        del_Om_vec = [del_Om_vec1(1:first_1), del_Om_vec2(Gam_2), del_Om_vec1(last_1:end)];
+                        del_om_vec = [del_om_vec1(1:first_1), del_om_vec2(Gam_2), del_om_vec1(last_1:end)];
+                    end
+               else
+                   if last_0 < first_0
+                        del_Om_vec = [del_Om_vec2(1:first_2),...
+                             del_Om_vec1(~Gam_1),...
+                            del_Om_vec2(last_2:end)];
+                        del_om_vec = [del_om_vec2(1:first_2),...
+                            del_om_vec1(~Gam_1),...
+                            del_om_vec2(last_2:end)];
+                    elseif last_2 < first_2
+                        del_Om_vec = [del_Om_vec1(1:first_1-1), del_Om_vec2(~Gam_2), del_Om_vec1(last_1+1:end)];
+                        del_om_vec = [del_om_vec1(1:first_1-1), del_om_vec2(~Gam_2), del_om_vec1(last_1+1:end)];
+                    else
+                        del_Om_vec = [del_Om_vec1(1:first_1-1),...
+                            del_Om_vec2(last_2:end), del_Om_vec2(1:first_2),...
+                            del_Om_vec1(last_1+1:end)];
+                        del_om_vec = [del_om_vec1(1:first_1-1),...
+                            del_om_vec2(last_2:end), del_om_vec2(1:first_2),...
+                            del_om_vec1(last_1+1:end)];
+                    end
+                end
+            del_Omega = [{del_Om_vec}, del_Omega(~track_intersect)];
+            del_omega = [{del_om_vec}, del_omega(~track_intersect)];
+           end
         end
     end
     figure()
