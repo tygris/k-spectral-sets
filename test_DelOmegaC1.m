@@ -16,9 +16,11 @@ sigA1_index = 60;
 %make a movie M1 of the estimated values of c1
  %[M1, ms1, ms1_prime, ms1_c1] = c1_movie(A1, r1, 5, omA1);
 
- %the second annulus removed is oriented in the wrong direction
-test_annuli1 = [5.5, 5.65, 4.5, 4.35];
-test_annuli2 = [4.5, 4.35, 5.5, 5.65];
+% Tests for defining more complicated del_Omega curves:
+test1 = [4.5, 5.5, 4.33, 4.66, 5.33, 5.66, 5.5+.2i, 5.5-.2i, 4.5-.2i, 4.5+.2i];
+test2 = [4, 6, 5+1i, 5-1i]; %especially used on the del_Om defined by test1
+test3 = [5+.12i 5+.2i, 5-.12i, 5-.2i, 5.03+.14i, 4.97+.14i, 5+.15i, 5-.15i, 5.1, 5.15, 5.12, 4.9, 4.85, 4.88];
+test4 = [5.5+.4i, 5.5-.4i, 6];
 
 %% Example 2
 % example 1 in Caswell and Neubert 1997 paper

@@ -1,5 +1,5 @@
 %Function to define del_Omega once all of the disks have been removed
-% 10/26: Only 1 (non-overlapping) annulus can be removed, and it must be done last.
+% 11/16: A single curve cannot be split into two
 %
 %[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
 %function to define del_Omega once all of the disks have been removed
@@ -41,9 +41,10 @@
 %   - remove_circle
 %   - circle
 %   - delOmega_flipper
+%   - curve_combine
 
 %Natalie Wellen
-%11/08/21
+%11/16/21
 
 %First, remove overlapping annuli 
 %Second, combine curves, where a removed disk interscts two or more distict simple curves
@@ -123,7 +124,7 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                 %Find Gamma 1
                 Gam_jj = inpolygon(real(del_Omega_jj), imag(del_Omega_jj),real(del_Om_vec), imag(del_Om_vec));
                 %find Gamma 0
-                Gam_0 = inpolygon(real(del_Om_vec), imag(del_Om_vec),real(del_Omega_jj), imag(del_Omega_jj));
+                [Gam_0, ON] = inpolygon(real(del_Om_vec), imag(del_Om_vec),real(del_Omega_jj), imag(del_Omega_jj));
                 
                 %Does the disk intersect the curve?
                 if ismember(0, Gam_jj) && ismember(1, Gam_jj) 
@@ -135,49 +136,16 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                     % we slightly overestimate the angle and maintain the upper bound.
                     [inter_new, first_0, last_0] = locate_intersections(Gam_0,del_Om_vec);
                     intersections = cat(2, intersections, inter_new); %row vector that only gets longer
-                    % combine Gam_jj and Gam_0 into a single curve 
-                    bounds_jj = Gam_jj(1:end-1) - Gam_jj(2:end);
-                    first_jj = find(bounds_jj == -1,1,'first')+1;
-                    last_jj = find(bounds_jj == 1,1, 'last');
                     
+                    % combine Gam_jj and Gam_0 into a single curve 
                     if kk==1
                     % define the new del_Omega with the removed half-disk
-                        if last_0 < first_0
-                            negatives = imag(del_Omega_jj) >= 0 & Gam_jj ==1;
-                            start = find(del_Omega_jj == min(del_Omega_jj(negatives)));
-                            del_Om_vec = [del_Omega_jj(start:last_jj), ...
-                                del_Om_vec(last_0), del_Om_vec(~Gam_0), del_Om_vec(first_0),...
-                                del_Omega_jj(first_jj:start)];
-                            del_om_vec = [del_omega_jj(start:last_jj), ...
-                                del_om_vec(first_0), del_om_vec(~Gam_0), del_om_vec(last_0),...
-                                del_omega_jj(first_jj:start)];
-                        elseif last_jj < first_jj
-                            del_Om_vec = [del_Om_vec(1:first_0), del_Omega_jj(first_jj:end), del_Omega_jj(1:last_jj), del_Om_vec(last_0:end)];
-                            del_om_vec = [del_om_vec(1:first_0), del_om_vec(first_jj:end), del_om_vec(1:last_jj), del_om_vec(last_0:end)];
-                        else
-                            del_Om_vec = [del_Om_vec(1:first_0), del_Omega_jj(Gam_jj), del_Om_vec(last_0:end)];
-                            del_om_vec = [del_om_vec(1:first_0), del_omega_jj(Gam_jj), del_om_vec(last_0:end)];
-                        end
+                        [del_Om_vec, del_om_vec] = curve_combine(1, del_Om_vec, del_om_vec,...
+                                        del_Omega_jj, del_omega_jj, Gam_0, Gam_jj, ON);
                     else
                     % define the new del_Omega with the removed half-disk
-                        if last_0 < first_0
-                            del_Om_vec = [del_Omega_jj(1:first_jj),...
-                                 del_Om_vec(~Gam_0),...
-                                del_Omega_jj(last_jj:end)];
-                            del_om_vec = [del_omega_jj(1:first_jj),...
-                                 del_om_vec(~Gam_0),...
-                                del_omega_jj(last_jj:end)];
-                        elseif last_jj < first_jj
-                            del_Om_vec = [del_Om_vec(1:first_0-1), del_Omega_jj(~Gam_jj), del_Om_vec(last_0+1:end)];
-                            del_om_vec = [del_om_vec(1:first_0-1), del_omega_jj(~Gam_jj), del_om_vec(last_0+1:end)];
-                        else
-                            del_Om_vec = [del_Om_vec(1:first_0-1),...
-                                del_Omega_jj(last_jj:end), del_Omega_jj(1:first_jj),...
-                                del_Om_vec(last_0+1:end)];
-                            del_om_vec = [del_om_vec(1:first_0-1),...
-                                del_omega_jj(last_jj:end), del_omega_jj(1:first_jj),...
-                                del_om_vec(last_0+1:end)];
-                        end
+                        [del_Om_vec, del_om_vec] = curve_combine(0, del_Om_vec, del_om_vec,...
+                                        del_Omega_jj, del_omega_jj, Gam_0, Gam_jj, ON);
                     end
                     %save the updated simple closed curve
                     del_Omega{ii, kk} = del_Om_vec; del_omega{ii,kk} = del_om_vec;
@@ -187,68 +155,48 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                 end
             end
             %check to see if the disk is an annulus
-           if is_annulus
+           if is_annulus && sum(track_intersect) == 0
                 [del_Omega{ii, next_col}, del_omega{ii, next_col}] = delOmega_flipper(del_Omega_jj, del_omega_jj, 0);
                 ncols = ncols+1;
             %check to see if the removed disk intersects multiple simple
             %closed curves
-            elseif sum(track_intersect) == 2 
+            elseif sum(track_intersect) >= 2 
                 ii = find(track_intersect == 1);
-                del_Om_vec1 = del_Omega{ii(1)}; del_om_vec1 = del_omega{ii(1)};
-                del_Om_vec2 = del_Omega{ii(2)}; del_om_vec2 = del_omega{ii(2)};
-                %first figure out which point(s) are part of both curves or
-                %
-                [Gam_1, ON] = inpolygon(real(del_Om_vec1), imag(del_Om_vec1), real(del_Om_vec2), imag(del_Om_vec2));
-                Gam_2 = inpolygon(real(del_Om_vec2), imag(del_Om_vec2), real(del_Om_vec1), imag(del_Om_vec1));
-                bounds_1 = Gam_1(1:end-1) - Gam_1(2:end);
-                first_1 = find(bounds_1 == -1,1,'first')+1;
-                last_1 = find(bounds_1 == 1,1, 'last');
-                bounds_2 = Gam_2(1:end-1) - Gam_2(2:end);
-                first_2 = find(bounds_2 == -1,1,'first')+1;
-                last_2 = find(bounds_2 == 1,1, 'last');
-                if track_intersect(1) == 1                    
-                    if first_1 > last_1
-                        negatives = imag(del_Om_vec2) >= 0 & Gam_2 ==1;
-                        start = find(del_Om_vec2 == min(del_Om_vec2(negatives)));
-                        del_Om_vec = [del_Om_vec2(start:last_2), ...
-                            del_Om_vec1(last_1), del_Om_vec1(~Gam_1), del_Om_vec1(first_1),...
-                            del_Om_vec2(first_2:start)];
-                        del_om_vec = [del_om_vec2(start:last_2), ...
-                            del_om_vec1(first_1), del_om_vec1(~Gam_1), del_om_vec1(last_1),...
-                            del_om_vec2(first_2:start)];
-                    elseif first_2 > last_2
-                        del_Om_vec = [del_Om_vec1(1:first_1), ...
-                            del_Om_vec2(first_2:end), del_Om_vec2(1:last_2), ...
-                            del_Om_vec1(last_1:end)];
-                        del_om_vec = [del_om_vec1(1:first_1), ...
-                            del_om_vec2(first_2:end), del_om_vec2(1:last_2), ...
-                            del_om_vec1(last_1:end)];
-                    else
-                        del_Om_vec = [del_Om_vec1(1:first_1), del_Om_vec2(Gam_2), del_Om_vec1(last_1:end)];
-                        del_om_vec = [del_om_vec1(1:first_1), del_om_vec2(Gam_2), del_om_vec1(last_1:end)];
+                
+                if track_intersect(1) == 1   
+                    del_Om_vec1 = del_Omega{1}; del_om_vec1 = del_omega{1};
+                    for jj = ii(2:end)
+                        del_Om_vec2 = del_Omega{jj}; del_om_vec2 = del_omega{jj};
+                        %first figure out which point(s) are part of both curves or
+                        %
+                        [Gam_1, ON] = inpolygon(real(del_Om_vec1), imag(del_Om_vec1), real(del_Om_vec2), imag(del_Om_vec2));
+                        Gam_2 = inpolygon(real(del_Om_vec2), imag(del_Om_vec2), real(del_Om_vec1), imag(del_Om_vec1));
+                
+                        [del_Om_vec1, del_om_vec1] = curve_combine(1, del_Om_vec1, del_om_vec1,...
+                                        del_Om_vec2, del_om_vec2, Gam_1, Gam_2, ON);
                     end
-               else
-                   if last_0 < first_0
-                        del_Om_vec = [del_Om_vec2(1:first_2),...
-                             del_Om_vec1(~Gam_1),...
-                            del_Om_vec2(last_2:end)];
-                        del_om_vec = [del_om_vec2(1:first_2),...
-                            del_om_vec1(~Gam_1),...
-                            del_om_vec2(last_2:end)];
-                    elseif last_2 < first_2
-                        del_Om_vec = [del_Om_vec1(1:first_1-1), del_Om_vec2(~Gam_2), del_Om_vec1(last_1+1:end)];
-                        del_om_vec = [del_om_vec1(1:first_1-1), del_om_vec2(~Gam_2), del_om_vec1(last_1+1:end)];
-                    else
-                        del_Om_vec = [del_Om_vec1(1:first_1-1),...
-                            del_Om_vec2(last_2:end), del_Om_vec2(1:first_2),...
-                            del_Om_vec1(last_1+1:end)];
-                        del_om_vec = [del_om_vec1(1:first_1-1),...
-                            del_om_vec2(last_2:end), del_om_vec2(1:first_2),...
-                            del_om_vec1(last_1+1:end)];
-                    end
+                    %save the new outer boundary and keep the untouched
+                    %simple closed curves
+                    del_Omega = [{del_Om_vec1}, del_Omega(~track_intersect)];
+                    del_omega = [{del_om_vec1}, del_omega(~track_intersect)];
+                else
+                   del_Om_vec1 = del_Omega{ii(1)}; del_om_vec1 = del_omega{ii(2)};
+                   for jj = ii(end:-1:2)
+                       del_Om_vec2 = del_Omega{jj}; del_om_vec2 = del_omega{jj};
+                       %first figure out which point(s) are part of both curves or
+                       %
+                       [Gam_1, ON] = inpolygon(real(del_Om_vec1), imag(del_Om_vec1), real(del_Om_vec2), imag(del_Om_vec2));
+                       Gam_2 = inpolygon(real(del_Om_vec2), imag(del_Om_vec2), real(del_Om_vec1), imag(del_Om_vec1));
+                
+                       [del_Om_vec1, del_om_vec1] = curve_combine(0, del_Om_vec1, del_om_vec1,...
+                                            del_Om_vec2, del_om_vec2, Gam_1, Gam_2, ON);
+                   end
+                   %save the new single annulus and keep the other simple
+                   %closed curves
+                   del_Omega = [del_Omega(~track_intersect), {del_Om_vec1}];
+                   del_omega = [del_omega(~track_intersect), {del_om_vec1}];
                 end
-            del_Omega = [{del_Om_vec}, del_Omega(~track_intersect)];
-            del_omega = [{del_om_vec}, del_omega(~track_intersect)];
+                ncols = ncols-1;
            end
         end
     end
