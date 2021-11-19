@@ -44,7 +44,7 @@
 %   - curve_combine
 
 %Natalie Wellen
-%11/16/21
+%11/18/21
 
 %First, remove overlapping annuli 
 %Second, combine curves, where a removed disk interscts two or more distict simple curves
@@ -121,6 +121,7 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                     next_col = kk;
                 end
                 del_om_vec = cell2mat(del_omega(ii,kk));
+                %assert(length(del_Om_vec) == length(del_om_vec), ["Double check how del_om_was defined last loop: kk=", int2str(kk)])
                 %Find Gamma 1
                 Gam_jj = inpolygon(real(del_Omega_jj), imag(del_Omega_jj),real(del_Om_vec), imag(del_Om_vec));
                 %find Gamma 0
@@ -196,8 +197,9 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                    del_Omega = [del_Omega(~track_intersect), {del_Om_vec1}];
                    del_omega = [del_omega(~track_intersect), {del_om_vec1}];
                 end
-                ncols = ncols-1;
+                ncols = ncols - length(ii)+1;
            end
+           
         end
     end
     figure()
