@@ -37,11 +37,13 @@ function [del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om
         %If combining with the outer curve
         %find the intersection points of the curves
         bounds_1 = Gam_1(1:end-1) - Gam_1(2:end);
-        first_1 = find(bounds_1 <= -1)+1;
+        first_1 = find(bounds_1 <= -1)+1; 
         last_1 = find(bounds_1 >= 1);
+        [first_1, last_1] = inter_clean(first_1, last_1);
         [bounds_2] = Gam_2(1:end-1) - Gam_2(2:end);
         first_2 = find(bounds_2 == -1)+1;
         last_2 = find(bounds_2 == 1);
+        [first_2, last_2] = inter_clean(first_2, last_2);
     
         %perform that actual curve combination
         if first_1 > last_1
@@ -49,7 +51,7 @@ function [del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om
             start = find(imag(del_Om_vec2) == min(imag(del_Om_vec2(negatives))));
             k = length(first_1);
             %to finish the curve
-            last_2(k+1) = start; first_2(k+1) = first_2(1);
+            last_2 = cat(2, last_2, start); first_2 = cat(2, first_2, first_2(1));
             % combine the first protrusion 
             del_Om_vec = [del_Om_vec2(start:last_2(1)), ...
                 del_Om_vec1(last_1(1):first_1(1)),...
@@ -109,11 +111,11 @@ function [del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om
         %If combining with an annulus
         %find the intersection points of the curves
         bounds_1 = Gam_1(1:end-1)-ON(1:end-1) - Gam_1(2:end)+ON(2:end);
-        first_1 = find(bounds_1 <= -1)+1;
-        last_1 = find(bounds_1 >= 1);
+        first_1 = find(bounds_1 <= -1,1, 'first')+1;
+        last_1 = find(bounds_1 >= 1,1,'last');
         [bounds_2] = Gam_2(1:end-1) - Gam_2(2:end);
-        first_2 = find(bounds_2 == -1)+1;
-        last_2 = find(bounds_2 == 1);
+        first_2 = find(bounds_2 == -1,1,'first')+1;
+        last_2 = find(bounds_2 == 1,1,'last');
         
         bounds_0 = Gam_1(1:end-1) - Gam_1(2:end);
         first_0 = find(bounds_0 <= -1)+1;
@@ -121,17 +123,17 @@ function [del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om
         
         %perform the actual curve combination
         if last_0(end) < first_0(1)
-            del_Om_vec = [del_Om_vec2(1:first_2), ...
-                del_Om_vec1(last_1), del_Om_vec1(~Gam_1), del_Om_vec1(first_1),...
-                del_Om_vec2(last_2:end)];
-            del_om_vec = [del_om_vec2(1:first_2), ...
-                del_om_vec1(first_1), del_om_vec1(~Gam_1), del_om_vec1(last_1),...
-                del_om_vec2(last_2:end)];
+%             del_Om_vec = [del_Om_vec2(1:first_2), ...
+%                 del_Om_vec1(last_1), del_Om_vec1(~Gam_1), del_Om_vec1(first_1),...
+%                 del_Om_vec2(last_2:end)];
+%             del_om_vec = [del_om_vec2(1:first_2), ...
+%                 del_om_vec1(last_1), del_om_vec1(~Gam_1), del_om_vec1(first_1),...
+%                 del_om_vec2(last_2:end)];
             del_Om_vec = [del_Om_vec2(1:first_2),...
-                 del_Om_vec1(logical(~Gam_1+ON)),...
+                 del_Om_vec1(last_1), del_Om_vec1(logical(~Gam_1+ON)), del_Om_vec1(first_1),...
                 del_Om_vec2(last_2:end)];
             del_om_vec = [del_om_vec2(1:first_2),...
-                del_om_vec1(logical(~Gam_1+ON)),...
+                del_om_vec1(last_1), del_om_vec1(logical(~Gam_1+ON)), del_om_vec1(first_1), ...
                 del_om_vec2(last_2:end)];
         elseif last_2 < first_2
             del_Om_vec = [del_Om_vec1(1:first_1-1), del_Om_vec2(~Gam_2), del_Om_vec1(last_1+1:end)];

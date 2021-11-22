@@ -114,6 +114,7 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
             track_intersect = zeros(1,ncols);
             is_annulus = 0;
             next_col = ncols+1; %assume we need a new cell in the row for an annulus
+            
             for kk = 1:ncols % each column after 1 is an annulus
                 del_Om_vec = cell2mat(del_Omega(ii,kk));
                 %if this cell is empty, it can be filled
@@ -121,7 +122,8 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                     next_col = kk;
                 end
                 del_om_vec = cell2mat(del_omega(ii,kk));
-                %assert(length(del_Om_vec) == length(del_om_vec), ["Double check how del_om_was defined last loop: kk=", int2str(kk)])
+                assert(length(del_Om_vec) == length(del_om_vec), ['Double check how del_om_vec was defined last loop: kk=', int2str(kk)])
+                
                 %Find Gamma 1
                 Gam_jj = inpolygon(real(del_Omega_jj), imag(del_Omega_jj),real(del_Om_vec), imag(del_Om_vec));
                 %find Gamma 0
@@ -162,11 +164,11 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
             %check to see if the removed disk intersects multiple simple
             %closed curves
             elseif sum(track_intersect) >= 2 
-                ii = find(track_intersect == 1);
+                smoosh = find(track_intersect == 1);
                 
                 if track_intersect(1) == 1   
                     del_Om_vec1 = del_Omega{1}; del_om_vec1 = del_omega{1};
-                    for jj = ii(2:end)
+                    for jj = smoosh(2:end)
                         del_Om_vec2 = del_Omega{jj}; del_om_vec2 = del_omega{jj};
                         %first figure out which point(s) are part of both curves or
                         %
@@ -181,8 +183,8 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                     del_Omega = [{del_Om_vec1}, del_Omega(~track_intersect)];
                     del_omega = [{del_om_vec1}, del_omega(~track_intersect)];
                 else
-                   del_Om_vec1 = del_Omega{ii(1)}; del_om_vec1 = del_omega{ii(2)};
-                   for jj = ii(end:-1:2)
+                   del_Om_vec1 = del_Omega{smoosh(1)}; del_om_vec1 = del_omega{smoosh(1)};
+                   for jj = smoosh(end:-1:2)
                        del_Om_vec2 = del_Omega{jj}; del_om_vec2 = del_omega{jj};
                        %first figure out which point(s) are part of both curves or
                        %
@@ -194,10 +196,11 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                    end
                    %save the new single annulus and keep the other simple
                    %closed curves
+                   
                    del_Omega = [del_Omega(~track_intersect), {del_Om_vec1}];
                    del_omega = [del_omega(~track_intersect), {del_om_vec1}];
                 end
-                ncols = ncols - length(ii)+1;
+                ncols = ncols - length(smoosh)+1;
            end
            
         end
