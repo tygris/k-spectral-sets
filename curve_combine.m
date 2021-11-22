@@ -1,6 +1,6 @@
 % Helper function to combine curves for define_del_Omega()
 %
-%[del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om_vec1,
+%[del_Om_vec, del_om_vec, intersections] = curve_combine(out_bound, del_Om_vec1, del_om_vec1,
 %del_Om_vec2, del_om_vec2, Gam_1, Gam_2)
 % 
 % input, out_bound, in [0,1] where 1 for combining curves with the outer boundary 
@@ -22,13 +22,15 @@
 %          from combining the input curves del_Om_vec1 and del_Om_vec2
 % output, del_om_vec, integer vector, the source for taking the derivative
 %        of the new del_Om_vec
+% output, intersections, a row vector of the list of new intersection
+%          points resulting from combining del_Om_vec1 and del_Om_vec2
 
 
 %Natalie Wellen
-%11/18/21
+%11/22/21
 
-function [del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om_vec1,...
-                                        del_Om_vec2, del_om_vec2, Gam_1, Gam_2, ON)
+function [del_Om_vec, del_om_vec, intersections] = curve_combine(out_bound, del_Om_vec1,...
+                                        del_om_vec1, del_Om_vec2, del_om_vec2, Gam_1, Gam_2, ON)
     assert(ismember(out_bound, [0,1]), ...
         "'out_bound' is 1 for combining curves with the outer boundary and 0 for combining annuli curves.")
     
@@ -45,6 +47,9 @@ function [del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om
         last_2 = find(bounds_2 == 1);
         [first_2, last_2] = inter_clean(first_2, last_2);
     
+        %save the list of new intersection points
+        intersections = reshape([del_Om_vec1(first_1); del_Om_vec1(last_1)], 1, []); %so intersections are in clockwise order
+        
         %perform that actual curve combination
         if first_1 > last_1
             negatives = imag(del_Om_vec2) >= 0 & Gam_2 ==1;
@@ -120,6 +125,9 @@ function [del_Om_vec, del_om_vec] = curve_combine(out_bound, del_Om_vec1, del_om
         bounds_0 = Gam_1(1:end-1) - Gam_1(2:end);
         first_0 = find(bounds_0 <= -1)+1;
         last_0 = find(bounds_0 >= 1);
+        
+        %save the list of new intersection points
+        intersections = reshape([del_Om_vec1(first_0); del_Om_vec1(last_0)], 1, []); %so intersections are in clockwise order
         
         %perform the actual curve combination
         if last_0(end) < first_0(1)

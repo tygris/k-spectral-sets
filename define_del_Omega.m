@@ -133,25 +133,20 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                 if ismember(0, Gam_jj) && ismember(1, Gam_jj) 
                     track_intersect(kk) = 1;
                     
-                    %!!!!!!   Here is where to edit intersection process
-                    %We need to find the points of intersection. Using where 
-                    % Gam_0 first becomes a 1 as the estimate ensures
-                    % we slightly overestimate the angle and maintain the upper bound.
-                    [inter_new, first_0, last_0] = locate_intersections(Gam_0,del_Om_vec);
-                    intersections = cat(2, intersections, inter_new); %row vector that only gets longer
-                    
                     % combine Gam_jj and Gam_0 into a single curve 
                     if kk==1
                     % define the new del_Omega with the removed half-disk
-                        [del_Om_vec, del_om_vec] = curve_combine(1, del_Om_vec, del_om_vec,...
+                        [del_Om_vec, del_om_vec, inter_new] = curve_combine(1, del_Om_vec, del_om_vec,...
                                         del_Omega_jj, del_omega_jj, Gam_0, Gam_jj, ON);
                     else
                     % define the new del_Omega with the removed half-disk
-                        [del_Om_vec, del_om_vec] = curve_combine(0, del_Om_vec, del_om_vec,...
+                        [del_Om_vec, del_om_vec, inter_new] = curve_combine(0, del_Om_vec, del_om_vec,...
                                         del_Omega_jj, del_omega_jj, Gam_0, Gam_jj, ON);
                     end
                     %save the updated simple closed curve
                     del_Omega{ii, kk} = del_Om_vec; del_omega{ii,kk} = del_om_vec;
+                    %save the new intersection points
+                    intersections = cat(2, intersections, inter_new);
                 %check to see if the disk is an annulus in this row
                 elseif  kk==1 && min(Gam_jj) == 1
                     is_annulus = 1;
@@ -202,8 +197,13 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                 end
                 ncols = ncols - length(smoosh)+1;
            end
-           
         end
+       %Not sure if I want to clean the intersection list here or not.
+       % It would require convverting to a vector yet not outputting... that vector.
+       % It seems like a waste of time especially considering I may change
+       % del_Omega by removing one disk at a time while looping through the
+       % script, which just means that my intersection list would never be
+       % cleaned inside of this function. It should def be a separate one.
     end
     figure()
     plot(cellmat2plot(del_Omega,1))
