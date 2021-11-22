@@ -28,11 +28,11 @@ numRange = numerical_range(mat,res_num);
 res_radii_plot = input('What resolution would you like for the contouring of radii?\n');
 [epssA, wofespssA] = spectral_set_choices(mat, numRange, res_radii_plot);
 
-%% 2. The user is asked where they would like to center removed circles
+%% 2. The user is asked where they would like the center of removed disks to be
 
 Y = 'Y'; N = 'N';
 om = [];
-radii = [];
+r_over_pi = [];
 xs = [];
 more = 'Y';
 del_Om = {numRange};
@@ -52,9 +52,9 @@ while more == 'Y'
     moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
     if moveon == 'Y'
         close
-        [del_Om, del_om, xs_new, radii_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
+        [del_Om, del_om, xs_new, roverpi_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
         om = cat(2, om, om_new);
-        radii = cat(2, radii, radii_new);
+        r_over_pi = cat(2, r_over_pi, roverpi_new);
         xs = cat(2, xs, xs_new);
     end
     more = input('Would you like to remove more disks? (Y/N)\n');

@@ -23,7 +23,7 @@ r_of_A()
 %Natalie Wellen
 %10/26/21
 
-function [del_Omega_k, r_over_pi] = remove_circ(A, om, res, radius)
+function [del_Omega_k, r_over_pi, radius] = remove_circ(A, om, res, radius)
     %Check that A is square
     [n,m] = size(A);
     assert(n == m, "A must be square");
