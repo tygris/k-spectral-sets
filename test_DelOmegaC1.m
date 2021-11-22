@@ -14,9 +14,39 @@ sigA1_index = 60;
 % c1 = 5.5706
 
 %make a movie M1 of the estimated values of c1
-[M1, ms1, ms1_prime, ms1_c1] = c1_movie(A1, r1, 5, omA1);
+ %[M1, ms1, ms1_prime, ms1_c1] = c1_movie(A1, r1, 5, omA1);
 
+% Tests for defining more complicated del_Omega curves:
+test1 = [4.5, 5.5, 4.33, 4.66, 5.33, 5.66, 5.5+.2i, 5.5-.2i, 4.5-.2i, 4.5+.2i];
+test2 = [4, 6, 5+1i, 5-1i]; %especially used on the del_Om defined by test1
+test3 = [5+.12i 5+.2i, 5-.12i, 5-.2i, 5.03+.14i, 4.97+.14i, 5+.15i, 5-.15i, 5.1, 5.15, 5.12, 4.9, 4.85, 4.88];
+test4 = [5.5+.4i, 5.5-.4i, 6, 4.5+.4i, 4.5-.4i, 4];
+test5 = [5.5+.45i, 5.5-.45i, 4.5+.45i, 4.5-.45i, 5+1i, 5-1i];
 
+%% Test measuring c1 with an annulus using A1 from Example 1
+
+%intiialize inputs to define_del_Omega
+numRange = numerical_range(A1,200);
+del_Om = {numRange};
+del_om = {zeros(1,length(numRange))};
+
+%define the curve with an annulus to test
+[del_Om, del_om, xs_new, rop_new] = define_del_Omega(del_Om,del_om,A1, 5.5, 200);
+[del_Om_0, del_om_0] = cellmat2plot(del_Om, del_om, 1);
+%convert cell array to vector
+[del_Om_0, del_om_0] = cellmat2plot(del_Om, del_om, 1);
+
+%get exact solution
+[hold, hold2, R_inverse] = remove_circ(A1, 5.5, 200);
+R_inverse
+R_inverse_equals_onesixth = R_inverse - 1/6
+c1A1_exact = (pi+ 4*asin(1/(6/2)))/pi
+
+%call function to calculate c1
+c1A1 = calc_c1(1, -pi/2, del_Om_0)
+
+%error
+error = abs(c1A1 - c1A1_exact)
 
 %% Example 2
 % example 1 in Caswell and Neubert 1997 paper

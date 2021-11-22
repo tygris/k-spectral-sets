@@ -23,13 +23,11 @@ r_of_A()
 %Natalie Wellen
 %10/26/21
 
-function [del_Omega_k, r_over_pi] = remove_circ(A, om, res, radius)
+function [del_Omega_k, r_over_pi, radius] = remove_circ(A, om, res, radius)
     %Check that A is square
     [n,m] = size(A);
-    if n ~= m
-        disp("A must be square")
-        return 
-    end
+    assert(n == m, "A must be square");
+    
     [epss, wOfPseudo] = r_of_A(A, m, om);
     %If the radius is not given as an input, calculate largest one
     if ~exist('radius', 'var') || isempty(radius) 
