@@ -2,7 +2,7 @@
 %  direction, either counter-clockwise or clockwise for annuli
 % This function is a helper for define_del_Omega
 %
-%[correct] = delOmega_flipper(del_Omega, del_omega, direction)
+%[correct, correct2] = delOmega_flipper(del_Omega, del_omega, direction)
 % input, del_Omega, complex vector, simple closed curve
 % input, del_omega, integer vector, source of point in corresponding
 %        location of del_Omega

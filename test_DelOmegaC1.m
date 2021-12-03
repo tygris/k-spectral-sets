@@ -1,7 +1,7 @@
 %This script file holds example variables for the package
 %
 %Natalie Wellen
-%10/18/21
+%11/22/21
 %
 
 %% Example 1
@@ -25,28 +25,36 @@ test5 = [5.5+.45i, 5.5-.45i, 4.5+.45i, 4.5-.45i, 5+1i, 5-1i];
 
 %% Test measuring c1 with an annulus using A1 from Example 1
 
-%intiialize inputs to define_del_Omega
-numRange = numerical_range(A1,200);
-del_Om = {numRange};
-del_om = {zeros(1,length(numRange))};
-
-%define the curve with an annulus to test
-[del_Om, del_om, xs_new, rop_new] = define_del_Omega(del_Om,del_om,A1, 5.5, 200);
-[del_Om_0, del_om_0] = cellmat2plot(del_Om, del_om, 1);
-%convert cell array to vector
-[del_Om_0, del_om_0] = cellmat2plot(del_Om, del_om, 1);
-
 %get exact solution
 [hold, hold2, R_inverse] = remove_circ(A1, 5.5, 200);
 R_inverse
 R_inverse_equals_onesixth = R_inverse - 1/6
 c1A1_exact = (pi+ 4*asin(1/(6/2)))/pi
 
+resolutions = [100, 200, 250, 4000, 10000];
+k = length(resolutions)
+errors = zeros(1,k);
+
+for jj = 1:k
+    resolution = resolutions(jj) ;
+%intiialize inputs to define_del_Omega
+numRange = numerical_range(A1,resolution);
+del_Om = {numRange};
+del_om = {zeros(1,length(numRange))};
+
+%define the curve with an annulus to test
+[del_Om, del_om, xs_new, rop_new] = define_del_Omega(del_Om,del_om,A1, 5.5, resolution);
+%convert cell array to vector
+[del_Om_0, del_om_0] = cellmat2plot(del_Om, del_om, 1);
+
 %call function to calculate c1
 c1A1 = calc_c1(1, -pi/2, del_Om_0)
 
+length(del_Om_0)
 %error
-error = abs(c1A1 - c1A1_exact)
+errors(jj) = abs(c1A1 - c1A1_exact)
+end
+errors
 
 %% Example 2
 % example 1 in Caswell and Neubert 1997 paper
@@ -64,4 +72,3 @@ r2 = 50;
 omA2_zero = [65.4385183500778 + 0.00000000000000i, 10.1027252814669 + 0.873653087730280i,2.46786437688462 + 0.269744475557558i,0.833401874525139 + 0.0883839638450861i,0.331464244821945 + 0.0326887947975829i,0.143798992781353 + 0.0118653950000352i,0.0500000000000000 + 0.00000000000000i,0.0225685981915412 + 0.000433092715613837i,0.00972320110960472 + 0.000230286896786214i,0.00362147265538962 + 0.000133951530309996i,0.000702482682489683 + 8.78659054104699e-05i];
 
 
- %% More examples can come from the pseudospectra package
