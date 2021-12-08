@@ -8,6 +8,9 @@
 %  input, del_Om, complex vector, the countour of the boundary of our
 %         spectral set del_Omega in the counter-clockwise direction
 %  output, c1, double, estimate of the spectral constant 
+%
+% Depends on:
+%     - angle_stepper
 
 %Natalie Wellen
 %11/22/21

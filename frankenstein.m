@@ -15,6 +15,9 @@
 %        the corresponding vector index
 % output, sigmap, double, the angle in radians of the derivative of sigma
 %         along del_Om
+%
+% Depends on:
+%     - sigma_prime
  
 %Natalie Wellen
 %10/14/21

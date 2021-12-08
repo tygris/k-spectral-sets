@@ -14,6 +14,10 @@
 %        default = 32
 % output, c1, the numerically estimated maximum of c1 based on the points
 %         given in delOm
+%
+% Depends on:
+%    - find_c1
+%       -angle_stepper
 
 %Natalie Wellen
 %12/06/21

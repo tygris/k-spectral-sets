@@ -24,6 +24,15 @@
 %  output, r1orr2, 1 or 2, 1 indicates that the radius satisfies the
 %          resolvent norm, 2 indicates the radius is less than the numerical
 %          radius of the resolvent.
+%
+% Depends on:
+%    - calc_c1
+%       - find_c1
+%          - angle_stepper
+%    - calc_c2
+%       - measureArcLength
+%       - findr
+%          - r_of_A
 
 %Natalie Wellen
 %12/01/21

@@ -36,12 +36,13 @@
 %       ev >= -R/(2*pi). In the same order as om.
 %
 % Depends on:
-%   - inpolygon
 %   - numerical_range
+%   - cellmat2plot
 %   - remove_circle
-%   - circle
+%       - circle
 %   - delOmega_flipper
 %   - curve_combine
+%       - inter_clean
 
 %Natalie Wellen
 %11/18/21

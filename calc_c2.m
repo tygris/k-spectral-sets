@@ -24,7 +24,9 @@
 %          the numerical range.
 %
 % Depends on: - delOmega_flipper
-%
+%             - measureArcLength
+%             - findr
+%                 - r_of_A
 %
 % [1] Wellen and Greenbaum, K-Spectral Sets
 

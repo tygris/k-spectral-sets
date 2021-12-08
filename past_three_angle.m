@@ -11,6 +11,9 @@
 % input, num_ignore (optional), integer, the boundary crosses we do not want to
 %       pay attention to (i.e for an annulus versus outer boundary)
 % output, theta, real number, the angle sigma(s) overlappingly travels
+%
+% Depends on:
+%    - del_Omega_cross
 
 %Natalie Wellen
 %10/25/21

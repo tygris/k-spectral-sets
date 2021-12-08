@@ -1,20 +1,20 @@
-%{
-Function to locate the maximum value of r for a point on a curve with a
-given derivative value. The matrix A must also be given to calculate r
-according to Theorem 2 in "K-Spectral Sets"
-
-[r, piOr2pi] = findr(A, sigma0, sigma0_prime, length, resolution)
-input, A, square matrix we are calculating c2 for
-input, sigma0, complex value, point on del_Omega we are analyzing
-input, sigma0_prime, complex_value, the clockwise direction of the
-       tangent curve to del_Omega at sigma0
-input, length, double, the distance from sigma0 we are searching for a
-       maximum r
-input, resolution, integer, the number of equally spaced points to search
-output, r, double, the length of the radius of the disk tangent to sigma0
-        and with equal derivative (mod pi)
-output, r1orr2, 1 or 2, indicates if 
-%}
+% Function to locate the maximum value of r for a point on a curve with a
+% given derivative value. The matrix A must also be given to calculate r
+% according to Theorem 2 in "K-Spectral Sets"
+% 
+% [r, piOr2pi] = findr(A, sigma0, sigma0_prime, length, resolution)
+% input, A, square matrix we are calculating c2 for
+% input, sigma0, complex value, point on del_Omega we are analyzing
+% input, sigma0_prime, complex_value, the clockwise direction of the
+%        tangent curve to del_Omega at sigma0
+% input, length, double, the distance from sigma0 we are searching for a
+%        maximum r
+% input, resolution, integer, the number of equally spaced points to search
+% output, r, double, the length of the radius of the disk tangent to sigma0
+%         and with equal derivative (mod pi)
+% output, r1orr2, 1 or 2, indicates if 
+% 
+% Depends on: -r_of_A
 
 %Natalie Wellen
 %12/07/21

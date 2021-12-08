@@ -1,16 +1,19 @@
+%Function to plot lines between sigma_0 and the intersections as an
+%illustration of the system.
+%
+% input, del_Om, complex vector, the countour of our spectral set
+% input, sigma_0, complex number, the starting point for measuring c1
+% input, intersections, complex vector, approx where the derivative is
+%        undefined on the spectral set
+% input, legend_on, optional 1, if passed then the legend is included
+% output, num_overlap, integer vector, the number of times sigma(s) crosses
+%         the line between sigma_0 and the corresponding intersection. The
+%         input and output vector are in the same order
+% output, plot, a plot of del_Om, sigma_0, the intersections, and the lines 
+%         from sigma_0 to each intersection
+
 %Natalie Wellen
 %09/28/21
-%function to plot between sigma_0 and the intersections
-%input, del_Om, complex vector, the countour of our spectral set
-%input, sigma_0, complex number, the starting point for measuring c1
-%input, intersections, complex vector, approx where the derivative is
-%       undefined on the spectral set
-%input, legend_on, optional 1, if passed then the legend is included
-%output, num_overlap, integer vector, the number of times sigma(s) crosses
-%        the line between sigma_0 and the corresponding intersection. The
-%        input and output vector are in the same order
-%output, plot, a plot of del_Om, sigma_0, the intersections, and the lines 
-%        from sigma_0 to each intersection
 
 function num_overlap = scouting_sig(del_Om, sigma_0, intersections, legend_on)
     

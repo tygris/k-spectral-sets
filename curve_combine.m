@@ -24,6 +24,8 @@
 %        of the new del_Om_vec
 % output, intersections, a row vector of the list of new intersection
 %          points resulting from combining del_Om_vec1 and del_Om_vec2
+%
+% Depends on: - inter_clean
 
 
 %Natalie Wellen

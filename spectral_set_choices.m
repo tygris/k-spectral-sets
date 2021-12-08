@@ -15,6 +15,9 @@
 %  (-R/pi)
 % output, contour plot of epss with the numerical range outlined
 % output, contour plot of wOfPseudo with the numerical range outlined
+%
+% Depends on: - radius_explore
+%                 - numerical_range
 
 %Natalie Wellen
 %10/25/21

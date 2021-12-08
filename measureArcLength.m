@@ -1,7 +1,8 @@
 % Function to measure the arclength of a curve in the complex plane
 %
 %[L] = measureArcLength(cont, derivs)
-% input
+% input, cont, complex vector, the contour of the curve being measured
+% output, L, the estimate of the curve length with O(n^2) error
 
 %Natalie Wellen
 %11/05/21
