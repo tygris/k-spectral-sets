@@ -17,7 +17,7 @@ output, r1orr2, 1 or 2, indicates if
 %}
 
 %Natalie Wellen
-%10/25/21
+%12/07/21
 
 function [r, r1orr2] = findr(A, sigma0, sigma0_prime, length, resolution)
     if ~exist('length', 'var')
@@ -28,7 +28,8 @@ function [r, r1orr2] = findr(A, sigma0, sigma0_prime, length, resolution)
     end
     search_direction = angle(1i*sigma0_prime); 
     search_points = linspace(sigma0, sigma0 + length*exp(1i*search_direction), resolution);
-    
+    %ignore the first search_point sigma_0
+    search_points = search_points(2:resolution); resolution = resolution-1; 
     %set-up for calculating the radii
     [n,m] = size(A);
     if n ~= m
@@ -45,13 +46,17 @@ function [r, r1orr2] = findr(A, sigma0, sigma0_prime, length, resolution)
     distance = abs(search_points- sigma0);
     r1_max_index = find(r1_vec >= distance, 1, 'last');
     r2_max_index = find(r2_vec >= distance, 1, 'last');
-    r1 = r1_vec(r1_max_index);
-    r2 = r2_vec(r2_max_index);
-    if 1/(2*pi*r1) >= 1/(pi*r2)
-        r1orr2 = 1;
-        r = distance(r1_max_index);
+    if isempty(r1_max_index)
+        [r, r1orr2] = findr(A, sigma0, sigma0_prime, distance(1), max(20, ceil(resolution/5)));
     else
-        r1orr2 = 2;
-        r = distance(r2_max_index);
+        r1 = r1_vec(r1_max_index);
+        r2 = r2_vec(r2_max_index);
+        if 1/(2*pi*r1) >= 1/(pi*r2)
+            r1orr2 = 1;
+            r = distance(r1_max_index);
+        else
+            r1orr2 = 2;
+            r = distance(r2_max_index);
+        end
     end
 end

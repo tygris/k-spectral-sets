@@ -29,7 +29,7 @@
 % [1] Wellen and Greenbaum, K-Spectral Sets
 
 %Natalie Wellen
-%12/01/21
+%12/06/21
 
 %Currently the negative of the minimum eigenvalue is being calculated instead
 % of c2
@@ -52,6 +52,7 @@ function [c2, mineig, L] = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_le
     %ensure that the numerical range and del_Om are in the expected order
     [nr, nr_prime] = delOmega_flipper(nr, nr_prime, 1);
     [del_Om, del_Om_prime] = delOmega_flipper(del_Om, del_Om_prime, 1);
+    
     %define Gamma 1 and the derivative of Gamma 1
     in1 = ~ismember(nr, del_Om);
     in2 = ~ismember(del_Om, nr);
@@ -76,7 +77,7 @@ function [c2, mineig, L] = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_le
         tempp = nr_prime(in1);
         gam1 = cat(2, temp, flip(del_Om(in2)), temp(1));
         gam1_prime = cat(2, tempp, flip(del_Om_prime(in2)), tempp(1));
-        figure(), plot(gam1), hold on
+        figure(), plot(gam1), daspect([1,1,1]), hold on
     end
     %calculate the arclength of gam1 using the absolute distance between
     %points
