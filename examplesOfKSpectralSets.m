@@ -25,7 +25,7 @@ del_OmA(vertical_index) = rhm*ones(1,sum(vertical_index)) + 1i*imag(del_OmA(vert
 del_OmA_prime(vertical_index) = -1i;
 
 %calculate spectral set value
-[kA, c1A, c2A] = calc_k(A, nrA, nrA_prime, del_OmA, del_OmA_prime, 1, 1, 1000)
+[kA, c1A, c2A] = calc_k(A, nrA, nrA_prime, del_OmA, del_OmA_prime, 1, 1000)
 close
 
 % calculate matrix envelope
@@ -77,7 +77,7 @@ for jj = 1:dimlength
     del_Om_prime(vertical_index) = -1i;
 
     %calculate spectral set
-    [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, 1, 1, 500) 
+    [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, 1, 500) 
     td_ks(jj) = {k};
     td_c1s(jj) = {c1};
     td_c2s(jj) = {c2};
@@ -110,7 +110,7 @@ for jj = 1:6
     del_Om_prime(vertical_index) = -1i;
 
     %calculate spectral set
-    [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, 1, 1, 500) 
+    [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, 1, 500) 
     td_kl(jj) = {k};
     td_c1l(jj) = {c1};
     td_c2l(jj) = {c2};

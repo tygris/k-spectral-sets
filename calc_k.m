@@ -3,7 +3,7 @@
 % comparing the previous minimum of r to the current point
 % This function assumes that for overlapping disks, c2 is calculated by 
 % 
-% [k] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, sigma0_index, max_length, resolution)
+% [k] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections)
 %  input, A, square matrix A that is an input to some function f
 %  input, nr, complex vector, the boundary of the numerical range of A
 %  input, nr_prime, complex vector, the corresponding derivatives of the
@@ -12,18 +12,18 @@
 %  input, del_Om_prime, complex vector, the iith entry is the corresponding 
 %         derivative of the spectral set at del_Om(ii). 
 %         Contains elements of the unit circle in the complex plane. 
-%  input, sigma_0_index, integer, the index of del_Omega for the starting point
-%        of estimating c1
 %  input, max_length, double, the furthest distance we expect the center of a
 %         removed disk to be. 1 is the default.
 %  input, resolution, integer, the number discretization points to use while
 %         searching for the maximum distance om can be from del_Om
+%  input (opt), intersections, integer vector, list of indices of delOm
+%        corresponding to points on delOm nearest to those without a derivative
+%  output, k, double, the spectral-set value
+%  output, c1, double, the value of the double potential kernel defining the 
+%          k-spectral-set, equivalently the maximum total change in angle 
+%          from a sigma_0 traversing the boundary of the spectral-set 
 %  output, c2, double, the value of c2 defining the k-spectral-set
-%  output, min_r, double, the length of the smallest maximum radius for points 
-%          in del_om, used to calculate c2
-%  output, r1orr2, 1 or 2, 1 indicates that the radius satisfies the
-%          resolvent norm, 2 indicates the radius is less than the numerical
-%          radius of the resolvent.
+%  
 %
 % Depends on:
 %    - calc_c1
@@ -35,10 +35,15 @@
 %          - r_of_A
 
 %Natalie Wellen
-%12/01/21
+%12/31/21
 
-function [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, sigma0_index, max_length, resolution)
-    c1 = calc_c1(sigma0_index, del_Om_prime(sigma0_index), del_Om);
+function [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections)
+    assert( nargin >=7, "ERROR: The first 7 function inputs are necessary. See help calc_k")
+    if nargin == 7
+        c1 = calc_c1(del_Om, del_Om_prime);
+    else
+        c1 = calc_c1(del_Om, del_Om_prime, intersections);
+    end
     c2 = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution);
     k = c2 + sqrt(c1^2 + c2);
 end

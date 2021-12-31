@@ -3,7 +3,7 @@
 %have a derivative, and also along interior boundaries rather than exterior
 %boundaries.
 %
-%[c1] = calc_c1(delOm, intersections, res)
+%[c1] = calc_c1(delOm, delOm_prime, intersections, res)
 % input, delOm, complex vector outlining the spectral set being considered
 % input, delOmprime, complex vector of corresponding derivatives at the
 %        point in delOm
@@ -20,12 +20,15 @@
 %       -angle_stepper
 
 %Natalie Wellen
-%12/06/21
+%12/31/21
 
 function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     %parse the input variables
     if nargin < 4
         res = 32;
+    end
+    if nargin < 3
+        intersections = [];
     end
     
     %choose the points to check first

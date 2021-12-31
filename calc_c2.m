@@ -31,10 +31,8 @@
 % [1] Wellen and Greenbaum, K-Spectral Sets
 
 %Natalie Wellen
-%12/06/21
+%12/31/21
 
-%Currently the negative of the minimum eigenvalue is being calculated instead
-% of c2
 function [c2, mineig, L] = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution)
     %Check that the fun inputs satisfy the requirements
     assert(nargin == 7, ...
@@ -71,39 +69,42 @@ function [c2, mineig, L] = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_le
         ind2 = in2 & imag(del_Om)>=0;
         ind3 = in1 & imag(nr) < 0;
         ind4 = in2 & imag(del_Om) < 0;
-        gam1 = cat(2, nr(ind1), flip(del_Om(ind2)), flip(del_Om(ind4)), nr(ind3), nr(1));
-        gam1_prime = cat(2, nr_prime(ind1), flip(del_Om_prime(ind2)), flip(del_Om_prime(ind4)), nr_prime(ind3), nr_prime(1));
-        figure(), plot(gam1), hold on
+        gam1 = cat(2, flip(del_Om(ind2)), flip(del_Om(ind4)));
+        gam1_prime = cat(2, flip(del_Om_prime(ind2)), flip(del_Om_prime(ind4)));
+        gamlam1 = cat(2, nr(ind1), gam1, nr(ind3), nr(1));
+        gamlam1_prime = cat(2, nr_prime(ind1), gam1_prime, nr_prime(ind3), nr_prime(1));
+        figure(), plot(gamlam1), hold on
     else
         temp = nr(in1);
         tempp = nr_prime(in1);
-        gam1 = cat(2, temp, flip(del_Om(in2)), temp(1));
-        gam1_prime = cat(2, tempp, flip(del_Om_prime(in2)), tempp(1));
-        figure(), plot(gam1), daspect([1,1,1]), hold on
+        gam1 = flip(del_Om(in2));
+        gam1_prime = flip(del_Om_prime(in2));
+        gamlam1 = cat(2, temp, gam1, temp(1));
+        gamlam1_prime = cat(2, tempp, gam1_prime, tempp(1));
+        figure(), plot(gamlam1), daspect([1,1,1]), hold on
     end
     %calculate the arclength of gam1 using the absolute distance between
     %points
-    L = measureArcLength(gam1, gam1_prime);
+    L = measureArcLength(gamlam1, gamlam1_prime);
+    G = measureArcLength(gam1, gam1_prime); 
     
-    %notice that we only need to calculate values of r along the
-    %     intersection of gam1 and nr
-    search_points = del_Om(in2);
-    search_primes = del_Om_prime(in2);
+    %notice that we only need to calculate values of r along gam1
     %calculate an initial estimate for the worst-case r 
-    % can be done at any point along del_Om, so choose the first
-    [min_r, r1orr2] = findr(A, search_points(1), search_primes(1), max_length, resolution);
+    
+    % change to be the point closest to an eigenvalue
+    [min_r, r1orr2] = findr(A, gam1(1), gam1_prime(1), max_length, resolution);
     % find next point along del_om where the maximum allowed radius is
     % smaller than min_r
-    for ii = 2:length(search_points)
-        new_om = search_points(ii)+min_r*1i*search_primes(ii);
+    for ii = 2:length(gam1)
+        new_om = gam1(ii)+min_r*1i*gam1_prime(ii);
         [new_r1, new_r2] = r_of_A(A, m, new_om);
         new_r = max(new_r1, new_r2);
         if new_r<min_r
             %find the new minimum value of r along del_Omega
-            [min_r, r1orr2] = findr(A, search_points(ii), search_primes(ii), min_r, resolution);            
+            [min_r, r1orr2] = findr(A, gam1(ii), gam1_prime(ii), min_r, resolution);            
         end
     end
     mineig = (r1orr2)/(2*pi*min_r);
-    S1 = mineig*L;
-    c2 = 1 + S1; %||S(f,A)|| <= 2c_2; S_0 = 2, and S_1 = S_2
+    S1 = mineig*(L+G); %equivalent to ||S_1|| + ||S_2|| in the paper 
+    c2 = (2 + S1)/2; %||S(f,A)|| <= 2c_2; 
 end
