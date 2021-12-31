@@ -7,7 +7,7 @@
 % output, angle_sigma_prime, complex double, the angle of the tangent line 
 %         centered at sigma pointing in the clockwise direction
 % output, angle_sigma, complex double, the angle from om to sigma_0
-%
+
 %Natalie Wellen
 %10/12/21
 

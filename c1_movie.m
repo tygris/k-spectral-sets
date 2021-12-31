@@ -2,7 +2,7 @@
 % and creates a movie of the calculation of c1 along the boundary of the
 % resulting spectral set
 %
-%[] = c1_movie(A, om, res)
+%[M] = c1_movie(A, om, res)
 % input, A, n by n matrix being analyzed
 % input, res, integer, the number of points to use on
 % input, skip, integer, the number of indices on del_Omega to skip while 
@@ -11,11 +11,27 @@
 %        from the numerical range of A
 % input, radii, optional double vector, contains the list of radii of disks
 %        removed corresponding to the centers in om
-% ouput, plot of changing values of sigma_0 and the corresponding value of c1
+% ouput, plot/movie of changing values of sigma_0 and the corresponding value of c1
+% output, M, the movie frames
+%
+% Depends on: - chebfun
+%             - frankenstein
+%                 - sigma_prime
+%             - find_c1
+%                 - angle_stepper
+%             - define_del_Omega
+%                 - numerical_range
+%                 - cellmat2plot
+%                 - remove_circle
+%                   - circle
+%                 - delOmega_flipper
+%                 - curve_combine
+%                   - inter_clean
+
 
 
 %Natalie Wellen
-%10/18/21
+%12/07/21
 
 function [M, del_Om, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, res, skip, om, radii)
     %find the numerical range
@@ -50,7 +66,7 @@ function [M, del_Om, moving_sig, moving_sig_prime, moving_sig_c1] = c1_movie(A, 
     for jj = 1:kk
         moving_sig_prime(jj) = frankenstein(moving_sig(jj), del_Om, del_om, om, Wvec, Wprimevec); 
         %also calc c1 at the same time
-        moving_sig_c1(jj) = c1_estimate(2+(jj-1)*skip, moving_sig_prime(jj), del_Om);
+        moving_sig_c1(jj) = find_c1(2+(jj-1)*skip, moving_sig_prime(jj), del_Om);
         %create movie figure and then close it after saving
         goo.XData = real(moving_sig(jj)); goo.YData = imag(moving_sig(jj));
         %delete goo, but build dummy objects outside of loop, then reassign each time

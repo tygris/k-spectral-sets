@@ -1,18 +1,16 @@
-%{
-Function to calculate the numerical range of a matrix and output a vector
-of finite length
-
-[nr, nr_prime] = numerical_range(A, resolution)
- input, A, the square matrix we are computing the numerical range of
- input, resoltuion, the number of points we are using to estimate the
-        numerical range
-output, nr, vector of complex values depicting the boundary of the
- numerical range. The contour travels in the counter-clockwise direction.
-output, nr_prime, complex vector of the clockwise tangent line direction
- for the corresponding nr points.
-
-depends on: chebfun
-%}
+% Function to calculate the numerical range of a matrix and output a vector
+% of finite length
+% 
+% [nr, nr_prime] = numerical_range(A, resolution)
+%  input, A, the square matrix we are computing the numerical range of
+%  input, resoltuion, the number of points we are using to estimate the
+%         numerical range
+% output, nr, vector of complex values depicting the boundary of the
+%  numerical range. The contour travels in the counter-clockwise direction.
+% output, nr_prime, complex vector of the clockwise tangent line direction
+%  for the corresponding nr points.
+% 
+% depends on: chebfun
 
 %Natalie Wellen
 %11/04/21

@@ -13,6 +13,9 @@
 % output, tangent_angle, real number, the angle with respect to sigma_0 of
 %         the tangent line at sigma_0
 %
+% Depends on:
+%    - sigma_prime
+
 %Natalie Wellen
 %10/12/21
 
