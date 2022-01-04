@@ -20,7 +20,7 @@
 %       -angle_stepper
 
 %Natalie Wellen
-%12/31/21
+%1/03/21
 
 function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     %parse the input variables
@@ -37,7 +37,8 @@ function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     max_index = 0;
     max_c1 = 0;
     for jj = checks
-        c1_check = find_c1(jj, delOm_prime(jj), delOm);
+        
+        c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
         if c1_check > max_c1
             max_c1 = c1_check; max_index = jj;
         end
@@ -52,7 +53,7 @@ function c1 = calc_c1(delOm, delOm_prime, intersections, res)
         checks = sort(checks);
         ii = find(max_index == checks);
         for jj = checks(ii-1)+1:checks(ii+1)-1
-            c1_check = find_c1(jj, delOm_prime(jj), delOm);
+            c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
             if c1_check > max_c1
                 max_c1 = c1_check; max_index = jj;
             end

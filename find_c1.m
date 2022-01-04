@@ -13,7 +13,7 @@
 %     - angle_stepper
 
 %Natalie Wellen
-%11/22/21
+%1/03/21
 
 function [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
     %determine where each simple closed curve begins and ends
@@ -26,10 +26,6 @@ function [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
     for jj = 1:(num_nans+1)
         % work on the jj'th simple closed curve
         del_Om = del_Om_0(endps(jj)+1:endps(jj+1)-1);
-        %I assume later that del_Om(2) has negative angle from sigma_0, ensure this is true.
-        if imag(del_Om(1)) < imag(del_Om(2)) || imag(del_Om(1)) > imag(del_Om(end-1))
-            del_Om = flip(del_Om);
-        end 
         %first check if sigma_0_prime is on this segment of del_Om_0
         if endps(jj) < sigma_0_index && sigma_0_index < endps(jj+1)
             %re-order the boundary to start and end at sigma_0
@@ -38,10 +34,17 @@ function [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
             %calculate the change in angle of the interior points of del_Om
             angle_step = angle_stepper(del_Om(2:end-2)-sigma_0, del_Om(3:end-1) - sigma_0);
             %calculate the change in angle for the two end points
-            angle_n = angle(del_Om(end-1)-sigma_0); %always positive
-            angle_n = min(abs(angle_n + sigma_0_prime), abs(sigma_0_prime -(angle_n+pi)));
-            angle_0 = angle(del_Om(2)-sigma_0); %always negative
-            angle_0 = min(abs(mod(angle_0, 2*pi) - sigma_0_prime), abs(sigma_0_prime -angle_0));
+            if sigma_0_prime > pi
+                sigma_0_prime = sigma_0_prime - 2*pi;
+            end
+            angle_n = angle(del_Om(end-1)-sigma_0);
+            angle_n = min(abs(abs(sigma_0_prime - angle_n)-2*pi), abs(sigma_0_prime -angle_n));
+            angle_0 = angle(del_Om(2)-sigma_0); 
+            sigma_0_pa0 = sigma_0_prime + pi;
+            if sigma_0_pa0> pi
+                sigma_0_pa0 = sigma_0_pa0 - 2*pi;
+            end
+            angle_0 = min(abs(abs(angle_0-sigma_0_pa0)-2*pi), abs(angle_0-sigma_0_pa0));
             %sum up all of the changes in angle to estimate c1
             c1_new = sum(angle_step) + angle_0 + angle_n;
             %if derivative was passed in the counter-clockwise direction by mistake
