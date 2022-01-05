@@ -80,6 +80,32 @@ for ii = 1:7
 end
 accuracy, relative_accuracy
 
+%% Check accuracy of find_c1 on a circle
+accuracy = zeros(1,7);
+relative_accuracy = zeros(1,7);
+for ii = 1:7
+    circ = circle(1, -0.5, 10^ii);
+    c_temp = find_c1(1, -pi/2, del_OmA1);
+    accuracy(ii) = abs(1-c_temp);
+    relative_accuracy(ii) = accuracy(ii)/2*pi;
+end
+accuracy
+
+%% Check accuracy of find_c1 on a modified boundary
+A1 = [.5 -1; 1 -1.5];
+accuracy = zeros(1,7);
+relative_accuracy = zeros(1,7);
+for ii = 1:7
+    [nrA1, nrA1_prime] = numerical_range(A1, 10^ii);
+    del_OmA1 = nrA1;
+    vertical_index = (real(del_OmA1)> -1/4);
+    del_OmA1(vertical_index) = -1/4*ones(1,sum(vertical_index)) + 1i*imag(del_OmA1(vertical_index));
+    c_temp = find_c1(1, -pi/2, del_OmA1);
+    accuracy(ii) = abs(1-c_temp);
+    relative_accuracy(ii) = accuracy(ii)/2*pi;
+end
+accuracy
+
 %% What happens when the numerical range is passed for calculating c2 (nothing removed)?
 
 [c2A1_2, minr_A1_2, A1_1or2_2] = calc_c2(A1, nrA1, nrA1_prime, nrA1, -1i*(del_OmA1 +1/2), 1, 1000)

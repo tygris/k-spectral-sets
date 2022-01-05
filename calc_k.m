@@ -3,7 +3,7 @@
 % comparing the previous minimum of r to the current point
 % This function assumes that for overlapping disks, c2 is calculated by 
 % 
-% [k] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections)
+% [k] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections, M)
 %  input, A, square matrix A that is an input to some function f
 %  input, nr, complex vector, the boundary of the numerical range of A
 %  input, nr_prime, complex vector, the corresponding derivatives of the
@@ -17,7 +17,11 @@
 %  input, resolution, integer, the number discretization points to use while
 %         searching for the maximum distance om can be from del_Om
 %  input (opt), intersections, integer vector, list of indices of delOm
-%        corresponding to points on delOm nearest to those without a derivative
+%        corresponding to points on delOm nearest to those without a
+%        derivative.
+%        Note it is assumed that there are always at least two intersections.
+%  input (opt), M, double, ||f||_{\Omega} for the function we are bounding 
+%         with the spectral set
 %  output, k, double, the spectral-set value
 %  output, c1, double, the value of the double potential kernel defining the 
 %          k-spectral-set, equivalently the maximum total change in angle 
@@ -39,11 +43,18 @@
 
 function [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections)
     assert( nargin >=7, "ERROR: The first 7 function inputs are necessary. See help calc_k")
-    if nargin == 7
+    if nargin == 7 
         c1 = calc_c1(del_Om, del_Om_prime);
-    else
-        c1 = calc_c1(del_Om, del_Om_prime, intersections);
+        M = 1;
+    elseif nargin == 8
+        if length(intersections) == 1
+            M = intersections;
+            c1 = calc_c1(del_Om, del_Om_prime);
+        else
+            c1 = calc_c1(del_Om, del_Om_prime, intersections);
+        end
     end
-    c2 = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution);
+    c2 = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, M);
     k = c2 + sqrt(c1^2 + c2);
+    close
 end
