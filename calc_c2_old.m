@@ -33,7 +33,7 @@
 % [1] Wellen and Greenbaum, K-Spectral Sets
 
 %Natalie Wellen
-%1/02/21
+%1/02/22
 
 function [c2, mineig, L] = calc_c2_old(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, M)
     %Check that the fun inputs satisfy the requirements

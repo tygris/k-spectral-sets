@@ -6,8 +6,6 @@
 % [k] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections, M)
 %  input, A, square matrix A that is an input to some function f
 %  input, nr, complex vector, the boundary of the numerical range of A
-%  input, nr_prime, complex vector, the corresponding derivatives of the
-%         numerical range of A
 %  input, del_Om, complex vector, the boundary of the spectral set
 %  input, del_Om_prime, complex vector, the iith entry is the corresponding 
 %         derivative of the spectral set at del_Om(ii). 
@@ -20,8 +18,6 @@
 %        corresponding to points on delOm nearest to those without a
 %        derivative.
 %        Note it is assumed that there are always at least two intersections.
-%  input (opt), M, double, ||f||_{\Omega} for the function we are bounding 
-%         with the spectral set
 %  output, k, double, the spectral-set value
 %  output, c1, double, the value of the double potential kernel defining the 
 %          k-spectral-set, equivalently the maximum total change in angle 
@@ -39,22 +35,16 @@
 %          - r_of_A
 
 %Natalie Wellen
-%12/31/21
+%1/05/22
 
-function [k, c1, c2] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections)
-    assert( nargin >=7, "ERROR: The first 7 function inputs are necessary. See help calc_k")
-    if nargin == 7 
+function [k, c1, c2] = calc_k(A, nr, del_Om, del_Om_prime, max_length, resolution, intersections)
+    assert( nargin >=6, "ERROR: The first 7 function inputs are necessary. See help calc_k")
+    if nargin == 6 
         c1 = calc_c1(del_Om, del_Om_prime);
-        M = 1;
-    elseif nargin == 8
-        if length(intersections) == 1
-            M = intersections;
-            c1 = calc_c1(del_Om, del_Om_prime);
-        else
-            c1 = calc_c1(del_Om, del_Om_prime, intersections);
-        end
+    else
+        c1 = calc_c1(del_Om, del_Om_prime, intersections);
     end
-    c2 = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, M);
+    c2 = calc_c2(A, nr, del_Om, del_Om_prime, max_length, resolution);
     k = c2 + sqrt(c1^2 + c2);
     close
 end
