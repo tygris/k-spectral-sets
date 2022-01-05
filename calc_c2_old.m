@@ -35,7 +35,7 @@
 %Natalie Wellen
 %1/02/21
 
-function [c2, mineig, L] = calc_c2(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, M)
+function [c2, mineig, L] = calc_c2_old(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, M)
     %Check that the fun inputs satisfy the requirements
     assert(nargin >= 7, ...
         "First seven function inputs are required: A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution.")
