@@ -23,75 +23,37 @@
 %1/05/22
 
 function [c2] = calc_c2(A, nr, del_Om, del_Om_prime, max_length, resolution)
-    %first find Gamma_1, the boundary of Omega within W(A)
-    %ignore repeated values on the boundary
-    if nr(1) == nr(end)
-        nr = nr(1:end-1); 
-    end
-    if del_Om(1) == del_Om(end)
-        del_Om = del_Om(1:end-1); 
-        del_Om_prime = del_Om_prime(1:end-1);
-    end
-    %ensure that the numerical range and del_Om are in the expected order
-    [nr] = delOmega_flipper(nr, 1);
-    [del_Om, del_Om_prime] = delOmega_flipper(del_Om, del_Om_prime, 1);
-    %define Gamma 1 and the derivative of Gamma 1
-    in1 = ~ismember(del_Om, nr);
-    %find where Gamma_1 is not continuous
-    temp = in1(1:end-1) - in1(2:end);
-    breakend = find(temp == 1);
-    breakstart = find(temp == -1)+1;
-    breakend(end+1) = length(del_Om); 
-    % if the spectral set is equal to the numerical range, then the
-    % operator is already positive definite and the integral of gamma(s)=0
-    if sum(in1) == 0
-        c2 = 1;
-        return
-    end
-    %otherwise we continue creating Gamma 1
-    if in1(1)
-        gam1 = cat(2, del_Om(breakstart(end):breakend(end)), del_Om(1:breakend(1)));
-        gam1_prime = cat(2, del_Om_prime(1:breakend(1)), del_Om_prime(breakstart(end):breakend(end)));
-        for jj = 1:length(breakend)-2
-            gam1 = cat(2, gam1, nan, del_Om(breakstart(jj):breakend(jj+1)));
-            gam1_prime = cat(2, gam1, nan, del_Om_prime(breakstart(jj):breakend(jj+1)));
-        end
-    else
-        gam1 = del_Om(breakstart(1):breakend(1));
-        gam1_prime = del_Om_prime(breakstart(1):breakend(1));
-        for jj = 2:length(breakstart)
-            gam1 = cat(2, gam1, nan, del_Om(breakstart(jj):breakend(jj)));
-            gam1_prime = cat(2, gam1_prime, nan, del_Om_prime(breakstart(jj):breakend(jj)));
-        end
-    end
+    %first find Gamma_1
+    [Gam1, Gam1_prime] = findGam1(del_Om, del_Om_prime, nr);
     
     %second find gamma(s) at each point of Gamma_1
-    n = length(gam1);
+    n = length(Gam1);
     rs = zeros(1, n);
     gammas = zeros(1,n);
     r1orr2s = zeros(1,n);
     for jj = 1:n
-        if isnan(gam1)
+        if isnan(Gam1)
             rs(jj) = nan; r1orr2s(jj) = nan;
             gammas(jj) = nan;
         else
-            [rs(jj), r1orr2s(jj)] = findr(A, gam1(jj), gam1_prime(jj), max_length, resolution);
-            gammas(jj) = (r1orr2s(jj))/(2*pi*rs(jj));
+            [rs(jj), r1orr2s(jj)] = findr(A, Gam1(jj), Gam1_prime(jj), max_length, resolution);
+            gammas(jj) = (r1orr2s(jj))/(rs(jj));
         end
     end
     
     
     %third use the trapezoidal rule to estimate the integral of gamma(s)
         %note we cannot assume points are equidistant
-    breaks = [0, find(isnan(gam1)), n+1];
+    breaks = [0, find(isnan(Gam1)), n+1];
     integral = 0;
     for jj = 1:length(breaks)-1
-        midpoints = abs(gam1(breaks(jj)+1:breaks(jj+1)-2) - gam1(breaks(jj)+2:breaks(jj+1)-1)).* ...
-            (1/2*(gammas(breaks(jj)+1:breaks(jj+1)-2)+gammas(breaks(jj)+2:breaks(jj+1)-1)));
-        endpointa = abs(gam1(breaks(jj)+1)-gam1(breaks(jj)+2))*(1/2*gammas(breaks(jj)+1));
-        endpointb = abs(gam1(breaks(jj+1)-2)-gam1(breaks(jj+1)-1))*(1/2*gammas(breaks(jj+1)-1));
+        midpoints = abs(Gam1(breaks(jj)+1:breaks(jj+1)-2) - Gam1(breaks(jj)+2:breaks(jj+1)-1)).* ...
+            ((gammas(breaks(jj)+1:breaks(jj+1)-2)+gammas(breaks(jj)+2:breaks(jj+1)-1)));
+        endpointa = abs(Gam1(breaks(jj)+1)-Gam1(breaks(jj)+2))*(gammas(breaks(jj)+1));
+        endpointb = abs(Gam1(breaks(jj+1)-2)-Gam1(breaks(jj+1)-1))*(gammas(breaks(jj+1)-1));
         integral = integral + endpointa + sum(midpoints) + endpointb;
     end
+    integral = integral/(4*pi);
     
     %finally, calculate c2
     c2 = 1+integral;

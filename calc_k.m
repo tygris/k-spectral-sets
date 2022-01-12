@@ -30,7 +30,6 @@
 %       - find_c1
 %          - angle_stepper
 %    - calc_c2
-%       - measureArcLength
 %       - findr
 %          - r_of_A
 

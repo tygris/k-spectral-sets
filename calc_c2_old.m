@@ -33,7 +33,7 @@
 % [1] Wellen and Greenbaum, K-Spectral Sets
 
 %Natalie Wellen
-%1/02/22
+%1/06/22
 
 function [c2, mineig, L] = calc_c2_old(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, M)
     %Check that the fun inputs satisfy the requirements
@@ -64,7 +64,7 @@ function [c2, mineig, L] = calc_c2_old(A, nr, nr_prime, del_Om, del_Om_prime, ma
     % if the spectral set is equal to the numerical range, then the
     % operator is already positive definite
     if sum(in2) == 0
-        c2 = 2;
+        c2 = 1;
         mineig = 0; L = NaN;
         return
     end
