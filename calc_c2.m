@@ -1,60 +1,48 @@
-%Function to calculate c2 along the boundaries of Omega within the
-%numerical range of A. The integral is estimated using the trapezoidal
-%rule.
+%Function to calculate c2 along Gamma1. The integral is estimated using the
+% trapezoidal rule.
 %
-%[c2] = calc_c2(A, nr, del_Om, del_Om_prime, max_length, resolution)
+%[c2] = calc_c2(A, Gam1, Gam1_prime)
 %  input, A, square matrix A that is an input to some function f
-%  input, nr, complex vector, the boundary of the numerical range of A
-%  input, del_Om, complex vector, the boundary of the spectral set Omega
-%  input, del_Om_prime, complex vector, the iith entry is the corresponding 
-%         derivative of the spectral set at del_Om(ii). 
-%         Contains elements of the unit circle in the complex plane. 
-%  input, max_length, double, the furthest distance we expect the center of a
-%         removed disk to be. 1 is the default.
-%  input, resolution, integer, the number discretization points to use while
-%         searching for the maximum distance om can be from del_Om
+%  input, Gam1, complex double, the part of delOmega within W(A).
+%         Discontinues pieces are separated by a NaN. Each continuous piece
+%         has equidistant points.
+%  input, Gam1_prime, complex double, the corresponding derivatives of Gam1
+%         with exactly the same lengthas Gam1.
+%  
 %  output, c2, double, the value of c2 defining the k-spectral-set
-%
-% Depends on: - delOmega_flipper
-%             - find_r
-%                 - r_of_A
+%  output, cif, double, the value of the cauchy integral formula along Gam1
 
 %Natalie Wellen
-%1/05/22
+%1/12/22
 
-function [c2] = calc_c2(A, nr, del_Om, del_Om_prime, max_length, resolution)
-    %first find Gamma_1
-    [Gam1, Gam1_prime] = findGam1(del_Om, del_Om_prime, nr);
-    
-    %second find gamma(s) at each point of Gamma_1
+function [c2, cif] = calc_c2(A, Gam1, Gam1_prime)
+    %gamma(s) and resolvent norm at each point of Gamma_1
+    m = length(A);
     n = length(Gam1);
-    rs = zeros(1, n);
     gammas = zeros(1,n);
-    r1orr2s = zeros(1,n);
+    rnorms = zeros(1,n);
     for jj = 1:n
-        if isnan(Gam1)
-            rs(jj) = nan; r1orr2s(jj) = nan;
-            gammas(jj) = nan;
-        else
-            [rs(jj), r1orr2s(jj)] = findr(A, Gam1(jj), Gam1_prime(jj), max_length, resolution);
-            gammas(jj) = (r1orr2s(jj))/(rs(jj));
-        end
+        R = Gam1_prime(jj)*inv(Gam1(jj)*eye(m) - A); %the matrix s'(sI-A)^-1
+        gammas(jj) = -1*min(eig(1/(2*pi*1i)*(R-R'))); 
+        rnorms(jj) = norm(R, 2); %/2*pi
     end
     
     
-    %third use the trapezoidal rule to estimate the integral of gamma(s)
-        %note we cannot assume points are equidistant
-    breaks = [0, find(isnan(Gam1)), n+1];
-    integral = 0;
-    for jj = 1:length(breaks)-1
-        midpoints = abs(Gam1(breaks(jj)+1:breaks(jj+1)-2) - Gam1(breaks(jj)+2:breaks(jj+1)-1)).* ...
-            ((gammas(breaks(jj)+1:breaks(jj+1)-2)+gammas(breaks(jj)+2:breaks(jj+1)-1)));
-        endpointa = abs(Gam1(breaks(jj)+1)-Gam1(breaks(jj)+2))*(gammas(breaks(jj)+1));
-        endpointb = abs(Gam1(breaks(jj+1)-2)-Gam1(breaks(jj+1)-1))*(gammas(breaks(jj+1)-1));
-        integral = integral + endpointa + sum(midpoints) + endpointb;
+    %Use the trapezoidal rule to estimate the integral of gamma(s)
+        %note we assume points are equidistant
+    ds = abs(Gam1(2)-Gam1(1));
+    midpoints = (gammas(1:n-1)+gammas(2:n)); %*ds/2
+    midpoints2 = rnorms(1:n-1)+rnorms(2:n);
+    if Gam1(1) == Gam1(n)
+        integral = sum(midpoints)*ds/2;
+        cif = sum(midpoints2)*ds/(4*pi);
+    else
+        endpointa = gammas(1);
+        endpointb = gammas(n);
+        integral = (endpointa + sum(midpoints) + endpointb)*ds/2;
+        cif = (rnorms(1)+rnorms(n) + sum(midpoints2))*ds/(4*pi);
     end
-    integral = integral/(4*pi);
     
     %finally, calculate c2
-    c2 = 1+integral;
+    c2 = 1+real(integral);
 end

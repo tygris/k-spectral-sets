@@ -20,7 +20,7 @@
 %       -angle_stepper
 
 %Natalie Wellen
-%1/03/21
+%1/12/21
 
 function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     %parse the input variables
@@ -32,12 +32,11 @@ function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     end
     
     %choose the points to check first
-    checks = ceil(linspace(2, length(delOm), res+1));
-    checks = cat(2, intersections, checks(2:end));
+    checks = ceil(linspace(2, length(delOm), res));
+    checks = cat(2, intersections, checks);
     max_index = 0;
     max_c1 = 0;
     for jj = checks
-        
         c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
         if c1_check > max_c1
             max_c1 = c1_check; max_index = jj;
@@ -47,17 +46,18 @@ function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     %Once we have the approximate location of the maximum we check
     % 1. Is it an intersection point? if yes stop
     % 2. If not then search all points along delOm in [checks-1, checks+1]
-    if ismember(max_index, intersections)
-        c1 = max_c1;
-    else
-        checks = sort(checks);
-        ii = find(max_index == checks);
-        for jj = checks(ii-1)+1:checks(ii+1)-1
-            c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
-            if c1_check > max_c1
-                max_c1 = c1_check; max_index = jj;
-            end
-        end
-        c1 = max_c1;
-    end
+%     if ismember(max_index, intersections)
+%         c1 = max_c1;
+%     else
+%         checks = sort(checks);
+%         ii = find(max_index == checks);
+%         for jj = checks(ii-1)+1:checks(ii+1)-1
+%             c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
+%             if c1_check > max_c1
+%                 max_c1 = c1_check; max_index = jj;
+%             end
+%         end
+%         c1 = max_c1;
+%     end
+    c1 = max_c1;
 end

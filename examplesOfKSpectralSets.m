@@ -121,7 +121,15 @@ end
     
     
     
-    
+%% Using the contDS Function pass these matrices
+
+A = [.5 -1; 1, -1.5];
+B = [0 1 2; -0.01 0 3; 0 0 0];
+C = boeing_demo('S'); %timestretch = 10
+D = transient_demo(10); %timestretch = 10
+
+%there is also the issue of K and cif not being constant upper bounds, but
+%  needing to be multiplied by e^t
     
     
     
