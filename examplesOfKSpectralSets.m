@@ -97,12 +97,90 @@ C = [0 1 2; -0.01 0 3; 0 0 0];
 figure()
 [kC, cifC] = contDS(C)
 
-pause %this next example is dim 55 and takes a long time to run
-D = boeing_demo('S'); %timestretch = 10
+T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
+         0.95, -0.18,0,0,0,0;
+         0, 0.15, -0.2569,0,0,0;
+         0,0,0.100, -0.0138,0,0;
+         0,0,0.0019, 0.0002, -0.0124,0;
+         0,0,0,0.0001, 0.0028, -0.0049]; %1986 Tuesday Lake
 figure()
-[kD, cifD] = contDS(D,10)
-% It also illustrates the issue of K and cif not being constant upper bounds, but
-%  needing to be multiplied by e^t
-% AKA the plot output
-    
+[kT,cifT] = contDS(T)
+
+% this next example is dim 55 and takes a long time to run
+% It can be found (with non-equidistant points) in testBoeing_demo_S.m
+%D = boeing_demo('S'); %timestretch = 10
+
    
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Block Diagonal Matrix Example
+    
+b1 = 3;
+b2 = 5;
+b3 = 2;
+res = 10000;
+A = [randn(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(10+5i)*eye(b2)];%, zeros(b2, b3); zeros(b3, b1+b2), rand(b3)-10-10*1i];
+
+figure()
+nr = numerical_range(A, res);
+plot(nr), hold on
+evs = eig(A);
+plot(evs, 'kx')
+plot(numerical_range(A(1:b1,1:b1), res))
+plot(numerical_range(A(b1+1:b1+b2,b1+1:b1+b2), res))
+%plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
+
+%%
+%check that A is square
+[n,m] = size(A);
+assert(n==m, 'A must be a square matrix.')
+fov = zeros(1,resolution+1);
+count = 0;
+for j  = [linspace(0, 2*pi, resolution),2*pi]
+    count = count+1;
+    A_rotated = exp(1i*j)*A;
+    B = 1/2*(A_rotated + A_rotated');
+    [V,D] = eig(B);
+    e = real(diag(D).');
+    contributer = max(e);
+    %the min real eigenvalue gives the min numerical range rather than max
+    index = find(e==contributer);
+    fov(count) = V(:,index(1))'*A*V(:,index(1));
+end
+
+

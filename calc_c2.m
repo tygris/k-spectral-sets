@@ -13,7 +13,7 @@
 %  output, cif, double, the value of the cauchy integral formula along Gam1
 
 %Natalie Wellen
-%1/12/22
+%1/19/22
 
 function [c2, cif] = calc_c2(A, Gam1, Gam1_prime)
     %gamma(s) and resolvent norm at each point of Gamma_1
@@ -23,24 +23,25 @@ function [c2, cif] = calc_c2(A, Gam1, Gam1_prime)
     rnorms = zeros(1,n);
     for jj = 1:n
         R = Gam1_prime(jj)*inv(Gam1(jj)*eye(m) - A); %the matrix s'(sI-A)^-1
-        gammas(jj) = -1*min(eig(1/(2*pi*1i)*(R-R'))); 
+        gammas(jj) = abs(min(real(eig(1/(2*pi*1i)*(R-R'))))); 
         rnorms(jj) = norm(R, 2); %/2*pi
     end
-    
+    figure()
+    plot(imag(Gam1), rnorms/(2*pi))
+    title("Integral of the Resolvent Norm");
+    figure()
+    plot(imag(Gam1), gammas)
+    title("gamma(s)");
     
     %Use the trapezoidal rule to estimate the integral of gamma(s)
         %note we assume points are equidistant
     ds = abs(Gam1(2)-Gam1(1));
-    midpoints = (gammas(1:n-1)+gammas(2:n)); %*ds/2
-    midpoints2 = rnorms(1:n-1)+rnorms(2:n);
     if Gam1(1) == Gam1(n)
-        integral = sum(midpoints)*ds/2;
-        cif = sum(midpoints2)*ds/(4*pi);
+        integral = sum(gammas)*ds;
+        cif = sum(rnorms)*ds/(2*pi);
     else
-        endpointa = gammas(1);
-        endpointb = gammas(n);
-        integral = (endpointa + sum(midpoints) + endpointb)*ds/2;
-        cif = (rnorms(1)+rnorms(n) + sum(midpoints2))*ds/(4*pi);
+        integral = (sum(gammas) - 0.5*(gammas(1)+gammas(n)))*ds;
+        cif = (sum(rnorms)-0.5*(rnorms(1)+rnorms(n)))*ds/(2*pi);
     end
     
     %finally, calculate c2

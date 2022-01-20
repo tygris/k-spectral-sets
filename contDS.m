@@ -23,8 +23,13 @@ function [k,cif,c1,c2] = contDS(A, timestretch)
     [nr, nr_prime] = numerical_range(A,200000);
     %find Gamma1 and it's derivative
     [y1, y2] = nrCutOff(A, 0);
-    Gam1 = linspace(y2, y1, 2000000);
-    Gam1_prime = -1i*ones(1,2000000);
+    if det(A) == 0
+        Gam1 = linspace(y2, y1, 2000000);
+        Gam1_prime = -1i*ones(1,2000000);
+    else
+        Gam1 = linspace(y2, y1, 2001);
+        Gam1_prime = -1i*ones(1,2001);
+    end
     %define delOmega and it's derivative
     ind1 = real(nr)<0;
     delOm = cat(2, Gam1, nr(ind1));
