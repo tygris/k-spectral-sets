@@ -45,7 +45,7 @@ function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, i
     breaks = [0, breaks, length(Gam1)+1]; %to include the start and end
     c2 = 0; cifG = 0;
     for ii = 1:length(breaks)-1
-        [c2_hold, cifG_hold] = calc_c2(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
+        [c2_hold, cifG_hold] = calc_c2_curve(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
             Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
         c2 = c2+c2_hold; cifG = cifG + cifG_hold;
     end

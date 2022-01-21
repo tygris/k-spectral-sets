@@ -89,7 +89,7 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
 %% Using the contDS Function pass these matrices
 
-B = [.5 -1; 1, -1.5];
+A = [.5 -1; 1, -1.5];
 figure()
 [kB, cifB] = contDS(B)
 
@@ -105,6 +105,22 @@ T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
          0,0,0,0.0001, 0.0028, -0.0049]; %1986 Tuesday Lake
 figure()
 [kT,cifT] = contDS(T)
+
+RF = zeros(9);
+RF(1,1) = -1.5622; RF(1,2) = .6685;
+RF(2,2) = -.7119; RF(2,5) = 2.5632;
+RF(3,1) = 1.4627; RF(3,2) = .0364; RF(3,3) = -6.4091; RF(3,6) = 1.1446; RF(3,8) = 55.8201;
+RF(3,9) = 17.2972;
+RF(4,4) = -.0222; RF(4,7) = 315.9443;
+RF(5,4) = .0201; RF(5,5) = -2.5632;
+RF(6,2) = .0070; RF(6,6) = -2.0348;
+RF(7,3) = 6.4091; RF(7,7) = -315.9443;
+RF(8,1) = .0995; RF(8,6) = .8902; RF(8,8) = -62.6458;
+RF(9,8) = 6.8257; RF(9,9) = -17.2972;
+figure()
+[kRF, cifRF] = contDS(RF)
+
+B
 
 % this next example is dim 55 and takes a long time to run
 % It can be found (with non-equidistant points) in testBoeing_demo_S.m

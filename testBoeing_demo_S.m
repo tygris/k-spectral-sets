@@ -12,7 +12,7 @@ A = boeing_demo('S');
 n = 2000001;
 Gam1 = flip(chebpts(n, [y2, y1]).');
 Gam1 = [y1, Gam1((n-1)/2+2:n-1)+y1, 0, Gam1(2:(n-1)/2)+y2, y2];
-Gam1_prime = -1i*ones(1,n);
+Gam1_prime = 1i*ones(1,n);
 ds = abs(Gam1(2:n)-Gam1(1:n-1));
 figure()
 plot(ds)

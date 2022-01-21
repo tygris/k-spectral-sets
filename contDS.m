@@ -13,29 +13,29 @@
 % output, various plots
 
 %Natalie Wellen
-%1/13/22
+%1/21/22
 
-function [k,cif,c1,c2] = contDS(A, timestretch)
+function [k,cif,c2] = contDS(A, timestretch)
     if nargin == 1
         timestretch = 1;
     end
     %calculate the numerical range and it's derivative
-    [nr, nr_prime] = numerical_range(A,200000);
+    [nr] = numerical_range(A,200000);
     %find Gamma1 and it's derivative
     [y1, y2] = nrCutOff(A, 0);
+    y1 = y1/1i; y2 = y2/1i;
     if det(A) == 0
         Gam1 = linspace(y2, y1, 2000000);
-        Gam1_prime = -1i*ones(1,2000000);
+        Gam1_prime = 1i*ones(1, 2000000);
+        [c2, cifG] = calc_c2_curve(A, Gam1, Gam1_prime);
     else
-        Gam1 = linspace(y2, y1, 2001);
-        Gam1_prime = -1i*ones(1,2001);
+        [c2, cifG] = calc_c2_2(A, y1,y2);
     end
     %define delOmega and it's derivative
     ind1 = real(nr)<0;
-    delOm = cat(2, Gam1, nr(ind1));
-    delOm_prime = cat(2, Gam1_prime, nr_prime(ind1));
+    delOm = cat(2, [y1*1i,y2*1i], nr(ind1));
     %calculate k, c1, and c2
-    [k, c1, c2, cifG] = calc_k(A, delOm, delOm_prime, Gam1, Gam1_prime);
+    k = c2 + sqrt(1+c2);
     %calculate the Cauchy Transform along delOmega
     cif = cauchyIntFormula(A, nr(ind1)) + cifG;
     

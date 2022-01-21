@@ -42,10 +42,10 @@ function [y1,y2] = nrCutOff(A, lineinter, lineslope)
         pts = find(ind1(2:20001)-ind1(1:20000));
         %find y1
         x1 = nr(pts(1)); x2 = nr(pts(1)+1);
-        y1 = imag(x1) + (imag(x2)-imag(x1))/(real(x2)-real(x1))*(lineinter-real(x1));
+        y2 = imag(x1) + (imag(x2)-imag(x1))/(real(x2)-real(x1))*(lineinter-real(x1));
         %find y2
         x1 = nr(pts(2)+1); x2 = nr(pts(2));
-        y2 = imag(x1) + (imag(x2)-imag(x1))/(real(x2)-real(x1))*(lineinter-real(x1));
+        y1 = imag(x1) + (imag(x2)-imag(x1))/(real(x2)-real(x1))*(lineinter-real(x1));
         %finalize output
         y1 = 1i*y1; y2 = 1i*y2;
     end
