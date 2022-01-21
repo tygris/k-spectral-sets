@@ -91,7 +91,7 @@ end
 
 A = [.5 -1; 1, -1.5];
 figure()
-[kB, cifB] = contDS(B)
+[kA, cifA] = contDS(A)
 
 C = [0 1 2; -0.01 0 3; 0 0 0];
 figure()
@@ -120,11 +120,9 @@ RF(9,8) = 6.8257; RF(9,9) = -17.2972;
 figure()
 [kRF, cifRF] = contDS(RF)
 
-B
-
-% this next example is dim 55 and takes a long time to run
-% It can be found (with non-equidistant points) in testBoeing_demo_S.m
-%D = boeing_demo('S'); %timestretch = 10
+B = boeing_demo('S');
+figure()
+[kB, cifB] = contDS(B,2);
 
    
 
@@ -181,22 +179,5 @@ plot(numerical_range(A(1:b1,1:b1), res))
 plot(numerical_range(A(b1+1:b1+b2,b1+1:b1+b2), res))
 %plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
 
-%%
-%check that A is square
-[n,m] = size(A);
-assert(n==m, 'A must be a square matrix.')
-fov = zeros(1,resolution+1);
-count = 0;
-for j  = [linspace(0, 2*pi, resolution),2*pi]
-    count = count+1;
-    A_rotated = exp(1i*j)*A;
-    B = 1/2*(A_rotated + A_rotated');
-    [V,D] = eig(B);
-    e = real(diag(D).');
-    contributer = max(e);
-    %the min real eigenvalue gives the min numerical range rather than max
-    index = find(e==contributer);
-    fov(count) = V(:,index(1))'*A*V(:,index(1));
-end
 
 
