@@ -1,5 +1,6 @@
-%helper function to find Gam_1, the boundary of delOm that lies within the
-%field of values of A
+%Helper function to find Gam_1, the boundary of delOm that lies within the
+%  field of values of A assuming we have access to delOmega, but not the
+%  union of simple closed curves of delOm in the interior of W(A).
 %
 %[Gam1, Gam1_prime] = findgam1(delOm, delOm_prime, A)
 % or
@@ -9,7 +10,7 @@
 %         derivative of delOm. 
 %         Contains elements of the unit circle in the complex plane.
 % input, nr, complex vector, the boundary of W(A) or the numerical range of A
-% input, A=square matrix
+% input, A, n by n complex double
 % 
 % output, Gam_1, complex vector, the boundary of delOm that lies within nr.
 %

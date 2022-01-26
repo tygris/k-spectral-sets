@@ -1,29 +1,29 @@
-%Function to define del_Omega once all of the disks have been removed
-% 1/24: A single annulus curve cannot be split into two (but the outer
-%       boundary can
+%Function to remove disks from a complex set and define del_Omega as the
+% resulting set.
 %
-%[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
-%function to define del_Omega once all of the disks have been removed
-%input, del_Omega_0, cell array of complex vectors, the original boundary 
+%[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, 
+%                                                    del_omega_0, A, om, res, radius)
+%  input, del_Omega_0, cell array of complex vectors, the original boundary 
 %       we are removing disks from. The first element of each cell needs to 
 %       be angle zero of the simple closed curve with respect to its center.
-%input, del_omega_0, cell array of integer vectors, 0 indicates the point is originally
+%  input, del_omega_0, cell array of integer vectors, 0 indicates the point is originally
 %       from the matrix numerical range, non-zero integers indicate which
 %       disk the arclength refers to in order of removal
-%input, A, square matrix being analyzed
-%input, om, complex vector, the center of the circles to be removed
-%input, res, integer, the number of points on the boundary of the circle
-%input, radius, double vector, optional argument for the radius of the circles 
+%  input, A, n by n complex double
+%  input, om, complex vector, the center of the circles to be removed
+%  input, res, integer, the number of points on the boundary of the circle
+%  input, radius, double vector, optional argument for the radius of the circles 
 %       to be removed. Must be the same length and in the same order as om
-%output, del_Omega, cell array of complex vectors, the closed boundary of 
+%
+%  output, del_Omega, cell array of complex vectors, the closed boundary of 
 %        the spectral set
 %        - each outer boundary is the first cell in a row, goes in the
 %        counter-clockwise direction from angle zero
 %        - the annuli are subsequent cells in the array, they go in the
 %        clockwise direction from angle zero
 %        - the union of all rows forms the spectral set
-%output, del_omega, integer vector of update to del_omega_0
-%output, intersections, complex matrix of the points part of del_Omega closest
+%  output, del_omega, cell array of integer vectors of update to del_omega_0
+%  output, intersections, complex matrix of the points part of del_Omega closest
 %       to the intersection disk jj and the rest of del_Omega
 %       -the first row is the intersection counter-clockwise closest to the
 %        abscissa
@@ -33,9 +33,11 @@
 %        input om
 %       -if the disk removed is an annulus without intersections, then the
 %        corresponding column comntains NaNs
-%output, r_over_pi, binary vector, 1 means the min ev >= -R/pi, 0 means min
+%  output, r_over_pi, binary vector, 1 means the min ev >= -R/pi, 0 means min
 %       ev >= -R/(2*pi). In the same order as om.
 %
+% 1/24: A single annulus curve cannot be split into two (but the outer
+%       boundary can
 % Depends on:
 %   - cellmat2plot
 %   - remove_circle
@@ -46,14 +48,6 @@
 
 %Natalie Wellen
 %11/18/21
-
-%First, remove overlapping annuli 
-%Second, combine curves, where a removed disk interscts two or more distict simple curves
-%Third, removing a disk that splits a simple closed curve into two separate curves
-
-%I also want to change the code to include the "intersections" in del_Omega
-%     I should then compare c1_estimate and measure_theta + angle_between
-%     again
 
 function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
     %Check that A is square
@@ -81,17 +75,7 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
         end
     end
     
-    % !!!
-    % I am considering changing the "intersections" variable to be a list
-    % of indices that updates each time through the loop.
-    % Previously I was trying to keep track of which Omega led to which
-    % intersection point, but if I include the intersection points in the
-    % del_Omega, then del_om will tell me (or have NaN for no derivative...)
-    %
-    %Honestly I think it is better to save the exact location and then
-    %  just use the find function when all is done...
-    
-    % define a for loop to remove all of the input circles.
+   % define a for loop to remove all of the input circles.
     num_remove = length(om);
     r_over_pi = -1*ones(1,num_remove);
     intersections = [];
@@ -154,10 +138,6 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                                         del_Omega_jj, del_omega_jj, Gam_0, Gam_jj, ON);
                         del_Omega{ii, kk} = del_Om_vec; del_omega{ii,kk} = del_om_vec;
                     end
-                    %save the updated simple closed curve
-                    %and if there was a split in the curve then update
-                    %del_Omega to have more rows.
-                    
                     %save the new intersection points
                     intersections = cat(2, intersections, inter_new);
                 %check to see if the disk is an annulus in this row

@@ -10,7 +10,8 @@
 % output, correct, complex vector, del_Omega with points ordered in the 
 %         desired direction
 % output, correct2, integer vector, del_omega matching del_Omega in the 
-%         desired direction
+%         desired direction. This output is only useful if del_omega was
+%         passed as input to the function. 
 
 %Natalie Wellen
 %1/05/22

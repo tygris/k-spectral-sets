@@ -31,7 +31,7 @@ function [clean_first, clean_last] = inter_clean(first, last, Gam1)
         end
     end
     %if last and first are not the same length, that means that 1st or end
-    %is a boundary too
+    %is a boundary too and was not originally added to the proper list.
     kf = length(first);
     kl = length(last);
     if kf < kl

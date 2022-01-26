@@ -21,7 +21,7 @@
 
 %Natalie Wellen
 %1/12/21
-
+%Could honestly use some optimization for the second part of the function
 function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     %parse the input variables
     if nargin < 4
@@ -46,18 +46,18 @@ function c1 = calc_c1(delOm, delOm_prime, intersections, res)
     %Once we have the approximate location of the maximum we check
     % 1. Is it an intersection point? if yes stop
     % 2. If not then search all points along delOm in [checks-1, checks+1]
-%     if ismember(max_index, intersections)
-%         c1 = max_c1;
-%     else
-%         checks = sort(checks);
-%         ii = find(max_index == checks);
-%         for jj = checks(ii-1)+1:checks(ii+1)-1
-%             c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
-%             if c1_check > max_c1
-%                 max_c1 = c1_check; max_index = jj;
-%             end
-%         end
-%         c1 = max_c1;
-%     end
+    if ismember(max_index, intersections)
+        c1 = max_c1;
+    else
+        checks = sort(checks);
+        ii = find(max_index == checks);
+        for jj = checks(ii-1)+1:checks(ii+1)-1
+            c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
+            if c1_check > max_c1
+                max_c1 = c1_check; max_index = jj;
+            end
+        end
+        c1 = max_c1;
+    end
     c1 = max_c1;
 end

@@ -1,11 +1,12 @@
 % Function to numerically estimate c1 at a given point by calculating the change in angle of
-% discretized points along the boundary of del_Omega
+%  discretized points along the boundary of del_Omega.
+% Helper function for calc_c1().
 % 
-% [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om)
+% [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
 %  input, sigma_0_index, integer, the index of del_Omega for the starting point
 %        of estimating c1
 %  input, sigma_0_prime, the angle of the derivative of del_Omega at sigma_0_prime
-%  input, del_Om, complex vector, the countour of the boundary of our
+%  input, del_Om_0, complex vector, the countour of the boundary of our
 %         spectral set del_Omega in the counter-clockwise direction
 %  output, c1, double, estimate of the spectral constant 
 %

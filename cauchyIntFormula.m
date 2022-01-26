@@ -3,16 +3,18 @@
 % trapezoid formula is used to compute the integral.
 %
 %[cif] = cauchyIntFormula(A, Gam1)
-% input, A, square matrix
+% input, A, n by n double, goal is to calculate the integral of the
+%        resolvent norm of A
 % input, Gam1, complex double, a subset of the boundary we are calculating
 %        the formula for. Assuming no NaNs, aka that discontinous pieces are
-%        passed separately.
+%        passed separately. Further, no assumption about equidistant points
+%        is made.
 %
 % output, cif, double, the estimate of the Cauchy Integral Formula bounding
-%         ||f(A)||/||f||_\Omega along Gam1
+%         ||f(A)||/||f||_\Omega along Gam1, the integral of the resolvent norm of A
 
 %Natalie Wellen
-%1/10/22
+%1/26/22
 
 function cif = cauchyIntFormula(A, Gam1)
     %calculate the norm of the resolvent for points along Gam1

@@ -13,6 +13,8 @@
 %Natalie Wellen
 %1/20/22
 
+%need to clean up y1 and y2 for when lineinter is not 0 (positive or
+%negative??
 function [y1,y2] = nrCutOff(A, lineinter, lineslope) 
     %parse input
     assert(nargin >= 2, "The first two inputs are necessary. See: help nrCutOff")

@@ -2,12 +2,15 @@
 % This function uses the built-in integral() to integrate.
 % integral() does not appear to work well for A singular (det(A)=0)
 %
-% input, A, square matrix with right side of delOmega on the imaginary axis
-% input, y1, the minimum value of delOmega on the imaginary axis
-% input, y2, the maximum value of delOmega on the imaginary axis
-% output, c2, a constant used to calculate K
-% output, cif, the integral of the resolvent norm along a horizontal line
-%              in the complex plane
+% input, A, n by n double
+% input, y1, the minimum real value of Gam1 on the real axis
+% input, y2, the maximum real value of Gam1 on the real axis
+% input (opt), yintercept, double, the imaginary value of y1 and y2.
+%        Default value is 0.
+%
+% output, c2, double, a constant used to calculate K
+% output, cif, double, the integral of the resolvent norm along a horizontal line
+%              in the complex plane, Gam1 = [y1, y2]
 
 % Natalie Wellen
 % 1/25/22

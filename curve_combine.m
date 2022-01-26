@@ -1,7 +1,7 @@
 % Helper function to combine curves for define_del_Omega()
 %
 %[del_Om_vec, del_om_vec, intersections] = curve_combine(out_bound, del_Om_vec1, del_om_vec1,
-%del_Om_vec2, del_om_vec2, Gam_1, Gam_2)
+%del_Om_vec2, del_om_vec2, Gam_1, Gam_2, ON)
 % 
 % input, out_bound, in [0,1] where 1 for combining curves with the outer boundary 
 %        and 0 for combining annuli curves.
@@ -15,15 +15,15 @@
 %        the boundary of del_Om_vec2
 % input, Gam_2, vector of 0s and 1s, 1 indicates del_Om_vec2 lies within or on
 %        the boundary of del_Om_vec1
-% input, ON, , vector of 0s and 1s, 1 indicates del_Om_vec1 is on the
+% input, ON, vector of 0s and 1s, 1 indicates del_Om_vec1 is on the
 %        boundary of del_Om_vec2 (has an equivalent point)
 % 
 % output, del_Om_vec, complex vector, the new simple closed curve resulting 
 %          from combining the input curves del_Om_vec1 and del_Om_vec2
 % output, del_om_vec, integer vector, the source for taking the derivative
 %        of the new del_Om_vec
-% output, intersections, a row vector of the list of new intersection
-%          points resulting from combining del_Om_vec1 and del_Om_vec2
+% output, intersections, complex vector, list of new intersection points 
+%         resulting from combining del_Om_vec1 and del_Om_vec2
 %
 % Depends on: - inter_clean
 

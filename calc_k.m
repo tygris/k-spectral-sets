@@ -4,7 +4,7 @@
 % This function assumes that for overlapping disks, c2 is calculated by 
 % 
 % [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, vorh, intersections)
-%  input, A, square matrix A that is an input to some function f
+%  input, A, square matrix double
 %  input, del_Om, complex vector, the boundary of the spectral set
 %  input, del_Om_prime, complex double, the corresponding derivatives of del_Om. 
 %         All entries have unit length one. 
@@ -64,11 +64,9 @@ function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, v
     c2 = 0; cifG = 0;
     for ii = 1:length(breaks)-1
         if vorh(ii) == 'v'
-            [c2_hold, cifG_hold] = calc_c2_v(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
-            Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
+            [c2_hold, cifG_hold] = calc_c2_v(A, Gam1(breaks(ii)+1), Gam1(breaks(ii+1)-1));
         elseif vorh(ii) == 'h'
-            [c2_hold, cifG_hold] = calc_c2_h(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
-            Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
+            [c2_hold, cifG_hold] = calc_c2_h(A, Gam1(breaks(ii)+1),Gam1(breaks(ii+1)-1));
         elseif vorh(ii) == 'n'
         [c2_hold, cifG_hold] = calc_c2_curve(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
             Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
