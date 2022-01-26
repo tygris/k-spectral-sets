@@ -29,7 +29,7 @@
 
 
 %Natalie Wellen
-%11/22/21
+%1/24/22
 
 function [del_Om_vec, del_om_vec, intersections] = curve_combine(out_bound, del_Om_vec1,...
                                         del_om_vec1, del_Om_vec2, del_om_vec2, Gam_1, Gam_2, ON)
@@ -43,17 +43,74 @@ function [del_Om_vec, del_om_vec, intersections] = curve_combine(out_bound, del_
         bounds_1 = Gam_1(1:end-1) - Gam_1(2:end);
         first_1 = find(bounds_1 <= -1)+1; 
         last_1 = find(bounds_1 >= 1);
-        [first_1, last_1] = inter_clean(first_1, last_1);
+        [first_1, last_1] = inter_clean(first_1, last_1, Gam_1);
         [bounds_2] = Gam_2(1:end-1) - Gam_2(2:end);
         first_2 = find(bounds_2 == -1)+1;
         last_2 = find(bounds_2 == 1);
-        [first_2, last_2] = inter_clean(first_2, last_2);
-    
+        [first_2, last_2] = inter_clean(first_2, last_2, Gam_2);
+        
         %save the list of new intersection points
         intersections = reshape([del_Om_vec1(first_1); del_Om_vec1(last_1)], 1, []); %so intersections are in clockwise order
         
         %perform that actual curve combination
-        if first_1 > last_1
+        n = length(first_1);
+        if length(first_1)>1
+            %what happens if the disk splits delOm into two pieces?
+            if Gam_1(1) == 0 %the first entry of numerical range stays the same
+            %first entry, (so I know when to add the NaN's in between
+            if last_2(1) < first_2(1)
+            del_Om_vec = [del_Om_vec1(1:first_1(1)), ...
+                del_Om_vec2(first_2(n):end), ...
+                del_Om_vec2(1:last_2(1)),...
+                del_Om_vec1(last_1(n):end)];
+            del_om_vec = [del_om_vec1(1:first_1(1)), ...
+                del_om_vec2(first_2(n):end), ...
+                del_om_vec2(1:last_2(1)),...
+                del_om_vec1(last_1(n):end)];
+            for j = 1:n-1
+                %add the divider between separate curves
+                del_Om_vec = cat(2, del_Om_vec, NaN+1i*NaN);
+                del_om_vec = cat(2, del_om_vec, NaN+1i*NaN);
+                %add the next simple closed curve of delOmega
+                del_Om_vec = cat(2, del_Om_vec, [del_Om_vec1(last_1(j):first_1(j+1)), ...
+                    del_Om_vec2(first_2(n-j):last_2(n-j+1))]);
+                del_om_vec = cat(2, del_om_vec, [del_om_vec1(last_1(j):first_1(j+1)), ...
+                    del_om_vec2(first_2(n-j):last_2(n-j+1))]);
+            end
+            else
+               del_Om_vec = [del_Om_vec1(1:first_1(1)), ...
+                del_Om_vec2(first_2(n):last_2(n)),...
+                del_Om_vec1(last_1(n):end)];
+            del_om_vec = [del_om_vec1(1:first_1(1)), ...
+                del_om_vec2(first_2(n):last_2(n)), ...
+                del_om_vec1(last_1(n):end)];
+            for j = 1:n-1
+                %add the divider between separate curves
+                del_Om_vec = cat(2, del_Om_vec, NaN+1i*NaN);
+                del_om_vec = cat(2, del_om_vec, NaN+1i*NaN);
+                %add the next simple closed curve of delOmega
+                del_Om_vec = cat(2, del_Om_vec, [del_Om_vec1(last_1(j):first_1(j+1)), ...
+                    del_Om_vec2(first_2(n-j):last_2(n-j))]);
+                del_om_vec = cat(2, del_om_vec, [del_om_vec1(last_1(j):first_1(j+1)), ...
+                    del_om_vec2(first_2(n-j):last_2(n-j))]);
+            end 
+            end
+            else %we need to define the new "start"
+            %first entry, (so I know when to add the NaN's in between
+            del_Om_vec = [del_Om_vec1(last_1(1):first_1(1)), del_Om_vec2(last_2(n):first_2(n))];
+            del_om_vec = [del_om_vec1(last_1(1):first_1(1)), del_om_vec2(last_2(n):first_2(n))];
+            for j = 2:n
+                del_Om_vec = cat(2, del_Om_vec, NaN+1i*NaN);
+                del_om_vec = cat(2, del_om_vec, NaN+1i*NaN);
+                %define the next simple closed curve
+                del_Om_vec = cat(2, del_Om_vec, [del_Om_vec1(last_1(j):first_1(j)),...
+                    del_Om_vec2(last_2(n-j+1):first_2(n-j+1))]);
+                del_om_vec = cat(2, del_om_vec, [del_om_vec1(last_1(j):first_1(j)),...
+                    del_om_vec2(last_2(n-j+1):first_2(n-j+1))]);
+            end
+            end
+        else    
+        if first_1 > last_1 
             negatives = imag(del_Om_vec2) >= 0 & Gam_2 ==1;
             start = find(imag(del_Om_vec2) == min(imag(del_Om_vec2(negatives))));
             k = length(first_1);
@@ -113,6 +170,7 @@ function [del_Om_vec, del_om_vec, intersections] = curve_combine(out_bound, del_
         else
             del_Om_vec = [del_Om_vec1(1:first_1), del_Om_vec2(Gam_2), del_Om_vec1(last_1:end)];
             del_om_vec = [del_om_vec1(1:first_1), del_om_vec2(Gam_2), del_om_vec1(last_1:end)];
+        end
         end
     else
         %If combining with an annulus

@@ -15,17 +15,28 @@
 %         intersection points included in the list
 
 %Natalie Wellen
-%11/21/21
+%1/24/22
 
-function [clean_first, clean_last] = inter_clean(first, last)
-    clean_first = first(1);
+function [clean_first, clean_last] = inter_clean(first, last, Gam1)
+    clean_first = [];
     clean_last = [];
-    k = length(first);
-    for ii = 2:k
-        if first(ii) - last(ii-1) > 2
-            clean_first = cat(2, clean_first, first(ii));
-            clean_last  = cat(2, clean_last, last(ii-1));
+    for ii = first 
+        if Gam1(ii:ii+1) == Gam1(ii+1:ii+2)
+            clean_first = cat(2, clean_first, ii);
         end
     end
-    clean_last = cat(2, clean_last, last(k));
+    for ii = last 
+        if Gam1(ii-1:ii) == Gam1(ii-2:ii-1)
+            clean_last = cat(2, clean_last, ii);
+        end
+    end
+    %if last and first are not the same length, that means that 1st or end
+    %is a boundary too
+    kf = length(first);
+    kl = length(last);
+    if kf < kl
+        clean_first = cat(2, 1, clean_first);
+    elseif kl < kf
+        clean_last = cat(2, clean_last, length(Gam1));
+    end
 end

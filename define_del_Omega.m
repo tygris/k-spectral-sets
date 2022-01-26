@@ -1,12 +1,13 @@
 %Function to define del_Omega once all of the disks have been removed
-% 11/16: A single curve cannot be split into two
+% 1/24: A single annulus curve cannot be split into two (but the outer
+%       boundary can
 %
 %[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
 %function to define del_Omega once all of the disks have been removed
 %input, del_Omega_0, cell array of complex vectors, the original boundary 
 %       we are removing disks from. The first element of each cell needs to 
 %       be angle zero of the simple closed curve with respect to its center.
-%input, del_omega_0, integer vector, 0 indicates the point is originally
+%input, del_omega_0, cell array of integer vectors, 0 indicates the point is originally
 %       from the matrix numerical range, non-zero integers indicate which
 %       disk the arclength refers to in order of removal
 %input, A, square matrix being analyzed
@@ -36,7 +37,6 @@
 %       ev >= -R/(2*pi). In the same order as om.
 %
 % Depends on:
-%   - numerical_range
 %   - cellmat2plot
 %   - remove_circle
 %       - circle
@@ -139,13 +139,25 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                     % define the new del_Omega with the removed half-disk
                         [del_Om_vec, del_om_vec, inter_new] = curve_combine(1, del_Om_vec, del_om_vec,...
                                         del_Omega_jj, del_omega_jj, Gam_0, Gam_jj, ON);
+                        split = find(isnan(del_Om_vec));
+                        if length(split)>=1
+                            del_Omega{ii, kk} =  del_Om_vec(1:split(1)-1); del_omega{ii, kk} =  del_om_vec(1:split(1)-1);
+                            split = cat(2, split, length(del_Om_vec)+1);
+                            for ii = 1:length(split)-1
+                                del_Omega{end+1, 1} = del_Om_vec(split(ii)+1:split(ii+1)-1);
+                                del_omega{end+1, 1} = del_om_vec(split(ii)+1:split(ii+1)-1);
+                            end
+                        end
                     else
                     % define the new del_Omega with the removed half-disk
                         [del_Om_vec, del_om_vec, inter_new] = curve_combine(0, del_Om_vec, del_om_vec,...
                                         del_Omega_jj, del_omega_jj, Gam_0, Gam_jj, ON);
+                        del_Omega{ii, kk} = del_Om_vec; del_omega{ii,kk} = del_om_vec;
                     end
                     %save the updated simple closed curve
-                    del_Omega{ii, kk} = del_Om_vec; del_omega{ii,kk} = del_om_vec;
+                    %and if there was a split in the curve then update
+                    %del_Omega to have more rows.
+                    
                     %save the new intersection points
                     intersections = cat(2, intersections, inter_new);
                 %check to see if the disk is an annulus in this row
@@ -199,12 +211,6 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                 ncols = ncols - length(smoosh)+1;
            end
         end
-       %Not sure if I want to clean the intersection list here or not.
-       % It would require convverting to a vector yet not outputting... that vector.
-       % It seems like a waste of time especially considering I may change
-       % del_Omega by removing one disk at a time while looping through the
-       % script, which just means that my intersection list would never be
-       % cleaned inside of this function. It should def be a separate one.
     end
     figure()
     plot(cellmat2plot(del_Omega,1))

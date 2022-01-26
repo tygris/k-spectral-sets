@@ -3,7 +3,7 @@
 % comparing the previous minimum of r to the current point
 % This function assumes that for overlapping disks, c2 is calculated by 
 % 
-% [k] = calc_k(A, nr, nr_prime, del_Om, del_Om_prime, max_length, resolution, intersections, M)
+% [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, vorh, intersections)
 %  input, A, square matrix A that is an input to some function f
 %  input, del_Om, complex vector, the boundary of the spectral set
 %  input, del_Om_prime, complex double, the corresponding derivatives of del_Om. 
@@ -13,6 +13,10 @@
 %         has equidistant points.
 %  input, Gam1_prime, complex double, the corresponding derivatives of Gam1
 %         with exactly the same lengthas Gam1.
+%  input (opt), vorh, 'v' or 'h' to indicate vertical or horizontal gamma1. The
+%         default is 'v'. 'n' indicates neither is true and Gam1 is a general curve. 
+%         This input is a vector with length equal to the number of connected curves 
+%         making up the input Gam1.
 %  input (opt), intersections, integer vector, list of indices of delOm
 %        corresponding to points on delOm nearest to those without a
 %        derivative.
@@ -29,26 +33,50 @@
 %    - calc_c1
 %       - find_c1
 %          - angle_stepper
-%    - calc_c2
+%    - calc_c2_(v, h, or curve)
 
 %Natalie Wellen
-%1/12/22
+%1/25/22
 
-function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, intersections)
+function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, vorh, intersections)
+    %parse inputs and assert they have the correct length
     assert( nargin >=5, "ERROR: The first 5 function inputs are necessary. See help calc_k")
+    breaks = find(isnan(Gam1));
     if nargin == 5 
+        vorh = repmat('v', 1, breaks+1);
         c1 = calc_c1(del_Om, del_Om_prime);
+    elseif nargin == 6
+        if ismember(vorh, ['v' 'h' 'n'])
+            c1 = calc_c1(del_Om, del_Om_prime);
+        else
+            intersections = vorh;
+            vorh = repmat('v', 1, breaks+1);
+            c1 = calc_c1(del_Om, del_Om_prime, intersections);
+        end
     else
         c1 = calc_c1(del_Om, del_Om_prime, intersections);
     end
-    breaks = find(isnan(Gam1));
+    assert(length(breaks)+1 == length(vorh), ...
+        "ERROR: Each connected curve needs to be listed as a vertical line 'v', \n horizontal line 'h', or a general curve 'n'.")
+    
+    %calculate c2 for each connected curve and add the total
     breaks = [0, breaks, length(Gam1)+1]; %to include the start and end
     c2 = 0; cifG = 0;
     for ii = 1:length(breaks)-1
+        if vorh(ii) == 'v'
+            [c2_hold, cifG_hold] = calc_c2_v(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
+            Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
+        elseif vorh(ii) == 'h'
+            [c2_hold, cifG_hold] = calc_c2_h(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
+            Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
+        elseif vorh(ii) == 'n'
         [c2_hold, cifG_hold] = calc_c2_curve(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
             Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
+        end
         c2 = c2+c2_hold; cifG = cifG + cifG_hold;
     end
+    
+    %calculate k
     k = c2 + sqrt(c1^2 + c2);
     close
 end

@@ -1,16 +1,17 @@
 %Function to calculate the spectral set and comparison Cauchy Integral for
 % a continuous time dynamical system represented as a matrix
 %
-%[k,c1,c2,cif] = contDS(A)
+%[k,cif,c2] = contDS(A, timestretch)
 % input, A, the continuous time DS
 % input (opt), timestretch, double, to shorten or widen the time steps and
 %              thus tmax for the second plot
 %
 % output, k, double, the estimated K value of the spectral set delOm
-% output, cif, double, the value of the cauchy transform along delOmega
-% output, c1, double 
+% output, cif, double, the value of the integral of the resolvent norm
+%              along delOmega
 % output, c2, double
-% output, various plots
+% output, plot of numerical range overlayed by delOmega and ||exp(At)||
+%         bounded by K and the value of cif
 
 %Natalie Wellen
 %1/21/22
@@ -25,11 +26,12 @@ function [k,cif,c2] = contDS(A, timestretch)
     [y1, y2] = nrCutOff(A, 0);
     y1 = y1/1i; y2 = y2/1i;
     if det(A) == 0
-        Gam1 = linspace(y2, y1, 2000000);
-        Gam1_prime = 1i*ones(1, 2000000);
-        [c2, cifG] = calc_c2_curve(A, Gam1, Gam1_prime);
+%         Gam1 = linspace(y2, y1, 2000000);
+%         Gam1_prime = 1i*ones(1, 2000000);
+%         [c2, cifG] = calc_c2_curve(A, Gam1, Gam1_prime);
+        
     else
-        [c2, cifG] = calc_c2_2(A, y1,y2);
+        [c2, cifG] = calc_c2_v(A, y1,y2);
     end
     %define delOmega and it's derivative
     ind1 = real(nr)<0;

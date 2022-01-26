@@ -19,7 +19,7 @@ A = [-1.5622, 0.6685,0,0,0,0,0,0,0;
  
  om = del_Omega_0(end);
 
-%% Testing the working inside-out removal of disks fromthe numerical range and 
+%% Testing the working inside-out removal of disks from the numerical range and 
 %  being able to define del_Omega this way
 
 %Check that A is square
