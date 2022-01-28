@@ -14,7 +14,7 @@
 %         bounded by K and the value of cif
 
 %Natalie Wellen
-%1/25/22
+%1/26/22
 
 function [k,cif,c2] = contDS(A, timestretch)
     if nargin == 1
@@ -23,14 +23,12 @@ function [k,cif,c2] = contDS(A, timestretch)
     %calculate the numerical range and it's derivative
     [nr] = numerical_range(A,200000);
     %find Gamma1 and it's derivative
-    [y1, y2] = nrCutOff(A, 0);
     if det(A) == 0
-        Gam1 = linspace(y1,y2, 2000000);
-        Gam1_prime = 1i*ones(1, 2000000);
-        [c2, cifG] = calc_c2_curve(A, Gam1, Gam1_prime);
-        
+        [y1, y2] = nrCutOff(A, 10^-8);
+        [c2, cifG] = calc_c2_v(A, imag(y1), imag(y2), real(y1));
     else
-        [c2, cifG] = calc_c2_v(A, y1/1i,y2/1i);
+        [y1, y2] = nrCutOff(A, 0);
+        [c2, cifG] = calc_c2_v(A, imag(y1), imag(y2));
     end
     %define delOmega and it's derivative
     ind1 = real(nr)<0;
@@ -41,22 +39,46 @@ function [k,cif,c2] = contDS(A, timestretch)
     cif = cauchyIntFormula(A, nr(ind1)) + cifG;
     
     %plot the numerical range, eigs, and delOmega
+    opts= {'LineWidth',2};
     figure()
-    subplot(2,1,1)
+    subplot(2,2,2)
     plot(nr, '--k'), daspect([1,1,1]), hold on
     eigvs = eig(A); 
     plot(real(eigvs), imag(eigvs), 'kx');
-    plot(delOm, '-b', 'LineWidth',2)
+    plot(delOm, '-b', opts{:})
+    title("Spectral Set and Eigenvalues")
     %plot e^(At) with k and cif upper bounds
-    subplot(2,1,2)
+    
+    subplot(2,2,1)
     % calculate matrix envelope
     timestep = 0.1*timestretch; iterations = 500;
     meA = times_expm(A, timestep, iterations);
     tmax = iterations*timestep;
     t = 0:timestep:tmax;
-    plot(t,meA, 'DisplayName', 'Matrix Envelope'), hold on
+    plot(t,meA, 'DisplayName', 'Matrix Envelope', opts{:}), hold on
     xlim([0,tmax])
-    plot([0,tmax], [k,k], 'DisplayName', 'K')
-    plot([0,tmax], [cif, cif], 'DisplayName', 'Cauchy Transform')
-    legend()
+    plot([0,tmax], [k,k], 'DisplayName', 'K', opts{:})
+    plot([0,tmax], [cif, cif], 'DisplayName', 'Cauchy Transform', opts{:})
+    %legend()
+    
+    % plot the resolvent norm and abs(min(eig(A)))
+    n = 20001;
+    m = length(A);
+    Gam1 = linspace(y1, y2, n);
+    Gam1_prime = 1i*ones(1,n);
+    gammas = zeros(1,n);
+    rnorms = zeros(1,n);
+    for jj = 1:n
+        R = 1/(2*pi)*inv(Gam1(jj)*eye(m) - A); %the matrix s'(sI-A)^-1
+        gammas(jj) = -1*(min(eig(R+R'))); 
+        rnorms(jj) = norm(R,2);
+    end
+    subplot(2,2,3)
+    semilogy(imag(Gam1), rnorms, opts{:})
+    ylim([min(rnorms)/5, max(rnorms)*1.5])
+    title("Resolvent Norm on Imaginary Axis")
+    subplot(2,2,4)
+    semilogy(imag(Gam1), gammas, opts{:})
+    ylim([min(gammas)/5, max(gammas)*1.5])
+    title("|lambdamin| on Imaginary Axis")
 end

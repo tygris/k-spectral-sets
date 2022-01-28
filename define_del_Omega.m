@@ -131,6 +131,8 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
                                 del_Omega{end+1, 1} = del_Om_vec(split(ii)+1:split(ii+1)-1);
                                 del_omega{end+1, 1} = del_om_vec(split(ii)+1:split(ii+1)-1);
                             end
+                        else
+                            del_Omega{ii, kk} =  del_Om_vec; del_omega{ii, kk} =  del_om_vec;
                         end
                     else
                     % define the new del_Omega with the removed half-disk

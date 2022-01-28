@@ -1,33 +1,32 @@
-% Function to calculate where a line would intersect the numerical range
-%   I start with the vertical case since it is of most interest
+% Function to calculate where a vertical or horizontal line would intersect
+%   the numerical range.
 %
 %[intersects] = nrCutOff(A, lineinter)
 %  input, A, square matrix
 %  input, lineinter, double, the intersection of the vertical line with the real axis
+%  input, lineslope, 'v'= vertical line or 'h'= horizontal line
 %
-%  output, intersects, vector of 2 complex doubles, the endpoints of Gamma1
+%  output, y1, complex double, the bottom or rightmost endpoint of Gamma1
+%  output, y2, complex double, the top or leftmost endpoint of Gamma1
 %
 % Depends on: -numerical_range
 
 
 %Natalie Wellen
-%1/20/22
+%1/26/22
 
-%need to clean up y1 and y2 for when lineinter is not 0 (positive or
-%negative??
 function [y1,y2] = nrCutOff(A, lineinter, lineslope) 
     %parse input
     assert(nargin >= 2, "The first two inputs are necessary. See: help nrCutOff")
     if nargin == 2
-        lineslope = 'vertical';
+        lineslope = 'v';
     end
-    assert(ismember(lineslope, {'horizontal', 'vertical'}), "Only horizontal or vertical lines are used");
+    assert(ismember(lineslope, ['h' 'v']), "Only vertical ('v') or horizontal ('h') lines are allowed.");
     
     %calculate the numerical range with high accuracy
     [nr] = numerical_range(A, 20000);
     %If horizontal line, then rotate nr appropriately
-    flipper = ismember(lineslope, {'horizontal'});
-    if flipper
+    if lineslope == 'h'
         % find the pts on the numerical range just before y1 and y2
         ind1 = imag(nr) > lineinter;
         pts = find(ind1(2:20001)-ind1(1:20000));
@@ -37,7 +36,8 @@ function [y1,y2] = nrCutOff(A, lineinter, lineslope)
         %find y2
         x1 = nr(pts(2)+1); x2 = nr(pts(2));
         y2 = real(x1) + (real(x2)-real(x1))/(imag(x2)-imag(x1))*(lineinter-imag(x1));
-        %finalize output (already done)
+        %finalize output 
+        y1 = y1 + lineinter*1i; y2 = y2 + lineinter*1i;
     else
         % find the pts on the numerical range just before y1 and y2
         ind1 = real(nr) > lineinter;
@@ -49,6 +49,6 @@ function [y1,y2] = nrCutOff(A, lineinter, lineslope)
         x1 = nr(pts(2)+1); x2 = nr(pts(2));
         y1 = imag(x1) + (imag(x2)-imag(x1))/(real(x2)-real(x1))*(lineinter-real(x1));
         %finalize output
-        y1 = 1i*y1; y2 = 1i*y2;
+        y1 = lineinter + 1i*y1; y2 = lineinter + 1i*y2;
     end
 end
