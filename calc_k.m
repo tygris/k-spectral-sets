@@ -75,6 +75,6 @@ function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, v
     end
     
     %calculate k
-    k = c2 + sqrt(c1^2 + c2);
+    k = c2 + sqrt(c1 + c2^2);
     close
 end

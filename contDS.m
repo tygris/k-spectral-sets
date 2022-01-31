@@ -34,7 +34,7 @@ function [k,cif,c2] = contDS(A, timestretch)
     ind1 = real(nr)<0;
     delOm = cat(2, [y1,y2], nr(ind1));
     %calculate k, c1, and c2
-    k = c2 + sqrt(1+c2);
+    k = c2 + sqrt(1+c2^2);
     %calculate the Cauchy Transform along delOmega
     cif = cauchyIntFormula(A, nr(ind1)) + cifG;
     
