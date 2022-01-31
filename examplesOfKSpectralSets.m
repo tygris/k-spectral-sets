@@ -1,7 +1,7 @@
 %File of different examples of how K-Spectral Sets can be used
 
 %Natalie Wellen
-%12/07/21
+%1/25/21
 
 %% Example 1
 % Using the transient_demo() from Eigtool: https://www.cs.ox.ac.uk/pseudospectra/eigtool/

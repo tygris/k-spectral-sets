@@ -21,7 +21,7 @@
 %          each sigma(s) along Gam1
 
 %Natalie Wellen
-%1/25/22
+%1/31/22
 
 function [c2, cif, rnorms, gammas] = calc_c2_curve(A, Gam1, Gam1_prime)
     %gamma(s) and resolvent norm at each point of Gamma_1
@@ -32,18 +32,19 @@ function [c2, cif, rnorms, gammas] = calc_c2_curve(A, Gam1, Gam1_prime)
     for jj = 1:n
         R = Gam1_prime(jj)*inv(Gam1(jj)*eye(m) - A); %the matrix s'(sI-A)^-1
         gammas(jj) = abs(min(real(eig(1/(2*pi*1i)*(R-R'))))); 
-        rnorms(jj) = norm(R, 2)/2*pi;
+        rnorms(jj) = norm(R, 2)/(2*pi);
     end
    
     %Use the trapezoidal rule to estimate the integral of gamma(s)
-        %note we assume points are equidistant
-    ds = abs(Gam1(2)-Gam1(1));
+    ds = abs(Gam1(2:n)-Gam1(1:n-1));
     if Gam1(1) == Gam1(n)
-        integrated = sum(gammas)*ds;
-        cif = sum(rnorms)*ds/(2*pi);
+        integrated = sum((gammas(2:n)+gammas(1:n-1)).*ds)/2;
+        cif = sum((rnorms(2:n)+rnorms(1:n-1)).*ds)/2;
     else
-        integrated = (sum(gammas) - 0.5*(gammas(1)+gammas(n)))*ds;
-        cif = (sum(rnorms)-0.5*(rnorms(1)+rnorms(n)))*ds;
+        integrated = sum((gammas(2:n)+gammas(1:n-1)).*ds)/2 +...
+            ((gammas(1)+gammas(2))*abs(Gam1(2)-Gam1(1))+(gammas(n-1)+gammas(n))*abs(Gam1(n) - Gam1(n-1)))/2;
+        cif = sum((rnorms(2:n)+rnorms(1:n-1)).*ds)/2 +...
+            ((rnorms(1)+rnorms(2))*abs(Gam1(2)-Gam1(1))+(rnorms(n-1)+rnorms(n))*abs(Gam1(n) - Gam1(n-1)))/2;
     end
     
     %finally, calculate c2
