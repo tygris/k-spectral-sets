@@ -14,7 +14,7 @@
 % depends on: chebfun
 
 %Natalie Wellen
-%01/26/21
+%02/02/21
 
 function [nr, nr_prime] = numerical_range(A, resolution)
     %check that A is square
@@ -31,6 +31,8 @@ function [nr, nr_prime] = numerical_range(A, resolution)
     nrp_cheb = diff(nr_cheb);
     nr_prime = nrp_cheb([0:resolution]*ds);
     nr_prime = -1*flip(nr_prime);
+    %normalize nr_prime so that every entry has abs(z) = 1
+    nr_prime = nr_prime./abs(nr_prime);
     % set the first and last entry equal with non-negative imaginary part
     if imag(nr(1))>=0
         nr(end) = nr(1);
