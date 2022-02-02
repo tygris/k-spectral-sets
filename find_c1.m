@@ -48,11 +48,11 @@ function [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
             end
             angle_0 = min(abs(abs(angle_0-sigma_0_pa0)-2*pi), abs(angle_0-sigma_0_pa0));
             %sum up all of the changes in angle to estimate c1
-            c1_new = sum(angle_step) + angle_0 + angle_n;
+            c1_new = sum(angle_step); %+ angle_0 + angle_n;
             %if derivative was passed in the counter-clockwise direction by mistake
-            if angle_0 >= pi
-                c1_new = c1_new-2*pi;
-            end
+%             if angle_0 >= pi
+%                 c1_new = c1_new-2*pi;
+%             end
         %otherwise we do not need to include sigma_0_prime in the calculation
         else
             sigma_0 = del_Om_0(sigma_0_index);

@@ -13,14 +13,9 @@
 %         has equidistant points.
 %  input, Gam1_prime, complex double, the corresponding derivatives of Gam1
 %         with exactly the same lengthas Gam1.
-%  input (opt), vorh, 'v' or 'h' to indicate vertical or horizontal gamma1. The
-%         default is 'v'. 'n' indicates neither is true and Gam1 is a general curve. 
-%         This input is a vector with length equal to the number of connected curves 
-%         making up the input Gam1.
-%  input (opt), intersections, integer vector, list of indices of delOm
-%        corresponding to points on delOm nearest to those without a
-%        derivative.
-%        Note it is assumed that there are always at least two intersections.
+%  input (opt), vorh, character vector of 'v', 'h', or 'n'. The default is 'n'.
+%         'v' for vertical, 'h' for horizontal, and 'n' for neither to describe
+%         each connected curve of Gam1. 
 %
 %  output, k, double, the spectral-set value
 %  output, c1, double, the value of the double potential kernel defining the 
@@ -36,26 +31,16 @@
 %    - calc_c2_(v, h, or curve)
 
 %Natalie Wellen
-%1/25/22
+%2/01/22
 
-function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, vorh, intersections)
+function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, vorh)
     %parse inputs and assert they have the correct length
     assert( nargin >=5, "ERROR: The first 5 function inputs are necessary. See help calc_k")
     breaks = find(isnan(Gam1));
     if nargin == 5 
-        vorh = repmat('v', 1, breaks+1);
-        c1 = calc_c1(del_Om, del_Om_prime);
-    elseif nargin == 6
-        if ismember(vorh, ['v' 'h' 'n'])
-            c1 = calc_c1(del_Om, del_Om_prime);
-        else
-            intersections = vorh;
-            vorh = repmat('v', 1, breaks+1);
-            c1 = calc_c1(del_Om, del_Om_prime, intersections);
-        end
-    else
-        c1 = calc_c1(del_Om, del_Om_prime, intersections);
+        vorh = repmat('n', 1, breaks+1);
     end
+    c1 = calc_c1(del_Om, del_Om_prime);
     assert(length(breaks)+1 == length(vorh), ...
         "ERROR: Each connected curve needs to be listed as a vertical line 'v', \n horizontal line 'h', or a general curve 'n'.")
     
@@ -64,9 +49,11 @@ function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, v
     c2 = 0; cifG = 0;
     for ii = 1:length(breaks)-1
         if vorh(ii) == 'v'
-            [c2_hold, cifG_hold] = calc_c2_v(A, Gam1(breaks(ii)+1), Gam1(breaks(ii+1)-1));
+            [c2_hold, cifG_hold] = calc_c2_v(A, imag(Gam1(breaks(ii)+1)), ...
+                imag(Gam1(breaks(ii+1)-1)), real(Gam1(breaks(ii)+1)));
         elseif vorh(ii) == 'h'
-            [c2_hold, cifG_hold] = calc_c2_h(A, Gam1(breaks(ii)+1),Gam1(breaks(ii+1)-1));
+            [c2_hold, cifG_hold] = calc_c2_h(A, real(Gam1(breaks(ii)+1)), ...
+                real(Gam1(breaks(ii+1)-1)), imag(Gam1(breaks(ii)+1)));
         elseif vorh(ii) == 'n'
         [c2_hold, cifG_hold] = calc_c2_curve(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
             Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));
