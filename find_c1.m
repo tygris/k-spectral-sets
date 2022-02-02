@@ -6,6 +6,7 @@
 %  input, sigma_0_index, integer, the index of del_Omega for the starting point
 %        of estimating c1
 %  input, sigma_0_prime, the angle of the derivative of del_Omega at sigma_0_prime
+%         element of [-pi, pi] 
 %  input, del_Om_0, complex vector, the countour of the boundary of our
 %         spectral set del_Omega in the counter-clockwise direction
 %  output, c1, double, estimate of the spectral constant 
@@ -40,19 +41,19 @@ function [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
                 sigma_0_prime = sigma_0_prime - 2*pi;
             end
             angle_n = angle(del_Om(end-1)-sigma_0);
-            angle_n = min(abs(abs(sigma_0_prime - angle_n)-2*pi), abs(sigma_0_prime -angle_n));
+            angle_n = min(abs(abs(sigma_0_prime - angle_n)-pi), abs(sigma_0_prime -angle_n)); %-2*pi
             angle_0 = angle(del_Om(2)-sigma_0); 
             sigma_0_pa0 = sigma_0_prime + pi;
             if sigma_0_pa0> pi
                 sigma_0_pa0 = sigma_0_pa0 - 2*pi;
             end
-            angle_0 = min(abs(abs(angle_0-sigma_0_pa0)-2*pi), abs(angle_0-sigma_0_pa0));
+            angle_0 = min(abs(abs(angle_0-sigma_0_pa0)-pi), abs(angle_0-sigma_0_pa0)); %-2*pi
             %sum up all of the changes in angle to estimate c1
-            c1_new = sum(angle_step); %+ angle_0 + angle_n;
+            c1_new = sum(angle_step) + angle_0 + angle_n;
             %if derivative was passed in the counter-clockwise direction by mistake
-%             if angle_0 >= pi
-%                 c1_new = c1_new-2*pi;
-%             end
+            if angle_0 >= pi
+                c1_new = c1_new-2*pi;
+            end
         %otherwise we do not need to include sigma_0_prime in the calculation
         else
             sigma_0 = del_Om_0(sigma_0_index);

@@ -3,7 +3,7 @@
 % comparing the previous minimum of r to the current point
 % This function assumes that for overlapping disks, c2 is calculated by 
 % 
-% [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, vorh, intersections)
+% [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, vorh)
 %  input, A, square matrix double
 %  input, del_Om, complex vector, the boundary of the spectral set
 %  input, del_Om_prime, complex double, the corresponding derivatives of del_Om. 

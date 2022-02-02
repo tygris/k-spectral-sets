@@ -17,7 +17,7 @@ delOm_prime = zeros(1,length(delOmvec));
 delOm_prime(ind_om1) = -1i*((delOmvec(ind_om1)-om)/abs(delOmvec(ind_om1(1))-om));
 delOm_prime(ind_nr) = nr_prime(indnrprime(1):indnrprime(2));
 disp("without intersections")
-tic, [c1] = calc_c1(delOmvec, delOm_prime), toc
+tic, [c1] = calc_c1_1(delOmvec, delOm_prime), toc
 
 %%I could turn the above into a function to work with define_del_Omega
 % A simple loop where I don't need to save the indices of om1 each time
@@ -31,7 +31,7 @@ ind_delOm = delomvec(2:end) - delomvec(1:end-1);
 intersections = find(ind_delOm == -1) +1;
 intersections = cat(2, intersections, find(ind_delOm == 1));
 disp("with intersections given")
-tic, [c1] = calc_c1(delOmvec, delOm_prime, intersections), toc
+tic, [c1] = calc_c1_1(delOmvec, delOm_prime, intersections), toc
 
 disp("By splitting the area into tens and iterating inwards without intersections")
 %editted into calc_c1_2 at the bottom of the script
@@ -77,20 +77,32 @@ delOm_prime(ind_om1) = -1i*((delOmvec(ind_om1)-omA(1))/abs(delOmvec(ind_om1(1))-
 delOm_prime(ind_om2) = -1i*((delOmvec(ind_om2)-omA(2))/abs(delOmvec(ind_om2(1))-omA(2)));
 delOm_prime(ind_nr) = [nr_prime(1:indnrprime(1)), nr_prime(indnrprime(2):indnrprime(3)), nr_prime(indnrprime(4):end)];
 disp("without intersections")
-tic, [c1] = calc_c1(delOmvec, delOm_prime), toc
+tic, [c1] = calc_c1_1(delOmvec, delOm_prime), toc
 
 disp("By splitting the area into tens and iterating inwards without intersections")
 %editted into calc_c1_2 at the bottom of the script
 tic, [c1] = calc_c1_2(delOmvec, delOm_prime), toc
 
 
+%% Test calc_k's use of the updated calc_c1 file
+A = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
+         0.95, -0.18,0,0,0,0;
+         0, 0.15, -0.2569,0,0,0;
+         0,0,0.100, -0.0138,0,0;
+         0,0,0.0019, 0.0002, -0.0124,0;
+         0,0,0,0.0001, 0.0028, -0.0049];
+[nr, nr_prime] = numerical_range(A, 20000);
+ind = (real(nr)<=0);
+[y1,y2] = nrCutOff(A, 0);
+Gam1 = linspace(y1, y2, 100);
+Gam1_prime = 1i*ones(1,100);
+delOm = cat(2, Gam1, nr(ind));
+delOm_prime = cat(2, Gam1_prime, nr_prime(ind));
 
+[k, c1, c2, cifG] = calc_k(A, delOm, delOm_prime, Gam1, Gam1_prime, 'v')
+cif = cifG + cauchyIntFormula(A, nr(ind))
 
-
-
-
-
-function c1 = calc_c1(delOm, delOm_prime, intersections, res)
+function c1 = calc_c1_1(delOm, delOm_prime, intersections, res)
     %parse the input variables
     if nargin < 4
         res = 32;
