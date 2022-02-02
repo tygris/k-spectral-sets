@@ -3,61 +3,63 @@
 %have a derivative, and also along interior boundaries rather than exterior
 %boundaries.
 %
-%[c1] = calc_c1(delOm, delOm_prime, intersections, res)
-% input, delOm, complex vector outlining the spectral set being considered
-% input, delOmprime, complex vector of corresponding derivatives at the
-%        point in delOm
-% input (opt), intersections, integer vector, list of indices of delOm
-%        corresponding to points on delOm nearest to those without a derivative
-% input (opt), resolution, integer, if passed determines the number of points 
-%        c1 is tested at while refining the search for the max; 
-%        default = 32
-% output, c1, the numerically estimated maximum of c1 based on the points
-%         given in delOm
+%[c1] = calc_c1(delOm, delOm_prime)
+% input, delOm, complex vector, contour of the boundary of the spectral set
+%        Omega.
+% input, delOmprime, complex vector, derivative of corresponding points of delOm.
+%
+% output, c1, double, the numerically estimated maximum of c1 based on the points
+%         given in delOm.
+%output, max_index, integer, the index of delOm where c1 was numerically
+%         maximized.
 %
 % Depends on:
 %    - find_c1
 %       -angle_stepper
 
 %Natalie Wellen
-%1/12/21
-%Could honestly use some optimization for the second part of the function
-function c1 = calc_c1(delOm, delOm_prime, intersections, res)
-    %parse the input variables
-    if nargin < 4
-        res = 32;
-    end
-    if nargin < 3
-        intersections = [];
-    end
+%2/01/22
+function [c1, max_index] = calc_c1(delOm, delOm_prime)
+    %set-up the variables needed in the loop
+    n = length(delOm);
+    res = 32; %number of points to check for max during each loop
+    where_my_nans_at = isnan(delOm); 
     
-    %choose the points to check first
-    checks = ceil(linspace(2, length(delOm), res));
-    checks = cat(2, intersections, checks);
+    list = 1:n; 
+    list = list(~where_my_nans_at); %the indices to check as sigma_0's
+    num_nans = sum(where_my_nans_at);
+    n = n-num_nans;
     max_index = 0;
     max_c1 = 0;
-    for jj = checks
-        c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
-        if c1_check > max_c1
-            max_c1 = c1_check; max_index = jj;
+    %loop through the list of potential sigma_0's refining the search each time
+    while n > res
+        checks = list(ceil(linspace(1, n, res)));
+        for jj = 1:res
+            c1_check = find_c1(checks(jj), angle(delOm_prime(checks(jj))), delOm);
+            if c1_check > max_c1
+                max_c1 = c1_check; max_index = checks(jj); loop = jj;
+            end
+        end
+        if loop == 1
+            list = checks(1)+1:checks(2)-1;
+            n = length(list);
+        elseif loop == res
+            list = checks(res-1)+1:checks(res)-1;
+            n = length(list);
+        else
+            list = checks(loop-1)+1:checks(loop+1)-1;
+            n = length(list);
         end
     end
-    
-    %Once we have the approximate location of the maximum we check
-    % 1. Is it an intersection point? if yes stop
-    % 2. If not then search all points along delOm in [checks-1, checks+1]
-    if ismember(max_index, intersections)
-        c1 = max_c1;
-    else
-        checks = sort(checks);
-        ii = find(max_index == checks);
-        for jj = checks(ii-1)+1:checks(ii+1)-1
+    %As the final step check all the indices around the max 
+    % between indices already checked
+    if n >= 1
+        for jj = list
             c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
             if c1_check > max_c1
                 max_c1 = c1_check; max_index = jj;
             end
         end
-        c1 = max_c1;
     end
     c1 = max_c1;
 end

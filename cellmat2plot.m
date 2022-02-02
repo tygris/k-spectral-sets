@@ -12,7 +12,7 @@
 % output, figure of del_Omega. Hold is on for the figure
 
 %Natalie Wellen
-%11/22/21
+%2/01/22
 
 function [plotter, del_om_vec] = cellmat2plot(delOm_ca, delom_ca, no_plot)
     [m,n] = size(delOm_ca);
@@ -41,18 +41,18 @@ function [plotter, del_om_vec] = cellmat2plot(delOm_ca, delom_ca, no_plot)
     for jj = 2:n
         foo = cell2mat(delOm_ca(1,jj));
         foo2 = cell2mat(delom_ca(1, jj));
-        plotter = cat(2, plotter, NaN);
+        plotter = cat(2, plotter, NaN+1i*NaN);
         plotter = cat(2, plotter, foo);
-        del_om_vec = cat(2, del_om_vec, NaN);
+        del_om_vec = cat(2, del_om_vec, NaN+1i*NaN);
         del_om_vec = cat(2, del_om_vec, foo2);
     end
     for ii = 2:m
         for jj = 1:n
             foo = cell2mat(delOm_ca(ii,jj));
             foo2 = cell2mat(delom_ca(ii, jj));
-            plotter = cat(2, plotter, NaN);
+            plotter = cat(2, plotter, NaN+1i*NaN);
             plotter = cat(2, plotter, foo);
-            del_om_vec = cat(2, del_om_vec, NaN);
+            del_om_vec = cat(2, del_om_vec, NaN+1i*NaN);
             del_om_vec = cat(2, del_om_vec, foo2);
         end
     end

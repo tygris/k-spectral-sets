@@ -1,249 +1,47 @@
-%File of different examples of how K-Spectral Sets can be used
+%Script used while testing different methods for optimizing calc_c1()
 
 %Natalie Wellen
-%1/25/21
+%2/01/22
 
-%% Example 1
-% Using the transient_demo() from Eigtool: https://www.cs.ox.ac.uk/pseudospectra/eigtool/
-
-A =  transient_demo(10);
-
-[k, cif] = contDS(A,2)
-
-
-%% Now we compare the value of the K to the corresponding pseudospectral
-%   bounds
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-% First very small dimension systems
-
-% for jj = 3:9
-%     A = transient_demo(jj);
-%     eigtool(A)
-% end
-%all of the relevant information is then exported and saved to td_39.mat
-load("td_39.mat")
-%
-dims = 4:9; dimlength = 6;
-Gam_tds = cell(1,dimlength); td_lbs = cell(1,dimlength); td_ups = zeros(1,dimlength);
-
-for jj = 1:dimlength
-    Gam_td = pe_contour(cell2mat(xtds(jj)),cell2mat(ytds(jj)),cell2mat(Ztds(jj)),cell2mat(powertds(jj)), 0);
-    td_lb = pseudo_lb(Gam_td, 'c');
-    td_up = exp(1)*dims(jj)*max(td_lb(2, :));
-    Gam_tds(jj) = {Gam_td};
-    td_lbs(jj) = {td_lb};
-    td_ups(jj) = td_up;
-end
-
-% Now find our upper bound on the matrix envelope
-td_ks = zeros(1,dimlength); td_cifs = zeros(1,dimlength); 
-td_c2s = zeros(1,dimlength);
-for jj = 1:dimlength
-    A = transient_demo(jj+3);
-    figure()
-    [k,cif,c2] = contDS(A,2);
-    td_ks(jj) = k;
-    td_cifs(jj) = cif;
-    td_c2s(jj) = c2;
-end
-
-td_ups
-td_ks
-td_cifs
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Then larger dense systems
-load("transientdem_dimex.mat")
-dims = 10:4:50; dimlength = length(dims);
-Gam_tdl = cell(1,dimlength); td_lbl = cell(1,dimlength); td_upl = zeros(1,dimlength);
-for jj = 1:dimlength
-    Gam_td = pe_contour(cell2mat(x_td(jj)),cell2mat(y_td(jj)),cell2mat(Z_td(jj)),cell2mat(powertd(jj)), 0);
-    td_lb = pseudo_lb(Gam_td, 'c');
-    td_up = exp(1)*dims(jj)*max(td_lb(2, :));
-    Gam_tdl(jj) = {Gam_td};
-    td_lbl(jj) = {td_lb};
-    td_upl(jj) = td_up;
-end
-
-% Now find our upper bound on the matrix envelope
-td_kl = zeros(1,dimlength); td_cifl = zeros(1,dimlength); td_c2l = zeros(1,dimlength);
-for jj = 1:dimlength
-    A = transient_demo(4*jj+6);
-    %calculate spectral set
-    [k, cif, c2] = contDS(A,4); 
-    td_kl(jj) = k;
-    td_cifl(jj) = cif;
-    td_c2l(jj) = c2;
-end
-    
-td_upl
-td_kl
-td_cifl
-
-figure()
-dims = [4:9, 10:4:50];
-opts = {'LineWidth', 2};
-semilogy(dims, [td_ups td_upl], 'DisplayName', 'Pseudospectral', opts{:})
-hold on
-plot(dims, [td_ks td_kl], 'DisplayName', 'K', opts{:})
-plot(dims, [td_cifs td_cifl], 'DisplayName', 'Resolvent Norm', opts{:})
-title('Transient Matrix Growth Bounds')
-xlabel('dim(A)')
-ylabel('Upper Bound')
-    
-    
-    
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-%% Using the contDS Function pass these matrices
-
+%Build a simple example
 A = [.5 -1; 1, -1.5];
-[kA, cifA] = contDS(A)
+[nr, nr_prime] = numerical_range(A, 20000);
+om = nr(1);
+[delOm, delom, inters, r1orr2] = define_del_Omega({nr}, {zeros(1,20001)}, A, om, 1000);
+[delOmvec, delomvec] = cellmat2plot(delOm, delom,1);
+%define delOm_prime
+indnrprime = find(ismember(nr,inters));
+ind_nr = find(delomvec == 0);
+ind_om1 = find(delomvec);
+delOm_prime = zeros(1,length(delOmvec));
+delOm_prime(ind_om1) = -1i*((delOmvec(ind_om1)-om)/abs(delOmvec(ind_om1(1))-om));
+delOm_prime(ind_nr) = nr_prime(indnrprime(1):indnrprime(2));
+disp("without intersections")
+tic, [c1] = calc_c1(delOmvec, delOm_prime), toc
 
-%C = [0 1 2; -0.01 0 3; 0 0 0];
-%[kC, cifC] = contDS(C)
-% C is a bad example for what we do because one of its eigenvalues = 0+0i
+%%I could turn the above into a function to work with define_del_Omega
+% A simple loop where I don't need to save the indices of om1 each time
+% will work. The only problem is how to split indnrprime if there are
+% unconnected curves that make up this part. I suppose that could be
+% another loop based on the length of ind_nr.
 
-T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
-         0.95, -0.18,0,0,0,0;
-         0, 0.15, -0.2569,0,0,0;
-         0,0,0.100, -0.0138,0,0;
-         0,0,0.0019, 0.0002, -0.0124,0;
-         0,0,0,0.0001, 0.0028, -0.0049]; %1986 Tuesday Lake
-[kT,cifT] = contDS(T)
+%define the intersection points on delOm
+%choose them to be the points on the numerical range (not on a removed disk)
+ind_delOm = delomvec(2:end) - delomvec(1:end-1);
+intersections = find(ind_delOm == -1) +1;
+intersections = cat(2, intersections, find(ind_delOm == 1));
+disp("with intersections given")
+tic, [c1] = calc_c1(delOmvec, delOm_prime, intersections), toc
 
-RF = zeros(9);
-RF(1,1) = -1.5622; RF(1,2) = .6685;
-RF(2,2) = -.7119; RF(2,5) = 2.5632;
-RF(3,1) = 1.4627; RF(3,2) = .0364; RF(3,3) = -6.4091; RF(3,6) = 1.1446; RF(3,8) = 55.8201;
-RF(3,9) = 17.2972;
-RF(4,4) = -.0222; RF(4,7) = 315.9443;
-RF(5,4) = .0201; RF(5,5) = -2.5632;
-RF(6,2) = .0070; RF(6,6) = -2.0348;
-RF(7,3) = 6.4091; RF(7,7) = -315.9443;
-RF(8,1) = .0995; RF(8,6) = .8902; RF(8,8) = -62.6458;
-RF(9,8) = 6.8257; RF(9,9) = -17.2972; %Panamanian Rainforest
-[kRF, cifRF] = contDS(RF)
-
-B = boeing_demo('S');
-[kB, cifB] = contDS(B,2)
-
-   
-
-
+disp("By splitting the area into tens and iterating inwards without intersections")
+%editted into calc_c1_2 at the bottom of the script
+tic, [c1] = calc_c1_2(delOmvec, delOm_prime), toc
 
 
+%% Now using a more complicated example:
+%%the block diagonal in two separate pieces with two disks removed
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%% Block Diagonal Matrix Example
-    
-b1 = 10;
-b2 = 10;
-%b3 = 2;
-res = 10000;
-A = [randn(b1)-5*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(10+5i)*eye(b2)];
-%A = [randn(b1), zeros(b1, b2+b3); zeros(b2, b1), randn(b2)+(10+5i)*eye(b2), zeros(b2, b3); zeros(b3, b1+b2), rand(b3)-(10-10*1i)*eye(b3)];
-
-
-figure()
-[nr, nr_prime] = numerical_range(A, res);
-plot(nr), hold on
-evs = eig(A);
-plot(evs, 'kx')
-plot(numerical_range(A(1:b1,1:b1), res))
-plot(numerical_range(A(b1+1:b1+b2,b1+1:b1+b2), res))
-%plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
-
-%% Remove disks from A
-[nr, nr_prime] = nrGapFill(nr, nr_prime);
-delOm = {nr};
-delom = {zeros(1,length(nr))};
-
-mat = A;
-res_num = 2000;
-
-[numRange, nr_prime] = numerical_range(mat,res_num);
-[numRange, nr_prime] = nrGapFill(numRange, nr_prime);
-figure()
-plot(numRange), daspect([1,1,1])
-
-
-% 2. The user is asked where they would like the center of removed disks to be
-
-Y = 'Y'; N = 'N';
-om = [];
-r_over_pi = [];
-xs = [];
-more = 'Y';
-del_Om = {numRange};
-del_om = {zeros(1,length(numRange))};
-moveon = 0;
-while more == 'Y'
-    om_new = input("Where would you like to remove a disk(s)?\n");
-    close
-    del_Om_vec = cellmat2plot(del_Om,1);
-    figure()
-    plot(real(del_Om_vec), imag(del_Om_vec))
-    daspect([1,1,1]);
-    hold on
-    plot(real(om_new), imag(om_new), 'mo');
-    moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
-    if moveon == 'Y'
-        close
-        [del_Om, del_om, xs_new, roverpi_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
-        om = cat(2, om, om_new);
-        r_over_pi = cat(2, r_over_pi, roverpi_new);
-        xs = cat(2, xs, xs_new);
-    end
-    more = input('Would you like to remove more disks? (Y/N)\n');
-    if more ~= 'Y'
-        if 'N' == input('Are you sure? (Y/N)\n')
-            more = input('Would you like to remove more disks? (Y/N)\n');
-        end
-    end
-end
-
-figure()
-plot(numRange, '--k'), hold on, axis equal
-plot(cellmat2plot(del_Om,1),'b')
-
-
-
-%%
-%Needs two disks removed.
-A1 =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e+00i	8.8840e-01 + 0.0000e+00i	-1.0224e-01 + 0.0000e+00i	-8.6365e-01 + 0.0000e+00i	-1.0891e+00 + 0.0000e+00i	-6.1560e-01 + 0.0000e+00i	1.4193e+00 + 0.0000e+00i	-1.1480e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
+A =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e+00i	8.8840e-01 + 0.0000e+00i	-1.0224e-01 + 0.0000e+00i	-8.6365e-01 + 0.0000e+00i	-1.0891e+00 + 0.0000e+00i	-6.1560e-01 + 0.0000e+00i	1.4193e+00 + 0.0000e+00i	-1.1480e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
 1.8339e+00 + 0.0000e+00i	-1.9651e+00 + 0.0000e+00i	-1.2075e+00 + 0.0000e+00i	-1.1471e+00 + 0.0000e+00i	-2.4145e-01 + 0.0000e+00i	7.7359e-02 + 0.0000e+00i	3.2557e-02 + 0.0000e+00i	7.4808e-01 + 0.0000e+00i	2.9158e-01 + 0.0000e+00i	1.0487e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
 -2.2588e+00 + 0.0000e+00i	7.2540e-01 + 0.0000e+00i	-4.2828e+00 + 0.0000e+00i	-1.0689e+00 + 0.0000e+00i	3.1921e-01 + 0.0000e+00i	-1.2141e+00 + 0.0000e+00i	5.5253e-01 + 0.0000e+00i	-1.9242e-01 + 0.0000e+00i	1.9781e-01 + 0.0000e+00i	7.2225e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
 8.6217e-01 + 0.0000e+00i	-6.3055e-02 + 0.0000e+00i	1.6302e+00 + 0.0000e+00i	-5.8095e+00 + 0.0000e+00i	3.1286e-01 + 0.0000e+00i	-1.1135e+00 + 0.0000e+00i	1.1006e+00 + 0.0000e+00i	8.8861e-01 + 0.0000e+00i	1.5877e+00 + 0.0000e+00i	2.5855e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
@@ -263,6 +61,129 @@ A1 =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	7.3936e-01 + 0.0000e+00i	-1.9609e+00 + 0.0000e+00i	-2.7787e-01 + 0.0000e+00i	1.1275e+00 + 0.0000e+00i	-5.3356e-01 + 0.0000e+00i	1.3514e+00 + 0.0000e+00i	-8.6547e-01 + 0.0000e+00i	1.0184e+01 + 5.0000e+00i	1.2607e+00 + 0.0000e+00i	4.6691e-01 + 0.0000e+00i;
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	1.7119e+00 + 0.0000e+00i	-1.9770e-01 + 0.0000e+00i	7.0154e-01 + 0.0000e+00i	3.5018e-01 + 0.0000e+00i	-2.0026e+00 + 0.0000e+00i	-2.2477e-01 + 0.0000e+00i	-1.7653e-01 + 0.0000e+00i	-4.7615e-01 + 0.0000e+00i	1.0660e+01 + 5.0000e+00i	-2.0971e-01 + 0.0000e+00i;
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	-1.9412e-01 + 0.0000e+00i	-1.2078e+00 + 0.0000e+00i	-2.0518e+00 + 0.0000e+00i	-2.9907e-01 + 0.0000e+00i	9.6423e-01 + 0.0000e+00i	-5.8903e-01 + 0.0000e+00i	7.9142e-01 + 0.0000e+00i	8.6202e-01 + 0.0000e+00i	-6.7866e-02 + 0.0000e+00i	1.0625e+01 + 5.0000e+00i];
-omA1 = [4+2i, 3+4i];
+omA = [4+2i, 3+4i];
 
-[numRange, numRangePrime] = numerical_range(A, 20001);
+[nr, nr_prime] = numerical_range(A, 20000);
+[nr, nr_prime] = nrGapFill(nr, nr_prime);
+[delOm, delom, inters, r1orr2] = define_del_Omega({nr}, {zeros(1,length(nr))}, A, omA, 1000);
+[delOmvec, delomvec] = cellmat2plot(delOm, delom,1);
+%define delOm_prime
+indnrprime = find(ismember(nr,inters));
+ind_nr = find(delomvec == 0);
+ind_om1 = find(delomvec == 1);
+ind_om2 = find(delomvec == 2);
+delOm_prime = zeros(1,length(delOmvec));
+delOm_prime(ind_om1) = -1i*((delOmvec(ind_om1)-omA(1))/abs(delOmvec(ind_om1(1))-omA(1)));
+delOm_prime(ind_om2) = -1i*((delOmvec(ind_om2)-omA(2))/abs(delOmvec(ind_om2(1))-omA(2)));
+delOm_prime(ind_nr) = [nr_prime(1:indnrprime(1)), nr_prime(indnrprime(2):indnrprime(3)), nr_prime(indnrprime(4):end)];
+disp("without intersections")
+tic, [c1] = calc_c1(delOmvec, delOm_prime), toc
+
+disp("By splitting the area into tens and iterating inwards without intersections")
+%editted into calc_c1_2 at the bottom of the script
+tic, [c1] = calc_c1_2(delOmvec, delOm_prime), toc
+
+
+
+
+
+
+
+
+function c1 = calc_c1(delOm, delOm_prime, intersections, res)
+    %parse the input variables
+    if nargin < 4
+        res = 32;
+    end
+    if nargin < 3
+        intersections = [];
+    end
+    
+    %choose the points to check first
+    checks = ceil(linspace(2, length(delOm), res));
+    checks = cat(2, intersections, checks);
+    max_index = 0;
+    max_c1 = 0;
+    for jj = checks
+        c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
+        if c1_check > max_c1
+            max_c1 = c1_check; max_index = jj;
+        end
+    end
+    
+    %Once we have the approximate location of the maximum we check
+    % 1. Is it an intersection point? if yes stop
+    % 2. If not then search all points along delOm in [checks-1, checks+1]
+    if ismember(max_index, intersections)
+        c1 = max_c1;
+    else
+        checks = sort(checks);
+        ii = find(max_index == checks);
+        if ii == 1
+            steps = cat(2, checks(end):length(delOm), 1:checks(2));
+        elseif ii == res
+            steps = checks(res-1):checks(res);
+        else
+            steps = checks(ii-1)+1:checks(ii+1)-1;
+        end
+        for jj = steps
+            c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
+            if c1_check > max_c1
+                max_c1 = c1_check; max_index = jj;
+            end
+        end
+        c1 = max_c1;
+    end
+    c1 = max_c1;
+    max_index
+end
+
+
+function c1 = calc_c1_2(delOm, delOm_prime)
+    %How to handle NaNs? Can I simply ignore it? dump them from the nr and
+    %move on? Best to just make sure that it isn't a jj I check. It is a
+    %useful part of what is in find_c1.
+    %each time through the loop the search is refined and res points are
+    %checked. We start with the entire delOm, and zoom in to the area
+    %surrounding the max checked point to start again.
+    n = length(delOm);
+    res = 32;
+    where_my_nans_at = isnan(delOm);
+    
+    list = 1:n;
+    list = list(~where_my_nans_at);
+    num_nans = sum(where_my_nans_at);
+    n = n-num_nans;
+    max_index = 0;
+    max_c1 = 0;
+    while n > res
+        checks = list(ceil(linspace(1, n, res)));
+        for jj = 1:res
+            c1_check = find_c1(checks(jj), angle(delOm_prime(checks(jj))), delOm);
+            if c1_check > max_c1
+                max_c1 = c1_check; max_index = checks(jj); loop = jj;
+            end
+        end
+        if loop == 1
+            list = checks(1)+1:checks(2)-1;
+            n = length(list);
+        elseif loop == res
+            list = checks(res-1)+1:checks(res)-1;
+            n = length(list);
+        else
+            list = checks(loop-1)+1:checks(loop+1)-1;
+            n = length(list);
+        end
+    end
+    
+    if n >= 1
+        for jj = list
+            c1_check = find_c1(jj, angle(delOm_prime(jj)), delOm);
+            if c1_check > max_c1
+                max_c1 = c1_check; max_index = jj;
+            end
+        end
+    end
+    c1 = max_c1;
+    max_index
+end

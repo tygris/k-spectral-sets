@@ -30,7 +30,8 @@ function [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
         %first check if sigma_0_prime is on this segment of del_Om_0
         if endps(jj) < sigma_0_index && sigma_0_index < endps(jj+1)
             %re-order the boundary to start and end at sigma_0
-            sigma_0 = del_Om(sigma_0_index);
+            sigma_0 = del_Om_0(sigma_0_index);
+            sigma_0_index = sigma_0_index - endps(jj);
             del_Om = [del_Om(sigma_0_index:end-1), del_Om(1:sigma_0_index)];   
             %calculate the change in angle of the interior points of del_Om
             angle_step = angle_stepper(del_Om(2:end-2)-sigma_0, del_Om(3:end-1) - sigma_0);
@@ -54,6 +55,7 @@ function [c1] = find_c1(sigma_0_index, sigma_0_prime, del_Om_0)
             end
         %otherwise we do not need to include sigma_0_prime in the calculation
         else
+            sigma_0 = del_Om_0(sigma_0_index);
             %calculate the change in angle of the all points on the curve
             angle_step = angle_stepper(del_Om(1:end-1)-sigma_0, del_Om(2:end) - sigma_0);
             %sum up all of the changes in angle to estimate c1
