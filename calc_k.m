@@ -13,9 +13,9 @@
 %         has equidistant points.
 %  input, Gam1_prime, complex double, the corresponding derivatives of Gam1
 %         with exactly the same lengthas Gam1.
-%  input (opt), vorh, character vector of 'v', 'h', or 'n'. The default is 'n'.
-%         'v' for vertical, 'h' for horizontal, and 'n' for neither to describe
-%         each connected curve of Gam1. 
+%  input (opt), vorh, character vector of 'v', 'h', 'd', or 'n'. The default is 'n'.
+%         'v' for vertical, 'h' for horizontal, 'd' for along the unit disk's edge, 
+%         and 'n' for none to describe each connected curve of Gam1. 
 %
 %  output, k, double, the spectral-set value
 %  output, c1, double, the value of the double potential kernel defining the 
@@ -54,6 +54,10 @@ function [k, c1, c2, cifG] = calc_k(A, del_Om, del_Om_prime, Gam1, Gam1_prime, v
         elseif vorh(ii) == 'h'
             [c2_hold, cifG_hold] = calc_c2_h(A, real(Gam1(breaks(ii)+1)), ...
                 real(Gam1(breaks(ii+1)-1)), imag(Gam1(breaks(ii)+1)));
+        elseif vorh(ii) == 'd'
+            angley = @(y) (y+2*pi).*(y<0)+y.*(y>=0);
+            [c2_hold, cifG_hold] = calc_c2_d(A, angley(Gam1(breaks(ii)+1)), ...
+                angley(Gam1(breaks(ii+1)-1))); 
         elseif vorh(ii) == 'n'
         [c2_hold, cifG_hold] = calc_c2_curve(A, Gam1(breaks(ii)+1:breaks(ii+1)-1),...
             Gam1_prime(breaks(ii)+1:breaks(ii+1)-1));

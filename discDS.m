@@ -12,11 +12,14 @@
 % output, c2, double
 % output, plot of numerical range overlayed by delOmega and ||exp(At)||
 %         bounded by K and the value of cif
-
-%uses inpolygon
+%
+%Depends on: -numerical_range
+%            -nrDiskOff
+%            -calc_c2_d
+%            -cauchyIntFormula
 
 %Natalie Wellen
-%2/02/22
+%2/03/22
 
 function [k,cif,c2] = discDS(A, timestretch)
     if nargin == 1
@@ -28,37 +31,44 @@ function [k,cif,c2] = discDS(A, timestretch)
     %Omega is the intersection of the unit disk and W(A)
     ind1 = abs(nr)<=1; %indices of the numerical range still part of delOm
     %find Gamma1 
-    [Gam1, ~] = nrDiskOff(nr,1); %I don't use the points nr intersects D 
-    Gam1_prime = 1i*Gam1; %counter-clockwise derivative of the unit disk
+    [Gam1, as] = nrDiskOff(nr,1); %I don't use the points nr intersects D 
+    %Gam1_prime = 1i*Gam1; %counter-clockwise derivative of the unit disk
     %calculate c2 and k
-    [c2, cifG] = calc_c2_curve(A, Gam1, Gam1_prime);
+    m = length(as);
+    c2 = 0; cifG = 0;
+    for jj = 1:2:m-1
+        [c2hold, cifGhold] = calc_c2_d(A, as(jj), as(jj+1));
+        c2 = c2+c2hold; cifG = cifG+cifGhold;
+    end
     k = c2 + sqrt(1+c2^2);
     %calculate the Cauchy Transform along delOmega
     cif = cauchyIntFormula(A, nr(ind1)) + cifG;
     
-%     %plot the numerical range, eigs, and delOmega
-%     opts= {'LineWidth',2};
-%     figure()
-%     subplot(2,2,2)
-%     plot(nr, '--k'), daspect([1,1,1]), hold on
-%     evs = eig(A); 
-%     plot(real(evs), imag(evs), 'kx');
-%     plot(Gam1, '-b', opts{:}), plot(nr(ind1), '-b', opts{:})
-%     title("Spectral Set and Eigenvalues")
-%     
-%     %plot ||A^k|| with K and cif upper bounds
-%     subplot(2,2,1)
-%     % calculate matrix envelope
-%     iterations = 500*time_stretch;
-%     meA = times_expm(A, timestep, iterations);
-%     tmax = iterations*timestep;
-%     t = 0:timestep:tmax;
-%     plot(t,meA, 'DisplayName', 'Matrix Envelope', opts{:}), hold on
-%     xlim([0,tmax])
-%     plot([0,tmax], [k,k], 'DisplayName', 'K', opts{:})
-%     plot([0,tmax], [cif, cif], 'DisplayName', 'Cauchy Transform', opts{:})
-%     %legend()
-%     
+    %plot the numerical range, eigs, and 
+    opts= {'LineWidth',2};
+    figure()
+    subplot(1,2,1)
+    plot(nr, '--k'), daspect([1,1,1]), hold on
+    evs = eig(A); 
+    plot(real(evs), imag(evs), 'kx');
+    %plot delOmega
+    nr_plot = nr;
+    nr_plot(~ind1) = NaN;
+    plot(Gam1, '-b', opts{:}), plot(nr_plot, '-b', opts{:})
+    title("Spectral Set and Eigenvalues")
+    
+    %plot ||A^k|| with K and cif upper bounds
+    subplot(1,2,2)
+    % calculate matrix envelope
+    iterations = 100*timestretch;
+    Aks = normAk(A, iterations);
+    t = 1:iterations;
+    plot(t,Aks, 'DisplayName', 'norm(A^k)', opts{:}), hold on
+    xlim([0,iterations])
+    plot([0,iterations], [k,k], 'DisplayName', 'K', opts{:})
+    plot([0,iterations], [cif, cif], 'DisplayName', 'Cauchy Transform', opts{:})
+    %legend()
+    
 %     % plot the resolvent norm and abs(min(eig(A)))
 %     n = 20001;
 %     m = length(A);
@@ -81,10 +91,13 @@ function [k,cif,c2] = discDS(A, timestretch)
 %     title("|lambdamin| on Imaginary Axis")
 end
 
-
-
-
-
-
-
-
+function [Aks] = normAk(A, iterations)
+    %define output vector
+    Aks = zeros(1,iterations);
+    Ak = A;
+    Aks(1) = norm(Ak, 2);
+    for jj = 2:iterations
+        Ak = Ak*A;
+        Aks(jj) = norm(Ak, 2);
+    end
+end

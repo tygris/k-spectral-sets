@@ -1,6 +1,5 @@
-% Function to calculate c2 along a segment of the imaginary axis.
+% Function to calculate c2 along a vertical line segment.
 % This function uses the built-in integral() to integrate.
-% integral() does not appear to work well for A singular (det(A)=0)
 %
 %[c2, cif] = calc_c2_v(A, y1, y2, xintercept)
 % input, A, n by n double
