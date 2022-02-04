@@ -10,6 +10,7 @@ A =  transient_demo(10);
 
 [k, cif] = contDS(A,2)
 
+[k, cif] = discDS(A, .75)
 
 %% Now we compare the value of the K to the corresponding pseudospectral
 %   bounds
@@ -90,7 +91,7 @@ plot(dims, [td_ks td_kl], 'DisplayName', 'K', opts{:})
 plot(dims, [td_cifs td_cifl], 'DisplayName', 'Resolvent Norm', opts{:})
 title('Transient Matrix Growth Bounds')
 xlabel('dim(A)')
-ylabel('Upper Bound')
+ylabel('Upper Bound of ||f(A)||')
     
     
     
@@ -100,9 +101,9 @@ ylabel('Upper Bound')
 A = [.5 -1; 1, -1.5];
 [kA, cifA] = contDS(A)
 
-%C = [0 1 2; -0.01 0 3; 0 0 0];
-%[kC, cifC] = contDS(C)
-% C is a bad example for what we do because one of its eigenvalues = 0+0i
+C = [0 1 2; -0.01 0 3; 0 0 0];
+[kC, cifC] = discDS(C)
+%C is a bad example for what we do because one of its eigenvalues = 0+0i
 
 T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
          0.95, -0.18,0,0,0,0;

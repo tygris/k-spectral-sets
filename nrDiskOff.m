@@ -25,9 +25,13 @@ function [Gam1, as] = nrDiskOff(nrA, absx)
     
     %for each pair of breaks, fill-in with elements of the disk
     Gam1 = [];
-    n = length(breaks);
     as = [];
     unitd = @(x) exp(1i*x);
+    n = length(breaks);
+    % Is Gam1 the entire unit circle, or connected segments of it?
+    if n == 0
+        Gam1 = unitd(linspace(0, 2*pi, 4000));
+    else
     %calculate the angle of intersection on [0, 2*pi]
     angley = @(y) (y+2*pi).*(y<0)+y.*(y>=0);
     ys = @(x1,x2) angley(angle(x1+(x2-x1)*(1 - abs(x1))/(abs(x2)-abs(x1))));
@@ -62,5 +66,6 @@ function [Gam1, as] = nrDiskOff(nrA, absx)
             Gam1 = cat(2, Gam1, NaN+1i*NaN, GamHold);            
             as = cat(2, as, y1, y2);
         end
+    end
     end
 end

@@ -75,5 +75,5 @@ function [k,cif,c2] = contDS(A, timestretch)
     subplot(2,2,4)
     semilogy(imag(Gam1), gammas, opts{:})
     ylim([min(gammas)/5, max(gammas)*1.5])
-    title("|lambdamin| on Imaginary Axis")
+    title("|\lambda_{min}| on the Imaginary Axis")
 end
