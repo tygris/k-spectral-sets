@@ -2,6 +2,7 @@
 % This function uses the built-in integral() to integrate.
 % integral() does not appear to work well for A singular (det(A)=0)
 %
+%[c2, cif] = calc_c2_v(A, y1, y2, xintercept)
 % input, A, n by n double
 % input, y1, double, the minimum imaginary value of Gam1 
 % input, y2, double, the maximum imaginary value of Gam1

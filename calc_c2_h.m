@@ -2,6 +2,7 @@
 % This function uses the built-in integral() to integrate.
 % integral() does not appear to work well for A singular (det(A)=0)
 %
+%[c2, cif] = calc_c2_h(A, y1, y2, yintercept)
 % input, A, n by n double
 % input, y1, the minimum real value of Gam1 on the real axis
 % input, y2, the maximum real value of Gam1 on the real axis

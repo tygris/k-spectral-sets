@@ -2,7 +2,7 @@
 % a continuous time dynamical system represented as a matrix
 %
 %[k,cif,c2] = contDS(A, timestretch)
-% input, A, the continuous time DS
+% input, A, n by n complex double, the continuous time DS
 % input (opt), timestretch, double, to shorten or widen the time steps and
 %              thus tmax for the second plot
 %
@@ -23,13 +23,8 @@ function [k,cif,c2] = contDS(A, timestretch)
     %calculate the numerical range and it's derivative
     [nr] = numerical_range(A,200000);
     %find Gamma1 and it's derivative
-    if det(A) == 0
-        [y1, y2] = nrCutOff(A, 10^-8);
-        [c2, cifG] = calc_c2_v(A, imag(y1), imag(y2), real(y1));
-    else
-        [y1, y2] = nrCutOff(A, 0);
-        [c2, cifG] = calc_c2_v(A, imag(y1), imag(y2));
-    end
+    [y1, y2] = nrCutOff(A, 0);
+    [c2, cifG] = calc_c2_v(A, imag(y1), imag(y2));
     %define delOmega and it's derivative
     ind1 = real(nr)<0;
     delOm = cat(2, [y1,y2], nr(ind1));

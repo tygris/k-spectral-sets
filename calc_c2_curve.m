@@ -5,13 +5,12 @@
 % possible, or to use Chebyshev like points that are denser near these 
 % singularities.
 %
-%[c2, cif, rnorms, gammas] = calc_c2(A, Gam1, Gam1_prime)
+%[c2, cif, rnorms, gammas] = calc_c2_curve(A, Gam1, Gam1_prime)
 %  input, A, n by n complex double 
 %  input, Gam1, complex double, the part of delOmega within W(A).
-%         Discontinues pieces are separated by a NaN. Each continuous piece
-%         has equidistant points.
+%         Discontinues pieces are separated by a NaN.
 %  input, Gam1_prime, complex double, the corresponding derivatives of Gam1
-%         with exactly the same lengthas Gam1.
+%         with exactly the same length as Gam1.
 %  
 %  output, c2, double, the value of c2 defining the k-spectral-set
 %  output, cif, double, the value of the cauchy integral formula along Gam1
