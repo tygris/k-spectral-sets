@@ -188,9 +188,9 @@ plot(numerical_range(A(b1+1:b1+b2,b1+1:b1+b2), res))
 %plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
 
 %% Remove disks from A
-[nr, nr_prime] = nrGapFill(nr, nr_prime);
-delOm = {nr};
-delom = {zeros(1,length(nr))};
+% [nr, nr_prime] = nrGapFill(nr, nr_prime);
+% delOm = {nr};
+% delom = {zeros(1,length(nr))};
 
 mat = A;
 res_num = 2000;
@@ -205,7 +205,7 @@ plot(numRange), daspect([1,1,1])
 
 Y = 'Y'; N = 'N';
 om = [];
-r_over_pi = [];
+r1orr2 = [];
 xs = [];
 more = 'Y';
 del_Om = {numRange};
@@ -223,9 +223,9 @@ while more == 'Y'
     moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
     if moveon == 'Y'
         close
-        [del_Om, del_om, xs_new, roverpi_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
+        [del_Om, del_om, xs_new, r1orr2_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
         om = cat(2, om, om_new);
-        r_over_pi = cat(2, r_over_pi, roverpi_new);
+        r1orr2 = cat(2, r1orr2, r1orr2_new);
         xs = cat(2, xs, xs_new);
     end
     more = input('Would you like to remove more disks? (Y/N)\n');
@@ -236,15 +236,49 @@ while more == 'Y'
     end
 end
 
+%define delOm
+[delOmvec, delomvec] = cellmat2plot(del_Om, del_om);
 figure()
 plot(numRange, '--k'), hold on, axis equal
-plot(cellmat2plot(del_Om,1),'b')
+plot(delOmvec,'b')
 
+%calculate K and the integral of the resolvent norm for A
+%define delOmPrime
+indBreaks = find(ismember(numRange,xs));
+delOm_prime = zeros(1, length(delOmvec));
+    %first along points of delOm that coincide with the numerical range
+primer = [];
+if ~delomvec(1) %false implies 1:indBreaks(1) is nr_prime
+    indBreaks = cat(2, 1, indBreaks, length(numRange));
+end
+for jj = 1:2:length(indBreaks)-1
+    primer = cat(2, primer, nr_prime(indBreaks(jj):indBreaks(jj+1)));
+end
+delOm_prime(delomvec == 0) = primer;
+    %then with points along boundaries of the removed disks
+for jj = 1:max(delomvec)
+    om_now = om(jj);
+    kk = find(delomvec == jj);
+    radius = abs(delOmvec(kk(1)) - om_now);
+    delOm_prime(kk) = -1i*((delOmvec(kk) - om_now)/radius);
+end
+% c1 is numerically estimated
+[c1] = calc_c1(delOmvec, delOm_prime);
+%We use Thoerem 2 to calculate a bound on c2
+c2 = 1+sum(r1orr2);
+k = c2+sqrt(c1+c2^2)
+indBreaks = find(isnan(delOmvec));
+indBreaks = cat(2, indBreaks, length(delOmvec)+1);
+cif = cauchyIntFormula(mat, delOmvec(1:indBreaks(1)-1));
+for jj = 2:length(indBreaks)
+    cif = cif + cauchyIntFormula(mat, delOmvec(indBreaks(jj-1)+1:indBreaks(jj)-1));
+end
+cif
 
 
 %%
 %Needs two disks removed.
-A1 =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e+00i	8.8840e-01 + 0.0000e+00i	-1.0224e-01 + 0.0000e+00i	-8.6365e-01 + 0.0000e+00i	-1.0891e+00 + 0.0000e+00i	-6.1560e-01 + 0.0000e+00i	1.4193e+00 + 0.0000e+00i	-1.1480e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
+A =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e+00i	8.8840e-01 + 0.0000e+00i	-1.0224e-01 + 0.0000e+00i	-8.6365e-01 + 0.0000e+00i	-1.0891e+00 + 0.0000e+00i	-6.1560e-01 + 0.0000e+00i	1.4193e+00 + 0.0000e+00i	-1.1480e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
 1.8339e+00 + 0.0000e+00i	-1.9651e+00 + 0.0000e+00i	-1.2075e+00 + 0.0000e+00i	-1.1471e+00 + 0.0000e+00i	-2.4145e-01 + 0.0000e+00i	7.7359e-02 + 0.0000e+00i	3.2557e-02 + 0.0000e+00i	7.4808e-01 + 0.0000e+00i	2.9158e-01 + 0.0000e+00i	1.0487e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
 -2.2588e+00 + 0.0000e+00i	7.2540e-01 + 0.0000e+00i	-4.2828e+00 + 0.0000e+00i	-1.0689e+00 + 0.0000e+00i	3.1921e-01 + 0.0000e+00i	-1.2141e+00 + 0.0000e+00i	5.5253e-01 + 0.0000e+00i	-1.9242e-01 + 0.0000e+00i	1.9781e-01 + 0.0000e+00i	7.2225e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
 8.6217e-01 + 0.0000e+00i	-6.3055e-02 + 0.0000e+00i	1.6302e+00 + 0.0000e+00i	-5.8095e+00 + 0.0000e+00i	3.1286e-01 + 0.0000e+00i	-1.1135e+00 + 0.0000e+00i	1.1006e+00 + 0.0000e+00i	8.8861e-01 + 0.0000e+00i	1.5877e+00 + 0.0000e+00i	2.5855e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
@@ -264,6 +298,4 @@ A1 =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	7.3936e-01 + 0.0000e+00i	-1.9609e+00 + 0.0000e+00i	-2.7787e-01 + 0.0000e+00i	1.1275e+00 + 0.0000e+00i	-5.3356e-01 + 0.0000e+00i	1.3514e+00 + 0.0000e+00i	-8.6547e-01 + 0.0000e+00i	1.0184e+01 + 5.0000e+00i	1.2607e+00 + 0.0000e+00i	4.6691e-01 + 0.0000e+00i;
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	1.7119e+00 + 0.0000e+00i	-1.9770e-01 + 0.0000e+00i	7.0154e-01 + 0.0000e+00i	3.5018e-01 + 0.0000e+00i	-2.0026e+00 + 0.0000e+00i	-2.2477e-01 + 0.0000e+00i	-1.7653e-01 + 0.0000e+00i	-4.7615e-01 + 0.0000e+00i	1.0660e+01 + 5.0000e+00i	-2.0971e-01 + 0.0000e+00i;
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	-1.9412e-01 + 0.0000e+00i	-1.2078e+00 + 0.0000e+00i	-2.0518e+00 + 0.0000e+00i	-2.9907e-01 + 0.0000e+00i	9.6423e-01 + 0.0000e+00i	-5.8903e-01 + 0.0000e+00i	7.9142e-01 + 0.0000e+00i	8.6202e-01 + 0.0000e+00i	-6.7866e-02 + 0.0000e+00i	1.0625e+01 + 5.0000e+00i];
-omA1 = [4+2i, 3+4i];
-
-[numRange, numRangePrime] = numerical_range(A, 20001);
+omA = [4+2i, 3+4i];

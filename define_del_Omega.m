@@ -1,7 +1,7 @@
 %Function to remove disks from a complex set and define del_Omega as the
 % resulting set.
 %
-%[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, 
+%[del_Omega, del_omega, intersections, radii, r_over_pi] = define_del_Omega(del_Omega_0, 
 %                                                    del_omega_0, A, om, res, radius)
 %  input, del_Omega_0, cell array of complex vectors, the original boundary 
 %       we are removing disks from. The first element of each cell needs to 
@@ -33,11 +33,12 @@
 %        input om
 %       -if the disk removed is an annulus without intersections, then the
 %        corresponding column comntains NaNs
-%  output, r_over_pi, binary vector, 1 means the min ev >= -R/pi, 0 means min
+%  output, r1orr2, vector of 1's and 2's, 1 means the radius is less than the
+%       resolvent norm, 2 means min
 %       ev >= -R/(2*pi). In the same order as om.
 %
 % 1/24: A single annulus curve cannot be split into two (but the outer
-%       boundary can
+%       boundary can)
 % Depends on:
 %   - cellmat2plot
 %   - remove_circle
@@ -47,9 +48,9 @@
 %       - inter_clean
 
 %Natalie Wellen
-%11/18/21
+%02/04/22
 
-function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
+function [del_Omega, del_omega, intersections, r1orr2] = define_del_Omega(del_Omega_0, del_omega_0, A, om, res, radius)
     %Check that A is square
     [m,n] = size(A);
     assert(n==m,"A must be square")
@@ -77,7 +78,7 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
     
    % define a for loop to remove all of the input circles.
     num_remove = length(om);
-    r_over_pi = -1*ones(1,num_remove);
+    r1orr2 = -1*ones(1,num_remove);
     intersections = [];
     %del_omega_plot = ;
     count_removed = max(cellmat2plot(del_omega_0,1)); %the number of disks already removed
@@ -85,9 +86,9 @@ function [del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del
         count_removed = count_removed +1; %the number of the disks removed after this loop
         %If the radius is not given as an input, call remove_circ without it
         if ~exist('radius', 'var')
-            [del_Omega_jj, r_over_pi(jj)] = remove_circ(A, om(jj), res);
+            [del_Omega_jj, r1orr2(jj)] = remove_circ(A, om(jj), res);
         else
-            [del_Omega_jj, r_over_pi(jj)] = remove_circ(A, om(jj), res, radius(jj));
+            [del_Omega_jj, r1orr2(jj)] = remove_circ(A, om(jj), res, radius(jj));
         end
         %define the new vector to update del_omega with
         del_omega_jj = count_removed*ones(1,length(del_Omega_jj));

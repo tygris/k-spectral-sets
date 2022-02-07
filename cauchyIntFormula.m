@@ -22,7 +22,7 @@ function cif = cauchyIntFormula(A, Gam1)
     cauchy = zeros(1, n);
     m = length(A);
     for jj = 1:n
-        A_shift_inv = inv(A-Gam1(jj)*eye(m));
+        A_shift_inv = inv(Gam1(jj)*eye(m)-A);
         cauchy(jj) = norm(A_shift_inv);
     end
     %figure()
