@@ -57,7 +57,7 @@ function [plotter, del_om_vec] = cellmat2plot(delOm_ca, delom_ca, no_plot)
         end
     end
     if no_plot ~= 1
-        figure()
+        %figure()
         plot(real(plotter), imag(plotter), 'b-')
         daspect([1,1,1])
         hold on

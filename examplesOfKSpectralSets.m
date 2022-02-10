@@ -242,5 +242,18 @@ omA = [4+1.5i, 3+4i]; omA2 = [4+2i, 3+4i];
 % Then the cif has a closed form analytic expression, but Omega is no
 % longer convex.
 
-A = [0 1 2; -0.01 0 3; 0 0 0];
-B = [-5 4 4; 0 -2-2i 4; 0 0 -0.3+1i];
+A = [0 1 2; -0.01 0 3; 0 0 0]; %eps = 10^-3.9
+% opts.levels = [-4]; opts.ax = [-0.03 0.03 -0.12 0.12]; opts.npts = 300;
+% eigtool(A, opts)
+% GamA = pe_contour(xA, yA, ZA, 10.^[-4, -4], 1);
+% delOmA = GamA(2:2:end);
+% delOmA = cellmat2plot(delOmA,1);
+B = [-5 4 4; 0 -2-2i 4; 0 0 -0.3+1i]; %eps = 10^-0.35
+% opts.levels = [-0.35]; opts.ax = [-5.7, 0.6 -2.9 1.9]; opts.npts = 300;
+% eigtool(B, opts)
+% GamB = pe_contour(xB, yB, ZB, 10.^[-0.35, -0.35], 1);
+% delOmB = GamB(2:2:end);
+% delOmB = cellmat2plot(delOmB,1);
+% save('psOmegas.mat', 'delOmB', 'delOmA')
+
+load('psOmegas.mat')
