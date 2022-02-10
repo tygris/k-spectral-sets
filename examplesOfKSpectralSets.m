@@ -1,7 +1,7 @@
 %File of different examples of how K-Spectral Sets can be used
 
 %Natalie Wellen
-%1/25/21
+%2/09/22
 
 %% Example 1
 % Using the transient_demo() from Eigtool: https://www.cs.ox.ac.uk/pseudospectra/eigtool/
@@ -170,110 +170,26 @@ B = boeing_demo('S');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Block Diagonal Matrix Example
     
-b1 = 10;
-b2 = 10;
-%b3 = 2;
+b1 = 50;
+b2 = 50;
+b3 = 20;
 res = 10000;
-A = [randn(b1)-5*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(10+5i)*eye(b2)];
-%A = [randn(b1), zeros(b1, b2+b3); zeros(b2, b1), randn(b2)+(10+5i)*eye(b2), zeros(b2, b3); zeros(b3, b1+b2), rand(b3)-(10-10*1i)*eye(b3)];
+A = [randn(b1)-(b1+(b1/2)*1i)*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(b2+(b2/2)*1i)*eye(b2)];
+%A = [randn(b1)-20*eye(b1), zeros(b1, b2+b3); zeros(b2, b1), randn(b2), zeros(b2, b3); zeros(b3, b1+b2), rand(b3)+20*eye(b3)];
 
 
 figure()
 [nr, nr_prime] = numerical_range(A, res);
-plot(nr), hold on
+plot(nr), hold on, axis equal
 evs = eig(A);
 plot(evs, 'kx')
 plot(numerical_range(A(1:b1,1:b1), res))
 plot(numerical_range(A(b1+1:b1+b2,b1+1:b1+b2), res))
 %plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
 
-%% Remove disks from A
-% [nr, nr_prime] = nrGapFill(nr, nr_prime);
-% delOm = {nr};
-% delom = {zeros(1,length(nr))};
-
-mat = A;
-res_num = 2000;
-
-[numRange, nr_prime] = numerical_range(mat,res_num);
-[numRange, nr_prime] = nrGapFill(numRange, nr_prime);
-figure()
-plot(numRange), daspect([1,1,1])
-
-
-% 2. The user is asked where they would like the center of removed disks to be
-
-Y = 'Y'; N = 'N';
-om = [];
-r1orr2 = [];
-xs = [];
-more = 'Y';
-del_Om = {numRange};
-del_om = {zeros(1,length(numRange))};
-moveon = 0;
-while more == 'Y'
-    om_new = input("Where would you like to remove a disk(s)?\n");
-    close
-    del_Om_vec = cellmat2plot(del_Om,1);
-    figure()
-    plot(real(del_Om_vec), imag(del_Om_vec))
-    daspect([1,1,1]);
-    hold on
-    plot(real(om_new), imag(om_new), 'mo');
-    moveon = input('Is this where you would like to remove the disk? (Y/N)\n');
-    if moveon == 'Y'
-        close
-        [del_Om, del_om, xs_new, r1orr2_new] = define_del_Omega(del_Om, del_om, mat, om_new, res_num);
-        om = cat(2, om, om_new);
-        r1orr2 = cat(2, r1orr2, r1orr2_new);
-        xs = cat(2, xs, xs_new);
-    end
-    more = input('Would you like to remove more disks? (Y/N)\n');
-    if more ~= 'Y'
-        if 'N' == input('Are you sure? (Y/N)\n')
-            more = input('Would you like to remove more disks? (Y/N)\n');
-        end
-    end
-end
-
-%define delOm
-[delOmvec, delomvec] = cellmat2plot(del_Om, del_om);
-figure()
-plot(numRange, '--k'), hold on, axis equal
-plot(delOmvec,'b')
-
-%calculate K and the integral of the resolvent norm for A
-%define delOmPrime
-indBreaks = find(ismember(numRange,xs));
-delOm_prime = zeros(1, length(delOmvec));
-    %first along points of delOm that coincide with the numerical range
-primer = [];
-if ~delomvec(1) %false implies 1:indBreaks(1) is nr_prime
-    indBreaks = cat(2, 1, indBreaks, length(numRange));
-end
-for jj = 1:2:length(indBreaks)-1
-    primer = cat(2, primer, nr_prime(indBreaks(jj):indBreaks(jj+1)));
-end
-delOm_prime(delomvec == 0) = primer;
-    %then with points along boundaries of the removed disks
-for jj = 1:max(delomvec)
-    om_now = om(jj);
-    kk = find(delomvec == jj);
-    radius = abs(delOmvec(kk(1)) - om_now);
-    delOm_prime(kk) = -1i*((delOmvec(kk) - om_now)/radius);
-end
-% c1 is numerically estimated
-[c1] = calc_c1(delOmvec, delOm_prime);
-%We use Thoerem 2 to calculate a bound on c2
-c2 = 1+sum(r1orr2);
-k = c2+sqrt(c1+c2^2)
-indBreaks = find(isnan(delOmvec));
-indBreaks = cat(2, indBreaks, length(delOmvec)+1);
-cif = cauchyIntFormula(mat, delOmvec(1:indBreaks(1)-1));
-for jj = 2:length(indBreaks)
-    cif = cif + cauchyIntFormula(mat, delOmvec(indBreaks(jj-1)+1:indBreaks(jj)-1));
-end
-cif
+pause
+[k, cif, delOm, delOm_prime] = removeDisks(A);
+k, cif
 
 
 %%
@@ -298,4 +214,33 @@ A =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e+
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	7.3936e-01 + 0.0000e+00i	-1.9609e+00 + 0.0000e+00i	-2.7787e-01 + 0.0000e+00i	1.1275e+00 + 0.0000e+00i	-5.3356e-01 + 0.0000e+00i	1.3514e+00 + 0.0000e+00i	-8.6547e-01 + 0.0000e+00i	1.0184e+01 + 5.0000e+00i	1.2607e+00 + 0.0000e+00i	4.6691e-01 + 0.0000e+00i;
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	1.7119e+00 + 0.0000e+00i	-1.9770e-01 + 0.0000e+00i	7.0154e-01 + 0.0000e+00i	3.5018e-01 + 0.0000e+00i	-2.0026e+00 + 0.0000e+00i	-2.2477e-01 + 0.0000e+00i	-1.7653e-01 + 0.0000e+00i	-4.7615e-01 + 0.0000e+00i	1.0660e+01 + 5.0000e+00i	-2.0971e-01 + 0.0000e+00i;
 0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	-1.9412e-01 + 0.0000e+00i	-1.2078e+00 + 0.0000e+00i	-2.0518e+00 + 0.0000e+00i	-2.9907e-01 + 0.0000e+00i	9.6423e-01 + 0.0000e+00i	-5.8903e-01 + 0.0000e+00i	7.9142e-01 + 0.0000e+00i	8.6202e-01 + 0.0000e+00i	-6.7866e-02 + 0.0000e+00i	1.0625e+01 + 5.0000e+00i];
-omA = [4+2i, 3+4i];
+omA = [4+1.5i, 3+4i]; omA2 = [4+2i, 3+4i];
+
+[k, cif] = removeDisks(A)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Pseudospectral Example
+
+%The goal is to use the epsilon pseudospectra to define Omega for a matrix.
+% Then the cif has a closed form analytic expression, but Omega is no
+% longer convex.
+
+A = [0 1 2; -0.01 0 3; 0 0 0];
+B = [-5 4 4; 0 -2-2i 4; 0 0 -0.3+1i];
