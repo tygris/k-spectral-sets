@@ -14,32 +14,41 @@
 %         passed as input to the function. 
 
 %Natalie Wellen
-%1/05/22
+%2/10/22
 
-function [correct, correct2] = delOmega_flipper(del_Omega, del_omega, direction)
+function [correct, correct2] = delOmega_flipper(delOm, delom, direction)
     if nargin == 2
-        direction = del_omega;
-        del_omega = ones(1, length(del_Omega));
+        direction = delom;
+        delom = ones(1, length(delOm));
     end
     assert(ismember(direction, [1,0]),...
         "Error: Direction must equal 0 or 1")
-    %find the location of the abscissa, often in the first entry
-    ii = find(real(del_Omega)==max(real(del_Omega)), 1, 'first'); 
-    if direction == 1
-        if (imag(del_Omega(ii)) - imag(del_Omega(ii+1))) > 0
-            correct = flip(del_Omega);
-            correct2 = flip(del_omega);
+    %for each connected line segment
+    breaks = find(isnan(delOm));
+    breaks = cat(2, 0, breaks, length(delOm)+1);
+    correct = []; correct2 = [];
+    for kk = 2: length(breaks)
+        del_Omega = delOm(breaks(kk-1)+1:breaks(kk)-1);
+        del_omega = delom(breaks(kk-1)+1:breaks(kk)-1);
+        %find the location of the abscissa
+        ii = find(real(del_Omega)==max(real(del_Omega)), 1, 'first'); 
+        if direction == 1
+            if (imag(del_Omega(ii)) - imag(del_Omega(ii+1))) > 0
+                correct = cat(2, correct, flip(del_Omega), nan+1i*nan);
+                correct2 = cat(2, correct2, flip(del_omega), nan+1i*nan);
+            else
+                correct = cat(2, correct, del_Omega, nan+1i*nan);
+                correct2 = cat(2, correct2, del_omega, nan+1i*nan);
+            end
         else
-            correct = del_Omega;
-            correct2 = del_omega;
-        end
-    else
-        if (imag(del_Omega(ii)) - imag(del_Omega(ii+1))) < 0
-            correct = flip(del_Omega);
-            correct2 = flip(del_omega);
-        else
-            correct = del_Omega;
-            correct2 = del_omega;
+            if (imag(del_Omega(ii)) - imag(del_Omega(ii+1))) < 0
+                correct = cat(2, correct, flip(del_Omega), nan+1i*nan);
+                correct2 = cat(2, correct2, flip(del_omega), nan+1i*nan);
+            else
+                correct = cat(2, correct, del_Omega, nan+1i*nan);
+                correct2 = cat(2, correct2, del_omega, nan+1i*nan);
+            end
         end
     end
+    correct = correct(1:end-1); correct2 = correct2(1:end-1);
 end

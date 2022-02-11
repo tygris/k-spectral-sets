@@ -242,18 +242,58 @@ omA = [4+1.5i, 3+4i]; omA2 = [4+2i, 3+4i];
 % Then the cif has a closed form analytic expression, but Omega is no
 % longer convex.
 
-A = [0 1 2; -0.01 0 3; 0 0 0]; %eps = 10^-3.9
-% opts.levels = [-4]; opts.ax = [-0.03 0.03 -0.12 0.12]; opts.npts = 300;
+A = [0 1 2; -0.01 0 3; 0 0 0]; %eps = 10^-4
+% opts.levels = [-4]; opts.ax = [-0.03 0.03 -0.12 0.12]; opts.npts = 1000;
 % eigtool(A, opts)
 % GamA = pe_contour(xA, yA, ZA, 10.^[-4, -4], 1);
 % delOmA = GamA(2:2:end);
 % delOmA = cellmat2plot(delOmA,1);
+% delOmA = delOmega_flipper(delOmA,1);
 B = [-5 4 4; 0 -2-2i 4; 0 0 -0.3+1i]; %eps = 10^-0.35
-% opts.levels = [-0.35]; opts.ax = [-5.7, 0.6 -2.9 1.9]; opts.npts = 300;
+% opts.levels = [-0.35]; opts.ax = [-5.7, 0.6 -2.9 1.9]; opts.npts = 1000;
 % eigtool(B, opts)
 % GamB = pe_contour(xB, yB, ZB, 10.^[-0.35, -0.35], 1);
 % delOmB = GamB(2:2:end);
 % delOmB = cellmat2plot(delOmB,1);
-% save('psOmegas.mat', 'delOmB', 'delOmA')
+% delOmB = delOmega_flipper(delOmB, 1);
+% 
+% delOmAP = delOmprime2(delOmA);
+% delOmBP = delOmprime2(delOmB);
+% save('psOmegas.mat', 'delOmB', 'delOmA', 'delOmAP', 'delOmBP')
 
 load('psOmegas.mat')
+
+% For matrix A and Omega equal to the 10^-3.9 pseudospectral set find
+% K
+c1A = calc_c1(delOmA, delOmAP);
+breaks = find(isnan(delOmA));
+c2A = calc_c2_curve(A, delOmA(1:breaks(1)-1), delOmAP(1:breaks(1)-1))+...
+    calc_c2_curve(A, delOmA(breaks(1)+1:breaks(2)-1), delOmAP(breaks(1)+1:breaks(2)-1))+...
+    calc_c2_curve(A, delOmA(breaks(2)+1:end), delOmAP(breaks(2)+1:end));
+kA = c2A + sqrt(c1A + c2A^2)
+% the integral of the resolvent norm
+cifA = cauchyIntFormula(A, delOmA(1:breaks(1)-1))+...
+    cauchyIntFormula(A, delOmA(breaks(1)+1:breaks(2)-1))+...
+    cauchyIntFormula(A, delOmA(breaks(2)+1:end))
+%analytic formula for the integral of the resolvent norm 
+L = cat(2, [delOmA(2:breaks(1)-1), delOmA(1)] - delOmA(1:breaks(1)-1),...
+    [delOmA(breaks(1)+2:breaks(2)-1), delOmA(breaks(1)+1)]-delOmA(breaks(1)+1:breaks(2)-1), ...
+    [delOmA(breaks(2)+2:end), delOmA(breaks(2)+1)]-delOmA(breaks(2)+1:end));
+L = sum(abs(L));
+cifAexact = L/(2*pi)*10^4
+
+% For matrix B and Omega equal to the 10^-0.35 pseudospectral set find
+% K
+c1B = calc_c1(delOmB, delOmBP);
+breaks = find(isnan(delOmB));
+c2B = calc_c2_curve(B, delOmB(1:breaks(1)-1), delOmBP(1:breaks(1)-1))+...
+    calc_c2_curve(B, delOmB(breaks(1)+1:end), delOmBP(breaks(1)+1:end));
+kB = c2B + sqrt(c1B + c2B^2)
+% the integral of the resolvent norm
+cifB = cauchyIntFormula(B, delOmB(1:breaks(1)-1))+...
+    cauchyIntFormula(B, delOmB(breaks(1)+1:end))
+%analytic formula for the integral of the resolvent norm 
+L = cat(2, [delOmB(2:breaks(1)-1), delOmB(1)] - delOmB(1:breaks(1)-1),...
+    [delOmB(breaks(1)+2:end), delOmB(breaks(1)+1)]-delOmB(breaks(1)+1:end));
+L = sum(abs(L));
+cifBexact = L/(2*pi)*10^0.35;
