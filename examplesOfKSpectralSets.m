@@ -297,3 +297,62 @@ L = cat(2, [delOmB(2:breaks(1)-1), delOmB(1)] - delOmB(1:breaks(1)-1),...
     [delOmB(breaks(1)+2:end), delOmB(breaks(1)+1)]-delOmB(breaks(1)+1:end));
 L = sum(abs(L));
 cifBexact = L/(2*pi)*10^0.35;
+
+
+%% Tuesday Lake with different types of Omega sets
+
+T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
+         0.95, -0.18,0,0,0,0;
+         0, 0.15, -0.2569,0,0,0;
+         0,0,0.100, -0.0138,0,0;
+         0,0,0.0019, 0.0002, -0.0124,0;
+         0,0,0,0.0001, 0.0028, -0.0049]; %1986 Tuesday Lake
+[kT,cifT] = contDS(T)
+
+opts.levels = [-1.1, -1.3] ; opts.ax = [-1.06 0.08 -0.14 0.14] ; opts.npts = 1000;
+eigtool(T, opts)
+% export the pseudospectral data from eigtool
+GamT1 = pe_contour(xT, yT, ZT, 10.^[-1.1, -1.1], 1);
+GamT3 = pe_contour(xT, yT, ZT, 10.^[-1.3, -1.3], 1);
+delOmT1 = GamT1(2:2:end);
+delOmT1 = cellmat2plot(delOmT1, 1);
+delOmT1 = delOmega_flipper(delOmT1,1);
+delOmT1_prime = delOmprime2(delOmT1);
+delOmT3 = GamT3(2:2:end);
+delOmT3 = cellmat2plot(delOmT3, 1);
+delOmT3 = delOmega_flipper(delOmT3,1);
+delOmT3_prime = delOmprime2(delOmT3);
+
+
+c1T1 = calc_c1(delOmT1, delOmT1_prime);
+breaks = find(isnan(delOmT1));
+%technically this set does extend past nrT, so this is a overestimation of c2
+c2T1 = calc_c2_curve(T, delOmT1(1:breaks(1)-1), delOmT1_prime(1:breaks(1)-1))+...
+    calc_c2_curve(T, delOmT1(breaks(1)+1:end), delOmT1_prime(breaks(1)+1:end));
+kT1 = c2T1 + sqrt(c1T1 + c2T1^2)
+% the integral of the resolvent norm
+cifT1 = cauchyIntFormula(T, delOmT1(1:breaks(1)-1))+...
+    cauchyIntFormula(T, delOmT1(breaks(1)+1:end))
+%analytic formula for the integral of the resolvent norm 
+L = cat(2, [delOmT1(2:breaks(1)-1), delOmT1(1)] - delOmT1(1:breaks(1)-1),...
+    [delOmT1(breaks(1)+2:end), delOmT1(breaks(1)+1)]-delOmT1(breaks(1)+1:end));
+L = sum(abs(L));
+cifT1exact = L/(2*pi)*10^1.1
+
+
+c1T3 = calc_c1(delOmT3, delOmT3_prime);
+breaks = find(isnan(delOmT3));
+c2T3 = calc_c2_curve(T, delOmT3(1:breaks(1)-1), delOmT3_prime(1:breaks(1)-1))+...
+    calc_c2_curve(T, delOmT3(breaks(1)+1:breaks(2)-1), delOmT3_prime(breaks(1)+1:breaks(2)-1))+...
+    calc_c2_curve(T, delOmT3(breaks(2)+1:end), delOmT3_prime(breaks(2)+1:end));
+kT3 = c2T3 + sqrt(c1T3 + c2T3^2)
+% the integral of the resolvent norm
+cifT3 = cauchyIntFormula(T, delOmT3(1:breaks(1)-1))+...
+    cauchyIntFormula(T, delOmT3(breaks(1)+1:breaks(2)-1))+...
+    cauchyIntFormula(T, delOmT3(breaks(2)+1:end))
+%analytic formula for the integral of the resolvent norm 
+L = cat(2, [delOmT3(2:breaks(1)-1), delOmT3(1)] - delOmT3(1:breaks(1)-1),...
+    [delOmT3(breaks(1)+2:breaks(2)-1), delOmT3(breaks(1)+1)]-delOmT3(breaks(1)+1:breaks(2)-1), ...
+    [delOmT3(breaks(2)+2:end), delOmT3(breaks(2)+1)]-delOmT3(breaks(2)+1:end));
+L = sum(abs(L));
+cifT3exact = L/(2*pi)*10^1.3
