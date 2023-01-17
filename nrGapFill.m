@@ -13,14 +13,20 @@
 %        derivatives of nr
 
 %Natalie Wellen
-%1/21/22
+%7/13/22
 
 function [nr_new, nr_prime_new] = nrGapFill(nr,nr_prime)
+    %Define outputs 
+    nr_new = nr;
+    nr_prime_new = nr_prime;
+    %calculate maximum step sixe
     gaps = abs(nr(2:end) - nr(1:end-1));
     step = min(gaps(1),gaps(2));
+%    step = min(gaps);
     [mgap,mgi] = max(gaps);
-    while mgap > 100*step
-        npts = ceil(mgap/(10*step));
+    %fill in the for gaps larger than maximum iteratively
+    while mgap > 10*step
+        npts = ceil(mgap/(step));
         nr_new = [nr(1:mgi-1), linspace(nr(mgi), nr(mgi+1),npts),nr(mgi+2:end)];
         prime = (nr(mgi+1) - nr(mgi))/abs(nr(mgi+1) - nr(mgi));
         nr_prime_new = [nr_prime(1:mgi-1), prime*ones(1,npts),nr_prime(mgi+2:end)];

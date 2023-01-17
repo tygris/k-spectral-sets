@@ -1,7 +1,7 @@
 %Function to remove disks from a complex set and define del_Omega as the
 % resulting set.
 %
-%[del_Omega, del_omega, intersections, radii, r_over_pi] = define_del_Omega(del_Omega_0, 
+%[del_Omega, del_omega, intersections, r_over_pi] = define_del_Omega(del_Omega_0, 
 %                                                    del_omega_0, A, om, res, radius)
 %  input, del_Omega_0, cell array of complex vectors, the original boundary 
 %       we are removing disks from. The first element of each cell needs to 

@@ -1,7 +1,7 @@
 %File of different examples of how K-Spectral Sets can be used
 
 %Natalie Wellen
-%2/09/22
+%6/13/22
 
 %% Example 1
 % Using the transient_demo() from Eigtool: https://www.cs.ox.ac.uk/pseudospectra/eigtool/
@@ -10,7 +10,15 @@ A =  transient_demo(10);
 
 [k, cif] = contDS(A,2)
 
-[k, cif] = discDS(A, .75)
+[k, cif] = discDS(A, .75) %ylim([1, 12])
+
+%% Explore different sets for calculating the integral of the resolvent norm
+
+cif_i = cauchyIntFormula(A, 1i*(-10000:0.01:10000))
+
+DU = @(x,r) r*exp(1i*x);
+unitD = DU(0:0.01:2*pi,1);
+cif_ud = cauchyIntFormula(A, unitD)
 
 %% Now we compare the value of the K to the corresponding pseudospectral
 %   bounds
@@ -42,7 +50,6 @@ td_ks = zeros(1,dimlength); td_cifs = zeros(1,dimlength);
 td_c2s = zeros(1,dimlength);
 for jj = 1:dimlength
     A = transient_demo(jj+3);
-    figure()
     [k,cif,c2] = contDS(A,2);
     td_ks(jj) = k;
     td_cifs(jj) = cif;
@@ -55,8 +62,9 @@ td_cifs
 
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Then larger dense systems
-load("transientdem_dimex.mat")
-dims = 10:4:50; dimlength = length(dims);
+ load("transientdem_dimex.mat")
+ dims = 10:4:50; 
+ dimlength = length(dims);
 Gam_tdl = cell(1,dimlength); td_lbl = cell(1,dimlength); td_upl = zeros(1,dimlength);
 for jj = 1:dimlength
     Gam_td = pe_contour(cell2mat(x_td(jj)),cell2mat(y_td(jj)),cell2mat(Z_td(jj)),cell2mat(powertd(jj)), 0);
@@ -66,7 +74,7 @@ for jj = 1:dimlength
     td_lbl(jj) = {td_lb};
     td_upl(jj) = td_up;
 end
-
+%38 should be K(A) = 86.8702, eps = 10^-3.3
 % Now find our upper bound on the matrix envelope
 td_kl = zeros(1,dimlength); td_cifl = zeros(1,dimlength); td_c2l = zeros(1,dimlength);
 for jj = 1:dimlength
@@ -85,21 +93,103 @@ td_cifl
 figure()
 dims = [4:9, 10:4:50];
 opts = {'LineWidth', 2};
-semilogy(dims, [td_ups td_upl], 'DisplayName', 'Pseudospectral', opts{:})
+semilogy(dims, [td_ups td_upl], 'DisplayName', 'Kreiss', opts{:})
 hold on
 plot(dims, [td_ks td_kl], 'DisplayName', 'K', opts{:})
 plot(dims, [td_cifs td_cifl], 'DisplayName', 'Resolvent Norm', opts{:})
 title('Transient Matrix Growth Bounds')
 xlabel('dim(A)')
 ylabel('Upper Bound of ||f(A)||')
+
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Transient Demo Discrete Version 
+%          
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% First very small dimension systems
+
+% for jj = 3:9
+%     A = transient_demo(jj);
+%     eigtool(A)
+% end
+%all of the relevant information is then exported and saved to td_39.mat
+load("td_39.mat")
+%
+dims = 4:9; dimlength = 6;
+Gam_tds = cell(1,dimlength); td_lbs = cell(1,dimlength); td_ups = zeros(1,dimlength);
+
+for jj = 1:dimlength
+    Gam_td = pe_contour(cell2mat(xtds(jj)),cell2mat(ytds(jj)),cell2mat(Ztds(jj)),cell2mat(powertds(jj)), 0);
+    td_lb = pseudo_lb(Gam_td, 'd');
+    td_up = exp(1)*dims(jj)*max(td_lb(2, :));
+    Gam_tds(jj) = {Gam_td};
+    td_lbs(jj) = {td_lb};
+    td_ups(jj) = td_up;
+end
+
+% Now find our upper bound on the matrix envelope
+td_ks = zeros(1,dimlength); td_cifs = zeros(1,dimlength); 
+td_c2s = zeros(1,dimlength);
+for jj = 1:dimlength
+    A = transient_demo(jj+3);
+    [k,cif,c2] = discDS(A,2);
+    td_ks(jj) = k;
+    td_cifs(jj) = cif;
+    td_c2s(jj) = c2;
+end
+
+td_ups
+td_ks
+td_cifs
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%% Then larger dense systems
+% load("transientdem_dimex.mat")
+% dims = 10:4:50; dimlength = length(dims);
+% Gam_tdl = cell(1,dimlength); td_lbl = cell(1,dimlength); td_upl = zeros(1,dimlength);
+% for jj = 1:dimlength
+%     Gam_td = pe_contour(cell2mat(x_td(jj)),cell2mat(y_td(jj)),cell2mat(Z_td(jj)),cell2mat(powertd(jj)), 0);
+%     td_lb = pseudo_lb(Gam_td, 'd');
+%     td_up = exp(1)*dims(jj)*max(td_lb(2, :));
+%     Gam_tdl(jj) = {Gam_td};
+%     td_lbl(jj) = {td_lb};
+%     td_upl(jj) = td_up;
+% end
+% 
+% % Now find our upper bound on the matrix envelope
+% td_kl = zeros(1,dimlength); td_cifl = zeros(1,dimlength); td_c2l = zeros(1,dimlength);
+% for jj = 1:dimlength
+%     A = transient_demo(4*jj+6);
+%     %calculate spectral set
+%     [k, cif, c2] = discDS(A,4); 
+%     td_kl(jj) = k;
+%     td_cifl(jj) = cif;
+%     td_c2l(jj) = c2;
+% end
+load("discreted_l.mat")    
+td_upl
+td_kl
+td_cifl
+
+figure()
+dims = [4:9, 10:4:50];
+opts = {'LineWidth', 2};
+semilogy(dims, [td_ups td_upl], 'DisplayName', 'Kreiss', opts{:})
+hold on
+plot(dims, [td_ks td_kl], 'DisplayName', 'K', opts{:})
+plot(dims, [td_cifs td_cifl], 'DisplayName', 'Resolvent Norm', opts{:})
+%title('Transient Matrix Growth Bounds')
+xlabel('dim(A)')
+ylabel('Upper Bound of ||f(A)||')
+legend()
     
     
     
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%    
-%% Using the contDS Function pass these matrices
+%% Using the contDS Function, pass these matrices
 
 A = [.5 -1; 1, -1.5];
-[kA, cifA] = contDS(A)
+[kA, cifA, c2, cifG] = contDS(A)
 
 C = [0 1 2; -0.01 0 3; 0 0 0];
 [kC, cifC] = discDS(C)
@@ -111,7 +201,7 @@ T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
          0,0,0.100, -0.0138,0,0;
          0,0,0.0019, 0.0002, -0.0124,0;
          0,0,0,0.0001, 0.0028, -0.0049]; %1986 Tuesday Lake
-[kT,cifT] = contDS(T)
+[kT,cifT, c2T, cifGT] = contDS(T)
 
 RF = zeros(9);
 RF(1,1) = -1.5622; RF(1,2) = .6685;
@@ -124,10 +214,10 @@ RF(6,2) = .0070; RF(6,6) = -2.0348;
 RF(7,3) = 6.4091; RF(7,7) = -315.9443;
 RF(8,1) = .0995; RF(8,6) = .8902; RF(8,8) = -62.6458;
 RF(9,8) = 6.8257; RF(9,9) = -17.2972; %Panamanian Rainforest
-[kRF, cifRF] = contDS(RF)
+[kRF, cifRF, c2RF, cifGRF] = contDS(RF)
 
 B = boeing_demo('S');
-[kB, cifB] = contDS(B,2)
+[kB, cifB, c2B, cifGB] = contDS(B,2)
 
    
 
@@ -169,15 +259,22 @@ B = boeing_demo('S');
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 %% Block Diagonal Matrix Example
-    
-b1 = 50;
-b2 = 50;
-b3 = 20;
+rng('default');    
+b1 = 10;
+b2 = 10;
+%b3 = 20;
+%b4 = 20;
+%b5 = 20;
 res = 10000;
-A = [randn(b1)-(b1+(b1/2)*1i)*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(b2+(b2/2)*1i)*eye(b2)];
-%A = [randn(b1)-20*eye(b1), zeros(b1, b2+b3); zeros(b2, b1), randn(b2), zeros(b2, b3); zeros(b3, b1+b2), rand(b3)+20*eye(b3)];
+%A = [randn(b1)-(b1+(b1/2)*1i)*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(b2+(b2/2)*1i)*eye(b2)];
+A = [randn(b1)-5*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(10+5*1i)*eye(b2)];
+% A = [randn(b1)+(-20)*eye(b1), zeros(b1, b2+b3+b4+b5); 
+%     zeros(b2, b1), randn(b2), zeros(b2, b3+b4+b5); 
+%     zeros(b3, b1+b2), rand(b3)+(20)*eye(b3), zeros(b3,b4+b5);
+%     zeros(b4, b1+b2+b3), rand(b4)+4*(-20+10i)*eye(b4), zeros(b4, b5);
+%     zeros(b5, b1+b2+b3+b4) rand(b5)+4*(20-10i)*eye(b3)];
 
-
+%%
 figure()
 [nr, nr_prime] = numerical_range(A, res);
 plot(nr), hold on, axis equal
@@ -185,7 +282,7 @@ evs = eig(A);
 plot(evs, 'kx')
 plot(numerical_range(A(1:b1,1:b1), res))
 plot(numerical_range(A(b1+1:b1+b2,b1+1:b1+b2), res))
-%plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
+plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
 
 pause
 [k, cif, delOm, delOm_prime] = removeDisks(A);
@@ -194,35 +291,215 @@ k, cif
 
 %%
 %Needs two disks removed.
-A =   [-4.4623e+00 + 0.0000e+00i	-1.3499e+00 + 0.0000e+00i	6.7150e-01 + 0.0000e+00i	8.8840e-01 + 0.0000e+00i	-1.0224e-01 + 0.0000e+00i	-8.6365e-01 + 0.0000e+00i	-1.0891e+00 + 0.0000e+00i	-6.1560e-01 + 0.0000e+00i	1.4193e+00 + 0.0000e+00i	-1.1480e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
-1.8339e+00 + 0.0000e+00i	-1.9651e+00 + 0.0000e+00i	-1.2075e+00 + 0.0000e+00i	-1.1471e+00 + 0.0000e+00i	-2.4145e-01 + 0.0000e+00i	7.7359e-02 + 0.0000e+00i	3.2557e-02 + 0.0000e+00i	7.4808e-01 + 0.0000e+00i	2.9158e-01 + 0.0000e+00i	1.0487e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
--2.2588e+00 + 0.0000e+00i	7.2540e-01 + 0.0000e+00i	-4.2828e+00 + 0.0000e+00i	-1.0689e+00 + 0.0000e+00i	3.1921e-01 + 0.0000e+00i	-1.2141e+00 + 0.0000e+00i	5.5253e-01 + 0.0000e+00i	-1.9242e-01 + 0.0000e+00i	1.9781e-01 + 0.0000e+00i	7.2225e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
-8.6217e-01 + 0.0000e+00i	-6.3055e-02 + 0.0000e+00i	1.6302e+00 + 0.0000e+00i	-5.8095e+00 + 0.0000e+00i	3.1286e-01 + 0.0000e+00i	-1.1135e+00 + 0.0000e+00i	1.1006e+00 + 0.0000e+00i	8.8861e-01 + 0.0000e+00i	1.5877e+00 + 0.0000e+00i	2.5855e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
-3.1877e-01 + 0.0000e+00i	7.1474e-01 + 0.0000e+00i	4.8889e-01 + 0.0000e+00i	-2.9443e+00 + 0.0000e+00i	-5.8649e+00 + 0.0000e+00i	-6.8493e-03 + 0.0000e+00i	1.5442e+00 + 0.0000e+00i	-7.6485e-01 + 0.0000e+00i	-8.0447e-01 + 0.0000e+00i	-6.6689e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
--1.3077e+00 + 0.0000e+00i	-2.0497e-01 + 0.0000e+00i	1.0347e+00 + 0.0000e+00i	1.4384e+00 + 0.0000e+00i	-3.0051e-02 + 0.0000e+00i	-3.4674e+00 + 0.0000e+00i	8.5931e-02 + 0.0000e+00i	-1.4023e+00 + 0.0000e+00i	6.9662e-01 + 0.0000e+00i	1.8733e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
--4.3359e-01 + 0.0000e+00i	-1.2414e-01 + 0.0000e+00i	7.2689e-01 + 0.0000e+00i	3.2519e-01 + 0.0000e+00i	-1.6488e-01 + 0.0000e+00i	-7.6967e-01 + 0.0000e+00i	-6.4916e+00 + 0.0000e+00i	-1.4224e+00 + 0.0000e+00i	8.3509e-01 + 0.0000e+00i	-8.2494e-02 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
-3.4262e-01 + 0.0000e+00i	1.4897e+00 + 0.0000e+00i	-3.0344e-01 + 0.0000e+00i	-7.5493e-01 + 0.0000e+00i	6.2771e-01 + 0.0000e+00i	3.7138e-01 + 0.0000e+00i	-7.4230e-01 + 0.0000e+00i	-4.5118e+00 + 0.0000e+00i	-2.4372e-01 + 0.0000e+00i	-1.9330e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
-3.5784e+00 + 0.0000e+00i	1.4090e+00 + 0.0000e+00i	2.9387e-01 + 0.0000e+00i	1.3703e+00 + 0.0000e+00i	1.0933e+00 + 0.0000e+00i	-2.2558e-01 + 0.0000e+00i	-1.0616e+00 + 0.0000e+00i	-1.7738e-01 + 0.0000e+00i	-4.7843e+00 + 0.0000e+00i	-4.3897e-01 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
-2.7694e+00 + 0.0000e+00i	1.4172e+00 + 0.0000e+00i	-7.8728e-01 + 0.0000e+00i	-1.7115e+00 + 0.0000e+00i	1.1093e+00 + 0.0000e+00i	1.1174e+00 + 0.0000e+00i	2.3505e+00 + 0.0000e+00i	-1.9605e-01 + 0.0000e+00i	-1.1658e+00 + 0.0000e+00i	-6.7947e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	1.0840e+01 + 5.0000e+00i	-2.1384e+00 + 0.0000e+00i	2.9080e+00 + 0.0000e+00i	-3.5385e-01 + 0.0000e+00i	2.2890e-02 + 0.0000e+00i	5.2006e-01 + 0.0000e+00i	-2.9375e-01 + 0.0000e+00i	-1.3320e+00 + 0.0000e+00i	-1.3617e+00 + 0.0000e+00i	-1.9522e-01 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	-8.8803e-01 + 0.0000e+00i	9.1604e+00 + 5.0000e+00i	8.2522e-01 + 0.0000e+00i	-8.2359e-01 + 0.0000e+00i	-2.6200e-01 + 0.0000e+00i	-2.0028e-02 + 0.0000e+00i	-8.4793e-01 + 0.0000e+00i	-2.3299e+00 + 0.0000e+00i	4.5503e-01 + 0.0000e+00i	-2.1761e-01 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	1.0009e-01 + 0.0000e+00i	1.3546e+00 + 0.0000e+00i	1.1379e+01 + 5.0000e+00i	-1.5771e+00 + 0.0000e+00i	-1.7502e+00 + 0.0000e+00i	-3.4771e-02 + 0.0000e+00i	-1.1201e+00 + 0.0000e+00i	-1.4491e+00 + 0.0000e+00i	-8.4871e-01 + 0.0000e+00i	-3.0311e-01 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	-5.4453e-01 + 0.0000e+00i	-1.0722e+00 + 0.0000e+00i	-1.0582e+00 + 0.0000e+00i	1.0508e+01 + 5.0000e+00i	-2.8565e-01 + 0.0000e+00i	-7.9816e-01 + 0.0000e+00i	2.5260e+00 + 0.0000e+00i	3.3351e-01 + 0.0000e+00i	-3.3489e-01 + 0.0000e+00i	2.3046e-02 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	3.0352e-01 + 0.0000e+00i	9.6095e-01 + 0.0000e+00i	-4.6862e-01 + 0.0000e+00i	2.8198e-01 + 0.0000e+00i	9.1686e+00 + 5.0000e+00i	1.0187e+00 + 0.0000e+00i	1.6555e+00 + 0.0000e+00i	3.9135e-01 + 0.0000e+00i	5.5278e-01 + 0.0000e+00i	5.1290e-02 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	-6.0033e-01 + 0.0000e+00i	1.2405e-01 + 0.0000e+00i	-2.7247e-01 + 0.0000e+00i	3.3480e-02 + 0.0000e+00i	-9.7921e-01 + 0.0000e+00i	9.8668e+00 + 5.0000e+00i	3.0754e-01 + 0.0000e+00i	4.5168e-01 + 0.0000e+00i	1.0391e+00 + 0.0000e+00i	8.2606e-01 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	4.8997e-01 + 0.0000e+00i	1.4367e+00 + 0.0000e+00i	1.0984e+00 + 0.0000e+00i	-1.3337e+00 + 0.0000e+00i	-1.1564e+00 + 0.0000e+00i	-7.1453e-01 + 0.0000e+00i	8.7429e+00 + 5.0000e+00i	-1.3028e-01 + 0.0000e+00i	-1.1176e+00 + 0.0000e+00i	1.5270e+00 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	7.3936e-01 + 0.0000e+00i	-1.9609e+00 + 0.0000e+00i	-2.7787e-01 + 0.0000e+00i	1.1275e+00 + 0.0000e+00i	-5.3356e-01 + 0.0000e+00i	1.3514e+00 + 0.0000e+00i	-8.6547e-01 + 0.0000e+00i	1.0184e+01 + 5.0000e+00i	1.2607e+00 + 0.0000e+00i	4.6691e-01 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	1.7119e+00 + 0.0000e+00i	-1.9770e-01 + 0.0000e+00i	7.0154e-01 + 0.0000e+00i	3.5018e-01 + 0.0000e+00i	-2.0026e+00 + 0.0000e+00i	-2.2477e-01 + 0.0000e+00i	-1.7653e-01 + 0.0000e+00i	-4.7615e-01 + 0.0000e+00i	1.0660e+01 + 5.0000e+00i	-2.0971e-01 + 0.0000e+00i;
-0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	0.0000e+00 + 0.0000e+00i	-1.9412e-01 + 0.0000e+00i	-1.2078e+00 + 0.0000e+00i	-2.0518e+00 + 0.0000e+00i	-2.9907e-01 + 0.0000e+00i	9.6423e-01 + 0.0000e+00i	-5.8903e-01 + 0.0000e+00i	7.9142e-01 + 0.0000e+00i	8.6202e-01 + 0.0000e+00i	-6.7866e-02 + 0.0000e+00i	1.0625e+01 + 5.0000e+00i];
-omA = [4+1.5i, 3+4i]; omA2 = [4+2i, 3+4i];
+load('tripleBlock0.mat');
+%omA = [4+1.5i, 3+4i]; omA2 = [4+2i, 3+4i];
 
-[k, cif] = removeDisks(A)
+[k, cif, delOmA] = removeDisks(A);
+k, cif
+
+eigA = eig(A);
+plot(eigA, 'rx')
+
+[n, ~] = size(A);
+r1 = r_of_A(A, n, omA(1));
+r2 = r_of_A(A, n, omA(2));
+
+diskwriter =@(r, om, x) r*exp(1i*x) + om;
+d1 = diskwriter(r1, omA(1), linspace(0,2*pi, 100));
+d2 = diskwriter(r2, omA(2), linspace(0,2*pi, 100));
+%plot disks
+plot(d1, 'b--')
+hold on
+plot(d2, 'b--')
+
+A1 = A(1:10, 1:10); A2 = A(11:end, 11:end);
+nr1 = numerical_range(A1,1000);
+nr2 = numerical_range(A2,1000);
+nr = numerical_range(A, 1000);
+plot(nr1, 'r')
+plot(nr2, 'r')
+plot(nr, 'b--')
+plot(delOmA, 'k', 'LineWidth', 1.25)
+
+% Now I calculate analytic formula for when one disk would split the nr
+[f1, i1] = max(real(nr1));
+[d, i2] = min(abs(nr2-f1));
+%min_sig = svds(A, 1, 'smallest');
+%xi = nr1(i1) + (nr2(i2) - nr1(i1))/2;
+%[fabscissa, i3] = max(abs(nr - xi));
+alpha1 = max(imag(nr1))/d;
+alpha2 = (max(real(nr2)) - min(real(nr2)))/d;
+if(1/(1+2*alpha1) > (alpha1+alpha2)/2)
+    test = "one disk should work"
+else
+    test = "one disk shouldn't work"
+end
+
+%% Removing multiple disks to split a block diagonal matrix
+load('tripleBlock1.mat')
+nr = numerical_range(A,100);
+evA = eig(A);
+figure()
+plot(nr, 'b--')
+hold on, axis equal
+plot(evA, 'rx')
+
+%Remove the disks at -9.5 and 10.5
+[k, cif, delOmA] = removeDisks(A);
+k, cif
+
+eigA = eig(A);
+plot(eigA, 'rx')
+
+[n, ~] = size(A);
+r1 = r_of_A(A, n, omA(1));
+r2 = r_of_A(A, n, omA(2));
+
+diskwriter =@(r, om, x) r*exp(1i*x) + om;
+d1 = diskwriter(r1, omA(1), linspace(0,2*pi, 100));
+d2 = diskwriter(r2, omA(2), linspace(0,2*pi, 100));
+%plot disks
+plot(d1, 'b--')
+hold on
+plot(d2, 'b--')
+
+A1 = A(1:10, 1:10); A2 = A(11:15, 11:15); A3 = A(16:35, 16:35);
+nr1 = numerical_range(A1,1000);
+nr2 = numerical_range(A2,1000);
+nr3 = numerical_range(A3,1000);
+nr  = numerical_range(A, 1000);
+plot(nr1, 'r')
+plot(nr2, 'r')
+plot(nr3, 'r')
+plot(nr, 'b--')
+plot(delOmA, 'k', 'LineWidth', 1.25)
+
+% between nr1 and nr2
+test = "Case 1: Disk containing W(A)"
+[f1, i1] = max(real(nr1));
+[d, i2] = min(abs(nr2-f1));
+d = d/2;
+alpha1 = (max(real(nr1)) - min(real(nr1)))/2/d;
+alpha2 = (max(real(nr2)) - min(real(nr2)))/2/d;
+if(1/(1+2*alpha1) > (alpha1+alpha2)/2)
+    test = "one disk should work"
+else
+    test = "one disk shouldn't work"
+end
+
+%between nr2 and nr3
+[f1, i1] = max(real(nr2));
+[d, i2] = min(abs(nr3-f1));
+d = d/2;
+alpha1 = (max(real(nr2)) - min(real(nr2)))/2/d;
+alpha2 = (max(real(nr3)) - min(real(nr3)))/2/d;
+if(1/(1+2*alpha1) > (alpha1+alpha2)/2)
+    test = "one disk should work"
+else
+    test = "one disk shouldn't work"
+end
+
+% between nr1 and nr2 min "spanning" disk instead
+test = "Case 2: min Disk tangent to W(A) at least twice."
+[f1, i1] = max(real(nr1));
+[d, i2] = min(abs(nr2-f1));
+d = d/2;
+alpha1 = (max(imag(nr1)))/2/d;
+alpha2 = (max(imag(nr2)))/2/d;
+if(1/(1+2*alpha1) > (alpha1+alpha2)/2)
+    test = "one disk should work"
+else
+    test = "one disk shouldn't work"
+end
+
+%between nr2 and nr3
+[f1, i1] = max(real(nr2));
+[d, i2] = min(abs(nr3-f1));
+d = d/2;
+alpha1 = (max(imag(nr2)))/2/d;
+alpha2 = (max(imag(nr3)))/2/d;
+if(1/(1+2*alpha1) > (alpha1+alpha2)/2)
+    test = "one disk should work"
+else
+    test = "one disk shouldn't work"
+end
+
+%Maybe the min "spanning" disk is a batter way of thinking of it rather
+%than a disk containing W(A)!
+
+%% Single Disk Anne Example
+
+rng('default')
+B11 = randn(4);
+B22 = randn(4) + 8*eye(4);
+B = [B11, zeros(4); zeros(4), B22];
+
+eigB = eig(B);
+
+[n, ~] = size(B);
+
+nr1 = numerical_range(B11,1000);
+nr2 = numerical_range(B22,1000);
+[nr, nrprime]  = numerical_range(B, 1000);
+[nr, nrprime] = nrGapFill(nr, nrprime);
+
+om = 3.5;
+[~, r1] = r_of_A(B, n, om);
+diskwriter =@(r, om, x) r*exp(1i*x) + om;
+d1 = diskwriter(r1, om, linspace(0,2*pi, 100));
+
+[delOmB, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, B, om, 1000, r1);
+[delOmB, delomvec] = cellmat2plot(delOmB, delomvec,1);
+[k, cif, delOm_prime] = calc_kRemovedDisk(B, om, nr, nrprime, delOmB, delomvec, xs, r1orr2);
+k, cif
+
+%plot disks
+plot(d1, 'b--')
+hold on
+%plot eigs
+plot(eigB, 'rx')
+%plot numerical ranges
+plot(nr1, 'r')
+plot(nr2, 'r')
+plot(nr, 'b--')
+plot(delOmB, 'k', 'LineWidth', 1.25)
+axis equal
 
 
 
 
 
 
+%% Gracar 100 Anne Example
+n = 100;
+A = gallery('grcar',n);
+
+eigA = eig(A);
+
+[n, ~] = size(A);
+
+[nr, nrprime]  = numerical_range(A, 1000);
+[nr, nrprime] = nrGapFill(nr, nrprime);
+
+om = 0;
+[~, r1] = r_of_A(A, n, om);
+diskwriter =@(r, om, x) r*exp(1i*x) + om;
+d1 = diskwriter(r1, om, linspace(0,2*pi, 100));
+
+[delOmA, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, A, om, 1000, r1);
+[delOmA, delomvec] = cellmat2plot(delOmA, delomvec,1);
+[k, cif, delOm_prime] = calc_kRemovedDisk(A, om, nr, nrprime, delOmA, delomvec, xs, r1orr2);
+k, cif
+
+%plot disks
+plot(d1, 'b--')
+hold on
+%plot eigs
+plot(eigA, 'rx')
+%plot numerical ranges
+plot(nr, 'b--')
+plot(delOmA, 'k', 'LineWidth', 1.25)
+axis equal
 
 
 
@@ -312,18 +589,24 @@ T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
 opts.levels = [-1.1, -1.3] ; opts.ax = [-1.06 0.08 -0.14 0.14] ; opts.npts = 1000;
 eigtool(T, opts)
 % export the pseudospectral data from eigtool
+load()
 GamT1 = pe_contour(xT, yT, ZT, 10.^[-1.1, -1.1], 1);
+GamT2 = pe_contour(xT2,yT2,ZT2, 10.^[-2.35,-2.35],1);
 GamT3 = pe_contour(xT, yT, ZT, 10.^[-1.3, -1.3], 1);
 delOmT1 = GamT1(2:2:end);
 delOmT1 = cellmat2plot(delOmT1, 1);
 delOmT1 = delOmega_flipper(delOmT1,1);
 delOmT1_prime = delOmprime2(delOmT1);
+delOmT2 = GamT2(2:2:end);
+delOmT2 = cellmat2plot(delOmT2, 1);
+delOmT2 = delOmega_flipper(delOmT2,1);
+delOmT2_prime = delOmprime2(delOmT2);
 delOmT3 = GamT3(2:2:end);
 delOmT3 = cellmat2plot(delOmT3, 1);
 delOmT3 = delOmega_flipper(delOmT3,1);
 delOmT3_prime = delOmprime2(delOmT3);
 
-
+%epsilon = -1.1
 c1T1 = calc_c1(delOmT1, delOmT1_prime);
 breaks = find(isnan(delOmT1));
 %technically this set does extend past nrT, so this is a overestimation of c2
@@ -340,6 +623,28 @@ L = sum(abs(L));
 cifT1exact = L/(2*pi)*10^1.1
 
 
+%epsilon = -2.35
+%For a set that remains in the left-half plane
+c1T2 = calc_c1(delOmT2, delOmT2_prime);
+breaks = find(isnan(delOmT2));
+%estimate c2
+c2T2 = calc_c2_curve(T, delOmT2(1:breaks(1)-1), delOmT2_prime(1:breaks(1)-1))+...
+    calc_c2_curve(T, delOmT2(breaks(1)+1:breaks(2)-1), delOmT2_prime(breaks(1)+1:breaks(2)-1))+...
+    calc_c2_curve(T, delOmT2(breaks(2)+1:breaks(3)-1), delOmT2_prime(breaks(2)+1:breaks(3)-1))+...
+    calc_c2_curve(T, delOmT2(breaks(3)+1:end), delOmT2_prime(breaks(3)+1:end));
+kT2 = c2T2 + sqrt(c1T2 + c2T2^2)
+% the integral of the resolvent norm
+cifT2 = cauchyIntFormula(T, delOmT1(1:breaks(1)-1))+...
+    cauchyIntFormula(T, delOmT2(breaks(1)+1:breaks(2)-1))+...
+    cauchyIntFormula(T, delOmT2(breaks(2)+1:breaks(3)-1))+...
+    cauchyIntFormula(T, delOmT2(breaks(3)+1:end))
+%analytic formula for the integral of the resolvent norm 
+% L = cat(2, [delOmT1(2:breaks(1)-1), delOmT1(1)] - delOmT1(1:breaks(1)-1),...
+%     [delOmT1(breaks(1)+2:end), delOmT1(breaks(1)+1)]-delOmT1(breaks(1)+1:end));
+% L = sum(abs(L));
+% cifT1exact = L/(2*pi)*10^1.1
+
+%epsilon = -1.3
 c1T3 = calc_c1(delOmT3, delOmT3_prime);
 breaks = find(isnan(delOmT3));
 c2T3 = calc_c2_curve(T, delOmT3(1:breaks(1)-1), delOmT3_prime(1:breaks(1)-1))+...
@@ -356,3 +661,118 @@ L = cat(2, [delOmT3(2:breaks(1)-1), delOmT3(1)] - delOmT3(1:breaks(1)-1),...
     [delOmT3(breaks(2)+2:end), delOmT3(breaks(2)+1)]-delOmT3(breaks(2)+1:end));
 L = sum(abs(L));
 cifT3exact = L/(2*pi)*10^1.3
+
+
+
+
+%%
+load("transient9_pseudo.mat");
+
+GamDem = pe_contour(xDem, yDem, ZDem, 10.^[-1.55, -1.55], 0);
+delOmDem = cat(2, GamDem{1,2}, NaN, GamDem{1,4});
+breaks = find(isnan(delOmDem));
+
+L = cat(2, [delOmDem(2:breaks-1), delOmDem(1)] - delOmDem(1:breaks-1),...
+    [delOmDem(breaks+2:end), delOmDem(breaks+1)]-delOmDem(breaks+1:end));
+L = sum(abs(L));
+cifDemexact = L/(2*pi)*10^1.55
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+%% Advection with Dirichlet boundary conditions only on one side
+% note with periodic boundary conditions, this problem results in a normal
+% matrix. With only one boundary given, then it results in a non-normal
+% matrix
+
+load("advectionEx.mat");
+%% To rerun the code instead of loading the experiment
+
+%define the matrix; n (integer) is the dimension aka number of steps
+Aad = @(n) diag(zeros(n,1)) + diag(ones(n-1,1),1) + diag(-1*ones(n-1,1),-1);
+
+dim = 7;
+k = zeros(1,dim); cif = zeros(1,dim); 
+for n = 3:10
+    A = Aad(n);
+    A(end, end-2:end) = [1 -4 3];
+    A = A - 2*eye(n);
+
+    [k(n-2), cif(n-2)] = contDS(A);
+end
+k
+cif
+
+
+dim = 3;
+kbig = zeros(1,dim); cifbig = zeros(1,dim); 
+for n = 50:50:150
+    A = Aad(n);
+    A(end, end-2:end) = [1 -4 3];
+    A = A - 2*eye(n);
+
+    [kbig(n/50), cifbig(n/50)] = contDS(A);
+end
+kbig
+cifbig
+
+save("advectionEx.mat", "n", "k", "cif", "nbig", "kbig", "cifbig")
+
+
+%%
+P = [.5 .5 0; .125 .75 .125; 0 .5 .5];
+% opts.levels = [-1.2]; opts.ax = [.15 1.1 -0.1 0.1]; opts.npts = 1000;
+% eigtool(P, opts)
+% GamP = pe_contour(xP, yP, ZP, 10.^[-1.2, -1.2], 1);
+% delOmP = GamP(2:2:end);
+% delOmP = cellmat2plot(delOmP,1);
+% delOmP = delOmega_flipper(delOmP,1);
+% delOmP_prime = delOmprime2(delOmP);
+
+% For matrix P and Omega equal to the 10^-1.2 pseudospectral set find
+% K
+c1P = calc_c1(delOmP, delOmP_prime);
+breaks = find(isnan(delOmP));
+c2P = calc_c2_curve(P, delOmP(1:breaks(1)-1), delOmP_prime(1:breaks(1)-1))+...
+    calc_c2_curve(P, delOmP(breaks(1)+1:breaks(2)-1), delOmP_prime(breaks(1)+1:breaks(2)-1))+...
+    calc_c2_curve(P, delOmP(breaks(2)+1:end), delOmP_prime(breaks(2)+1:end));
+kP = c2P + sqrt(c1P + c2P^2)
+% the integral of the resolvent norm
+cifP = cauchyIntFormula(P, delOmP(1:breaks(1)-1))+...
+    cauchyIntFormula(P, delOmP(breaks(1)+1:breaks(2)-1))+...
+    cauchyIntFormula(P, delOmP(breaks(2)+1:end))
+%analytic formula for the integral of the resolvent norm 
+L = cat(2, [delOmP(2:breaks(1)-1), delOmP(1)] - delOmP(1:breaks(1)-1),...
+    [delOmP(breaks(1)+2:breaks(2)-1), delOmP(breaks(1)+1)]-delOmP(breaks(1)+1:breaks(2)-1), ...
+    [delOmP(breaks(2)+2:end), delOmP(breaks(2)+1)]-delOmP(breaks(2)+1:end));
+L = sum(abs(L));
+cifPexact = L/(2*pi)*10^1.2

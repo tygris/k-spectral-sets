@@ -1,9 +1,9 @@
-%Function to calculate c2 along Gamma1. The integral is estimated using the
-% trapezoidal rule. This function tends to have large errors due to the
-% singularities often found near Gamma1. Ideal is to use a vertical or
-% horizontal line and one of the other functions for calculating c2 when 
-% possible, or to use Chebyshev like points that are denser near these 
-% singularities.
+%Function to calculate c2 along Gamma1, a continuous curve. The integral is 
+% estimated using the trapezoidal rule. This function tends to have large 
+% errors due to the singularities often found near Gamma1. Ideal is to use 
+% a vertical or horizontal line and one of the other functions for 
+% calculating c2 when possible, or to use Chebyshev like points that are 
+% denser near these singularities.
 %
 %[c2, cif, rnorms, gammas] = calc_c2_curve(A, Gam1, Gam1_prime)
 %  input, A, n by n complex double 
@@ -20,7 +20,7 @@
 %          each sigma(s) along Gam1
 
 %Natalie Wellen
-%1/31/22
+%1/13/23
 
 function [c2, cif, rnorms, gammas] = calc_c2_curve(A, Gam1, Gam1_prime)
     %gamma(s) and resolvent norm at each point of Gamma_1

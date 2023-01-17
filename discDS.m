@@ -19,7 +19,7 @@
 %            -cauchyIntFormula
 
 %Natalie Wellen
-%2/03/22
+%7/05/22
 
 function [k,cif,c2] = discDS(A, timestretch)
     if nargin == 1
@@ -38,17 +38,25 @@ function [k,cif,c2] = discDS(A, timestretch)
     %Gam1_prime = 1i*Gam1; %counter-clockwise derivative of the unit disk
     %calculate c2 and k
     m = length(as);
-    c2 = 0; cifG = 0;
+    c2 = 1; cifG = 0;
     for jj = 1:2:m-1
         [c2hold, cifGhold] = calc_c2_d(A, as(jj), as(jj+1));
         c2 = c2+c2hold; cifG = cifG+cifGhold;
     end
     k = c2 + sqrt(1+c2^2);
     %calculate the Cauchy Transform along delOmega
+    cif = cifG;
     if as == [0, 2*pi]
-        cif = cifG;
     else
-        cif = cauchyIntFormula(A, nr(ind1)) + cifG;
+        boundary = ind1(1:end-1) - ind1(2:end);
+        if ind1(1) == 1
+            inds = cat(2, 1, find(boundary), length(nr));
+        elseif ind1(1) == 0
+            inds = find(boundary);
+        end
+        for jj = 1:2:length(inds)
+            cif = cauchyIntFormula(A, nr(inds(jj):inds(jj+1))) + cif;
+        end
     end
     
     %plot the numerical range, eigs, and 
@@ -57,12 +65,12 @@ function [k,cif,c2] = discDS(A, timestretch)
     subplot(2,2,2)
     plot(nr, '--k'), daspect([1,1,1]), hold on
     evs = eig(A); 
-    plot(real(evs), imag(evs), 'kx');
+    plot(real(evs), imag(evs), 'bx');
     %plot delOmega
     nr_plot = nr;
     nr_plot(~ind1) = NaN;
-    plot(Gam1, '-b', opts{:}), plot(nr_plot, '-b', opts{:})
-    title("Spectral Set and Eigenvalues")
+    plot(Gam1, '-k', opts{:}), plot(nr_plot, '-k', opts{:})
+    title("Numerical Range and Eigenvalues")
     
     %plot ||A^k|| with K and cif upper bounds
     subplot(2,2,1)
@@ -72,8 +80,8 @@ function [k,cif,c2] = discDS(A, timestretch)
     t = 1:iterations;
     plot(t,Aks, 'DisplayName', 'norm(A^k)', opts{:}), hold on
     xlim([0,iterations])
-    plot([0,iterations], [k,k], 'DisplayName', 'K', opts{:})
-    plot([0,iterations], [cif, cif], 'DisplayName', 'Cauchy Transform', opts{:})
+    %plot([0,iterations], [k,k], 'DisplayName', 'K', opts{:})
+    %plot([0,iterations], [cif, cif], 'DisplayName', 'Cauchy Transform', opts{:})
     %legend()
     
     % plot the resolvent norm and abs(min(eig(A)))
@@ -89,14 +97,25 @@ function [k,cif,c2] = discDS(A, timestretch)
         gammas(jj) = -1*(min(eig(R+R'))); 
         rnorms(jj) = norm(R,2);
     end
-    subplot(2,2,3)
-    semilogy(angley(angle(Gam1)), rnorms, opts{:})
-    ylim([min(rnorms)/5, max(rnorms)*1.5])
-    title("Resolvent Norm on the Unit Disk")
     subplot(2,2,4)
+    semilogy(angley(angle(Gam1)), rnorms, opts{:})
+    ylim([1, 12])
+    %ylim([min(rnorms)/5, max(rnorms)*1.5])
+    title("Resolvent norm on unit disk")
+    subplot(2,2,3)
     semilogy(angley(angle(Gam1)), gammas, opts{:})
-    ylim([min(gammas)/5, max(gammas)*1.5])
-    title("|\lambda_{min}| on the Unit Disk")
+    ylim([1, 12])
+    %ylim([min(gammas)/5, max(gammas)*1.5])
+    title("|lambdamin| on unit disk")
+    
+    figure()
+    plot(nr, '--k'), daspect([1,1,1]), hold on
+    evs = eig(A); 
+    plot(real(evs), imag(evs), 'kx');
+    %plot delOmega
+    nr_plot = nr;
+    nr_plot(~ind1) = NaN;
+    plot(Gam1, '-b', opts{:}), plot(nr_plot, '-b', opts{:})
 end
 
 function [Aks] = normAk(A, iterations)

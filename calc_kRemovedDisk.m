@@ -27,7 +27,7 @@
 %          counter-clockwise direction
 
 %Natalie Wellen
-%2/09/22
+%1/13/23
 
 function [k, cif, delOm_prime] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delom, xs, r1orr2)
     %calculate K and the integral of the resolvent norm for A
@@ -53,7 +53,32 @@ function [k, cif, delOm_prime] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, d
     % c1 is numerically estimated
     [c1] = calc_c1(delOm, delOm_prime);
     %We use Thoerem 2 to calculate an upper bound on c2
-    c2 = 1+sum(r1orr2);
+    c2_1 = 1+sum(r1orr2);
+    %Alternatively, use Theorem 1 to estimate the value of c2 
+    % Recall that on the boundary of the numerical range the integral of c2=0
+    breaks = (delom~=0);
+    nans = isnan(delom);
+    breaks(nans) = 0;
+    breaks = find(breaks(1:end-1)-breaks(2:end));
+    if real(delom(end)) >  0
+        breaks = [breaks, length(delom)];
+    end
+    c2_est = 0;
+    mm = length(breaks);
+    if delom(1) == 1
+        c2_est = c2_est + calc_c2_curve(A, [delOm(breaks(end)+1:end),delOm(1:breaks(1))],[delOm_prime(breaks(end)+1:end),delOm_prime(1:breaks(1))]);
+        if mm > 2
+            for jj = 2:2:mm-1
+                c2_est = c2_est + calc_c2_curve(A, delOm(breaks(jj)+1:breaks(jj+1)),delOm_prime(breaks(jj)+1:breaks(jj+1)))-1;
+            end
+        end
+    else
+        for jj = 1:2:mm-1
+            c2_est = c2_est + calc_c2_curve(A, delOm(breaks(jj)+1:breaks(jj+1)),delOm_prime(breaks(jj)+1:breaks(jj+1)))-1;
+        end
+        c2_est = c2_est+1;
+    end
+    c2 = (c2_1 <= c2_est)*c2_1 + (c2_est<c2_1)*c2_est;
     k = c2+sqrt(c1+c2^2);
     indBreaks = find(isnan(delOm));
     indBreaks = cat(2, indBreaks, length(delOm)+1);

@@ -16,7 +16,7 @@
 %Natalie Wellen
 %1/26/22
 
-function [k,cif,c2] = contDS(A, timestretch)
+function [k,cif,c2, cifG, distG, extra_cif] = contDS(A, timestretch)
     if nargin == 1
         timestretch = 1;
     end
@@ -25,13 +25,25 @@ function [k,cif,c2] = contDS(A, timestretch)
     %find Gamma1 and it's derivative
     [y1, y2] = nrCutOff(A, 0);
     [c2, cifG] = calc_c2_v(A, imag(y1), imag(y2));
+%    mean_cif = cifG/abs(y2-y1);
+%    mean_c2 = c2/abs(y2-y1);
+    distG = abs(y2-y1);
     %define delOmega and it's derivative
     ind1 = real(nr)<0;
     delOm = cat(2, [y1,y2], nr(ind1));
     %calculate k, c1, and c2
     k = c2 + sqrt(1+c2^2);
     %calculate the Cauchy Transform along delOmega
-    cif = cauchyIntFormula(A, nr(ind1)) + cifG;
+    extra_cif = cauchyIntFormula(A, nr(ind1));
+    cif = extra_cif + cifG;
+    
+    figure()
+    opts= {'LineWidth',2};
+    plot(nr, '--k'), daspect([1,1,1]), hold on
+    eigvs = eig(A); 
+    plot(real(eigvs), imag(eigvs), 'kx');
+    plot(delOm, '-b', opts{:})
+    title("Spectral Set and Eigenvalues")
     
     %plot the numerical range, eigs, and delOmega
     opts= {'LineWidth',2};
@@ -52,8 +64,8 @@ function [k,cif,c2] = contDS(A, timestretch)
     t = 0:timestep:tmax;
     plot(t,meA, 'DisplayName', 'Matrix Envelope', opts{:}), hold on
     xlim([0,tmax])
-    plot([0,tmax], [k,k], 'DisplayName', 'K', opts{:})
-    plot([0,tmax], [cif, cif], 'DisplayName', 'Cauchy Transform', opts{:})
+    %plot([0,tmax], [k,k], 'DisplayName', 'K', opts{:})
+    %plot([0,tmax], [cif, cif], 'DisplayName', 'Cauchy Transform', opts{:})
     %legend()
     
     % plot the resolvent norm and abs(min(eig(A)))
@@ -68,6 +80,7 @@ function [k,cif,c2] = contDS(A, timestretch)
         gammas(jj) = -1*(min(eig(R+R'))); 
         rnorms(jj) = norm(R,2);
     end
+%    max_rnorm = max(rnorms);
     subplot(2,2,3)
     semilogy(imag(Gam1), rnorms, opts{:})
     ylim([min(rnorms)/5, max(rnorms)*1.5])
@@ -75,5 +88,5 @@ function [k,cif,c2] = contDS(A, timestretch)
     subplot(2,2,4)
     semilogy(imag(Gam1), gammas, opts{:})
     ylim([min(gammas)/5, max(gammas)*1.5])
-    title("|\lambda_{min}| on the Imaginary Axis")
+    title("|\lambda_{min}| on Imaginary Axis")
 end
