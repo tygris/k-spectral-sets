@@ -262,17 +262,17 @@ B = boeing_demo('S');
 rng('default');    
 b1 = 10;
 b2 = 10;
-%b3 = 20;
+%b3 = 10;
 %b4 = 20;
 %b5 = 20;
 res = 10000;
 %A = [randn(b1)-(b1+(b1/2)*1i)*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(b2+(b2/2)*1i)*eye(b2)];
 A = [randn(b1)-5*eye(b1), zeros(b1, b2); zeros(b2, b1), randn(b2)+(10+5*1i)*eye(b2)];
-% A = [randn(b1)+(-20)*eye(b1), zeros(b1, b2+b3+b4+b5); 
-%     zeros(b2, b1), randn(b2), zeros(b2, b3+b4+b5); 
-%     zeros(b3, b1+b2), rand(b3)+(20)*eye(b3), zeros(b3,b4+b5);
-%     zeros(b4, b1+b2+b3), rand(b4)+4*(-20+10i)*eye(b4), zeros(b4, b5);
-%     zeros(b5, b1+b2+b3+b4) rand(b5)+4*(20-10i)*eye(b3)];
+%  A = [randn(b1)+(-20)*eye(b1), zeros(b1, b2+b3);%+b4+b5); 
+%      zeros(b2, b1), randn(b2), zeros(b2, b3);%+b4+b5); 
+%     zeros(b3, b1+b2), randn(b3)+(20)*eye(b3)];%, zeros(b3,b4+b5);
+%     zeros(b4, b1+b2+b3), randn(b4)+4*(-20+10i)*eye(b4), zeros(b4, b5);
+%     zeros(b5, b1+b2+b3+b4) randn(b5)+4*(20-10i)*eye(b3)];
 
 %%
 figure()
@@ -336,7 +336,7 @@ else
 end
 
 %% Removing multiple disks to split a block diagonal matrix
-load('tripleBlock1.mat')
+%load('tripleBlock1.mat')
 nr = numerical_range(A,100);
 evA = eig(A);
 figure()
@@ -344,8 +344,8 @@ plot(nr, 'b--')
 hold on, axis equal
 plot(evA, 'rx')
 
-%Remove the disks at -9.5 and 10.5
-[k, cif, delOmA] = removeDisks(A);
+%Remove the disks at -9.5 and 10.25 for optimal
+[k, cif, delOmA, ~, c1, c2] = removeDisks(A);
 k, cif
 
 eigA = eig(A);
@@ -363,7 +363,7 @@ plot(d1, 'b--')
 hold on
 plot(d2, 'b--')
 
-A1 = A(1:10, 1:10); A2 = A(11:15, 11:15); A3 = A(16:35, 16:35);
+A1 = A(1:10, 1:10); A2 = A(11:15, 11:15); A3 = A(16:25, 16:25);
 nr1 = numerical_range(A1,1000);
 nr2 = numerical_range(A2,1000);
 nr3 = numerical_range(A3,1000);

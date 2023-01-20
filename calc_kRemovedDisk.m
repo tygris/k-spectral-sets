@@ -25,11 +25,13 @@
 %  output, cif, double, the value of the integral of the resolvent norm of A
 %  output, delOm_prime, complex double, the derivative of delOm in the
 %          counter-clockwise direction
+%  output, c1, double
+%  output, c2, double
 
 %Natalie Wellen
-%1/13/23
+%1/18/23
 
-function [k, cif, delOm_prime] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delom, xs, r1orr2)
+function [k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delom, xs, r1orr2)
     %calculate K and the integral of the resolvent norm for A
     %define delOmPrime
     indBreaks = find(ismember(nr,xs));

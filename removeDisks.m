@@ -9,6 +9,8 @@
 %  output, delOm, complex double, the boundary of Omega in the complex plane 
 %  output, delOm_prime, complex double, the derivative of delOm in the
 %          counter-clockwise direction
+%  output, c1, double
+%  output, c2, double
 %
 % Depends on:  - numerical_range
 %              - nrGapFill
@@ -19,9 +21,9 @@
 %              - calc_kRemovedDisk
 
 %Natalie Wellen
-%2/09/22
+%1/18/23
 
-function [k, cif, delOm, delOm_prime] = removeDisks(A)
+function [k, cif, delOm, delOm_prime, c1, c2] = removeDisks(A)
     %The resolution of the W(A). Half this value is used for the
     %disks removed from W(A).
     res_num = 2000;
@@ -80,5 +82,5 @@ function [k, cif, delOm, delOm_prime] = removeDisks(A)
     plot(delOm,'b')
     %with the results of defining delOm with define_del_Omega(), calculate
     %K and the integral of the resolvent norm
-    [k, cif, delOm_prime] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delomvec, xs, r1orr2);
+    [k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delomvec, xs, r1orr2);
 end
