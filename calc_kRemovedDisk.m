@@ -3,7 +3,7 @@
 % the input matrix A. This function is best used in conjunction with the 
 % outputs of define_del_Omega().
 %
-%[k, cif, delOmPrime] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delom, xs, r1orr2)
+%[k, cif, delOmPrime, c1, c2] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delom, xs, r1orr2)
 %  input, A, n by n double, Matrix of interest
 %  input, om, complex vector, the center of the disks removed from W(A) to
 %         define Omega
@@ -29,7 +29,13 @@
 %  output, c2, double
 
 %Natalie Wellen
-%1/18/23
+%1/25/23
+
+%1/25 found an error with how the derivative of delOm is defined.
+%The problem is that depending on if the numerical range is split into
+%disjoint sets or not the derivative of nr_prime nees to be kept track of
+%in totally different ways. Currently this code works for disjoint sets
+%that split the numerical range, and has not been tested for annuli
 
 function [k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delom, xs, r1orr2)
     %calculate K and the integral of the resolvent norm for A
@@ -38,11 +44,21 @@ function [k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(A, om, nr, nr_prime, 
     delOm_prime = zeros(1, length(delOm));
         %first along points of delOm that coincide with the numerical range
     primer = [];
-    if ~delom(1) %false implies 1:indBreaks(1) is nr_prime
-        indBreaks = cat(2, 1, indBreaks, length(nr));
+
+    %This code is a temporary fix to allow for calc when nr is split by
+    %removing disks.
+    if ~delom(1) %false implies 1:indBreaks(1) is where nr_prime goes
+        breaks = [1, indBreaks(1), indBreaks(end), length(nr)];
+        if length(indBreaks)>2
+        for jj = 2:length(indBreaks)/4
+            breaks = cat(2, breaks, indBreaks(jj), indBreaks(jj+1),...
+                indBreaks(end-jj), indBreaks(end-jj+1));
+        end
+        breaks = cat(2, breaks, indBreaks(length(indBreaks)/2), indBreaks(length(indBreaks)/2+1));
+        end
     end
-    for jj = 1:2:length(indBreaks)-1
-        primer = cat(2, primer, nr_prime(indBreaks(jj):indBreaks(jj+1)));
+    for jj = 1:2:length(breaks)-1
+        primer = cat(2, primer, nr_prime(breaks(jj):breaks(jj+1)));
     end
     delOm_prime(delom == 0) = primer;
         %then with points along boundaries of the removed disks
@@ -82,10 +98,10 @@ function [k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(A, om, nr, nr_prime, 
     end
     c2 = (c2_1 <= c2_est)*c2_1 + (c2_est<c2_1)*c2_est;
     k = c2+sqrt(c1+c2^2);
-    indBreaks = find(isnan(delOm));
-    indBreaks = cat(2, indBreaks, length(delOm)+1);
-    cif = cauchyIntFormula(A, delOm(1:indBreaks(1)-1));
-    for jj = 2:length(indBreaks)
-        cif = cif + cauchyIntFormula(A, delOm(indBreaks(jj-1)+1:indBreaks(jj)-1));
+    breaks = find(isnan(delOm));
+    breaks = cat(2, breaks, length(delOm)+1);
+    cif = cauchyIntFormula(A, delOm(1:breaks(1)-1));
+    for jj = 2:length(breaks)
+        cif = cif + cauchyIntFormula(A, delOm(breaks(jj-1)+1:breaks(jj)-1));
     end
 end

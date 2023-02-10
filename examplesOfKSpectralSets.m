@@ -1,16 +1,16 @@
 %File of different examples of how K-Spectral Sets can be used
 
 %Natalie Wellen
-%6/13/22
+%2/10/23
 
 %% Example 1
 % Using the transient_demo() from Eigtool: https://www.cs.ox.ac.uk/pseudospectra/eigtool/
 
 A =  transient_demo(10);
 
-[k, cif] = contDS(A,2)
+[k, cif, c2] = contDS(A,2)
 
-[k, cif] = discDS(A, .75) %ylim([1, 12])
+[k, cif, c2] = discDS(A, .75) %ylim([1, 12])
 
 %% Explore different sets for calculating the integral of the resolvent norm
 
@@ -290,12 +290,12 @@ k, cif
 
 
 %%
-%Needs two disks removed.
+%Needs two disks removed to split into two disjoint subsets.
 load('tripleBlock0.mat');
 %omA = [4+1.5i, 3+4i]; omA2 = [4+2i, 3+4i];
 
-[k, cif, delOmA] = removeDisks(A);
-k, cif
+[k, cif, delOmA,~,c1, c2] = removeDisks(A);
+c1, c2, k, cif
 
 eigA = eig(A);
 plot(eigA, 'rx')
@@ -335,8 +335,8 @@ else
     test = "one disk shouldn't work"
 end
 
-%% Removing multiple disks to split a block diagonal matrix
-%load('tripleBlock1.mat')
+%% Split a block diagonal matrix into three disjoint sets
+load('tripleBlock1.mat')
 nr = numerical_range(A,100);
 evA = eig(A);
 figure()
@@ -344,9 +344,9 @@ plot(nr, 'b--')
 hold on, axis equal
 plot(evA, 'rx')
 
-%Remove the disks at -9.5 and 10.25 for optimal
+%Remove the disks at -9.5 and 10 for optimal
 [k, cif, delOmA, ~, c1, c2] = removeDisks(A);
-k, cif
+c1, c2, k, cif
 
 eigA = eig(A);
 plot(eigA, 'rx')
@@ -450,8 +450,8 @@ d1 = diskwriter(r1, om, linspace(0,2*pi, 100));
 
 [delOmB, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, B, om, 1000, r1);
 [delOmB, delomvec] = cellmat2plot(delOmB, delomvec,1);
-[k, cif, delOm_prime] = calc_kRemovedDisk(B, om, nr, nrprime, delOmB, delomvec, xs, r1orr2);
-k, cif
+[k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(B, om, nr, nrprime, delOmB, delomvec, xs, r1orr2);
+k, cif, c1, c2
 
 %plot disks
 plot(d1, 'b--')
@@ -486,7 +486,7 @@ om = 0;
 diskwriter =@(r, om, x) r*exp(1i*x) + om;
 d1 = diskwriter(r1, om, linspace(0,2*pi, 100));
 
-[delOmA, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, A, om, 1000, r1);
+[delOmA, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, A, om, 10000, r1);
 [delOmA, delomvec] = cellmat2plot(delOmA, delomvec,1);
 [k, cif, delOm_prime] = calc_kRemovedDisk(A, om, nr, nrprime, delOmA, delomvec, xs, r1orr2);
 k, cif
@@ -501,7 +501,40 @@ plot(nr, 'b--')
 plot(delOmA, 'k', 'LineWidth', 1.25)
 axis equal
 
+%% Gracar 32 Anne Example
+n = 32;
+%For Grchar(32) use epsilon = 10^-3
+%For Grchar(24) use epsilon = 10^-2.2
+eps = -3; %log 10 of the epsilon value.
+A = gallery('grcar',n);
 
+eigA = eig(A);
+
+% opts.levels = [-3]; opts.ax = [-0.5 2 -2.6 2.6]; opts.npts = 2000;
+% eigtool(A,opts)
+% pause
+% GamA = pe_contour(xGrchar, yGrchar, ZGrchar, 10.^[eps, eps], 1);
+% delOmA = GamA(2:2:end);
+% delOmA = cellmat2plot(delOmA,1);
+% delOmA = delOmega_flipper(delOmA,1);
+% delOmAP = delOmprime2(delOmA);
+% save('psGrcharBIG.mat', 'delOmA', 'delOmAP', 'xGrchar','yGrchar','ZGrchar')
+
+load('psGrcharBIG.mat')
+
+%calculate the two different values of K for the set of epsilon=10^-3 pseudospectra 
+[c1A, c1_index] = calc_c1(delOmA, delOmAP)
+breaks = find(isnan(delOmA)); breaks = [0,breaks, length(delOmA)+1];
+c2A = 0; cifA = 0; L = 0;
+for jj = 1:length(breaks)-1
+    c2A = c2A + calc_c2_curve(A, delOmA(breaks(jj)+1:breaks(jj+1)-1), delOmAP(breaks(jj)+1:breaks(jj+1)-1));
+    cifA = cifA + cauchyIntFormula(A, delOmA(breaks(jj)+1:breaks(jj+1)-1));
+    L = L + sum(abs([delOmA(breaks(jj)+2:breaks(jj+1)-1), delOmA(breaks(jj)+1)]-delOmA(breaks(jj)+1:breaks(jj+1)-1)));
+end
+c2A
+kA = c2A + sqrt(c1A + c2A^2)
+cifA
+cifAexact = L/(2*pi)*10^-eps
 
 
 
