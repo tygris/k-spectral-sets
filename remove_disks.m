@@ -1,7 +1,7 @@
 %Function to define a spectral set Omega by removing disks from W(A), then
 %estimate an uppper bound on the value of K for the set Omega.
 %
-%[k, cif, delOm, delOm_prime, c1, c2] = removeDisks(A)
+%[k, cif, delOm, delOm_prime, c1, c2] = remove_disks(A)
 %  input, A, n by n double, the matrix we wish to define a spectral set for
 %  
 %  output, k, double, the K value of the spectral set Omega
@@ -26,7 +26,7 @@
 %Natalie Wellen
 %3/06/23
 
-function [k, resNorm, delOm, delOm_prime, c1, c2] = removeDisks(A)
+function [k, resNorm, delOm, delOm_prime, c1, c2] = remove_disks(A)
     %The resolution of the W(A). Half this value is used for the
     %disks removed from W(A).
     res = 20000;

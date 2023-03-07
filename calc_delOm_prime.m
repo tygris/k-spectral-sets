@@ -3,7 +3,7 @@
 % is assumed that the contour is a union of simple closed curves, with the
 % curves separated by NaN's
 %
-%[delOm_prime] = delOmprimer2(delOm)
+%[delOm_prime] = calc_delOm_prime(delOm)
 %  input, delOm, complex vector, the countour of a set boundary in the complex plane
 %        comprised of a union of simple closed curves, each curve separated
 %        by NaN+1i*NaN
@@ -15,7 +15,7 @@
 %Natalie Wellen
 %3/06/23
 
-function [delOm_prime] = delOmprime2(delOm)
+function [delOm_prime] = calc_delOm_prime(delOm)
     %use a loop to go through each simple closed curve
     breaks = find(isnan(delOm));
     breaks = cat(2, 0, breaks, length(delOm)+1);

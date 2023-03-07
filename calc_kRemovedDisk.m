@@ -28,14 +28,23 @@
 %  output, c1, double
 %  output, c2, double
 
+%Depends on:
+%    - calc_c1
+%        - find_c1
+%    - calc_c2_curve
+%    - cauchyIntFormula
+
 %Natalie Wellen
-%1/25/23
+%3/06/23
 
 %1/25 found an error with how the derivative of delOm is defined.
 %The problem is that depending on if the numerical range is split into
 %disjoint sets or not the derivative of nr_prime nees to be kept track of
 %in totally different ways. Currently this code works for disjoint sets
 %that split the numerical range, and has not been tested for annuli
+
+%GOAL: estimate the derivative in the calculation rather than passing it to
+%the function, or have some kind of derivative check?
 
 function [k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(A, om, nr, nr_prime, delOm, delom, xs, r1orr2)
     %calculate K and the integral of the resolvent norm for A

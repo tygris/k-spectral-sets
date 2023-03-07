@@ -2,20 +2,20 @@
 %  removing disks. For example, when defining the numerical range for a
 %  block diagonal matrix.
 %
-%[nrNew, nr_primeNew] = nrGapFill(nr,nr_prime)
+%[nrNew, nr_primeNew] = nr_gap_fill(nr,nr_prime)
 % input, nr, complex vector, the boundary of the numerical range
 % input, nr_prime,  complex vector, the corresponding
 %        derivatives of nr
 %
 % output, nrNew, complex vector, the boundary of the numerical 
 %        range with smaller gaps
-% input, nr_primeNew,  complex vector, the corresponding
+% output, nr_primeNew,  complex vector, the corresponding
 %        derivatives of nr
 
 %Natalie Wellen
 %3/06/23
 
-function [nrNew, nr_primeNew] = nrGapFill(nr,nr_prime)
+function [nrNew, nr_primeNew] = nr_gap_fill(nr,nr_prime)
     %Define outputs 
     nrNew = nr;
     nr_primeNew = nr_prime;

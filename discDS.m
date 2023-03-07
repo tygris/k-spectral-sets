@@ -1,5 +1,5 @@
-%Function to calculate the spectral set and comparison Cauchy Integral for
-% a discrete time dynamical system represented as a matrix
+%Function to calculate the K-spectral set and integral of the resolvent norm
+% bounds on growth for a discrete time dynamical system represented as a matrix
 %
 %[k,cif,c2] = discDS(A, timestretch)
 % input, A, n by n complex double, the discrete time DS
@@ -7,45 +7,44 @@
 %              thus tmax for the second plot
 %
 % output, k, double, the estimated K value of the spectral set delOm
-% output, cif, double, the value of the integral of the resolvent norm
+% output, resNorm, double, the value of the integral of the resolvent norm
 %              along delOmega
 % output, c2, double
 % output, plot of numerical range overlayed by delOmega and ||exp(At)||
 %         bounded by K and the value of cif
-%
+
 %Depends on: -numerical_range
-%            -nrDiskOff
+%            -nr_disk_off
 %            -calc_c2_d
-%            -cauchyIntFormula
+%            -resolvent_norm_integral
 
 %Natalie Wellen
-%7/05/22
+%3/06/23
 
-function [k,cif,c2] = discDS(A, timestretch)
+function [k,resNorm,c2] = discDS(A, timestretch)
     if nargin == 1
         timestretch = 1;
     end
     %calculate the numerical range 
-    nres = 200000;
-    [nr] = numerical_range(A,nres);
+    res = 200000;
+    [nr] = numerical_range(A,res);
     %Omega is the intersection of the unit disk and W(A)
     ind1 = abs(nr)<=1; %indices of the numerical range still part of delOm
-    %find Gamma1 
-    [Gam1, as] = nrDiskOff(nr,1); %I don't use the points nr intersects D 
-    if isempty(as)
+    %find Gamma1 and the angles where the disk and nr intersect
+    [Gam1, as] = nr_disk_off(nr,1); %I don't use the points where nr extends beyond D(0,radius) 
+    if isempty(as) %Use the entire disk boundary instead of a subset
         as = [0, 2*pi];
     end
-    %Gam1_prime = 1i*Gam1; %counter-clockwise derivative of the unit disk
     %calculate c2 and k
     m = length(as);
-    c2 = 1; cifG = 0;
+    c2 = 1; GamResNorm = 0;
     for jj = 1:2:m-1
-        [c2hold, cifGhold] = calc_c2_d(A, as(jj), as(jj+1));
-        c2 = c2+c2hold; cifG = cifG+cifGhold;
+        [c2hold, GamResNormHold] = calc_c2_d(A, as(jj), as(jj+1));
+        c2 = c2+c2hold; GamResNorm = GamResNorm+GamResNormHold;
     end
     k = c2 + sqrt(1+c2^2);
     %calculate the Cauchy Transform along delOmega
-    cif = cifG;
+    resNorm = GamResNorm;
     if as == [0, 2*pi]
     else
         boundary = ind1(1:end-1) - ind1(2:end);
@@ -55,7 +54,7 @@ function [k,cif,c2] = discDS(A, timestretch)
             inds = find(boundary);
         end
         for jj = 1:2:length(inds)
-            cif = cauchyIntFormula(A, nr(inds(jj):inds(jj+1))) + cif;
+            resNorm = resolvent_norm_integral(A, nr(inds(jj):inds(jj+1))) + resNorm;
         end
     end
     
@@ -89,7 +88,7 @@ function [k,cif,c2] = discDS(A, timestretch)
     n = 20001;
     m = length(A);
     Gam1 = exp(1i*(linspace(as(1), as(2), n)));
-    Gam1_prime = 1i.*Gam1;
+    Gam1_prime = 1i.*Gam1; %counter-clockwise derivative of the unit disk
     gammas = zeros(1,n);
     rnorms = zeros(1,n);
     for jj = 1:n

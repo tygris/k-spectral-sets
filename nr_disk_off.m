@@ -2,7 +2,7 @@
 % boundary of a closed curve (the numerical range of A), 
 % and to fill in and return contour(s) along the disk boundary that are in the 
 % interior of the inputted closed curve
-%Helper function for disc_DS
+%Helper function for discDS
 % 
 % [Gam1, xs] = nr_disk_off(curve, radius)
 % input nrA, complex vector, the boundary of W(A)
@@ -28,11 +28,11 @@ function [Gam1, xs] = nr_disk_off(curve, radius)
     %for each pair of breaks, fill-in with elements of the disk
     Gam1 = [];
     xs = [];
-    unitd = @(x) exp(1i*x);
+    unitD = @(x) exp(1i*x);
     n = length(breaks);
     % Is Gam1 the entire unit circle, or connected segments of it?
     if n == 0
-        Gam1 = unitd(linspace(0, 2*pi, 4000));
+        Gam1 = unitD(linspace(0, 2*pi, 4000));
     else
     %calculate the angle of intersection on [0, 2*pi]
     angley = @(y) (y+2*pi).*(y<0)+y.*(y>=0);
@@ -45,7 +45,7 @@ function [Gam1, xs] = nr_disk_off(curve, radius)
             y1 = ys(x1,x2);
             x2 = curve(breaks(jj+1)); x1 = curve(breaks(jj+1)+1);
             y2 = ys(x1,x2);
-            GamHold = unitd(linspace(y1, y2, 1000));
+            GamHold = unitD(linspace(y1, y2, 1000));
             Gam1 = cat(2, Gam1, NaN+1i*NaN, GamHold);            
             xs = cat(2, xs, y1, y2);
         end
@@ -57,14 +57,14 @@ function [Gam1, xs] = nr_disk_off(curve, radius)
         y1 = ys(x1,x2)-2*pi; %this angle is in [-pi, 0)
         x2 = curve(breaks(1)); x1 = curve(breaks(1)+1);
         y2 = ys(x1,x2);
-        Gam1 = unitd(linspace(y1, y2, 1000));
+        Gam1 = unitD(linspace(y1, y2, 1000));
         xs = cat(2, xs, y1, y2);
         for jj = 2:2:n-2
             x1 = curve(breaks(jj)); x2 = curve(breaks(jj)+1);
             y1 = ys(x1,x2);
             x2 = curve(breaks(jj+1)); x1 = curve(breaks(jj+1)+1);
             y2 = ys(x1,x2);
-            GamHold = unitd(linspace(y1, y2, 1000));
+            GamHold = unitD(linspace(y1, y2, 1000));
             Gam1 = cat(2, Gam1, NaN+1i*NaN, GamHold);            
             xs = cat(2, xs, y1, y2);
         end

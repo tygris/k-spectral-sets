@@ -16,14 +16,14 @@
 %Natalie Wellen
 %3/06/23
 
-function cif = cauchyIntFormula(A, Gam1)
+function cif = resolvent_norm_integral(A, Gam1)
     %calculate the norm of the resolvent for points along Gam1
     n = length(Gam1);
     cauchy = zeros(1, n);
     m = length(A);
     for jj = 1:n
-        A_shift_inv = inv(Gam1(jj)*eye(m)-A);
-        cauchy(jj) = norm(A_shift_inv);
+        AShiftInv = inv(Gam1(jj)*eye(m)-A);
+        cauchy(jj) = norm(AShiftInv);
     end
     %figure()
     %semilogy(imag(Gam1), cauchy)

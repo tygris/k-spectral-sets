@@ -1,41 +1,51 @@
 %Function to calculate the spectral set and comparison Cauchy Integral for
 % a continuous time dynamical system represented as a matrix
 %
-%[k,cif,c2] = contDS(A, timestretch)
+%[k,resNorm,c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestretch)
 % input, A, n by n complex double, the continuous time DS
 % input (opt), timestretch, double, to shorten or widen the time steps and
 %              thus tmax for the second plot
 %
 % output, k, double, the estimated K value of the spectral set delOm
-% output, cif, double, the value of the integral of the resolvent norm
+% output, resNorm, double, the value of the integral of the resolvent norm
 %              along delOmega
 % output, c2, double
+% output, GamDist, double, the length of the vertical line that is on the
+%         boundary of delOm and interior of numerical_range(A)
+% output, extraResNorm, integral of the resolvent along the boundary of nr
+%         that is contained in delOm
 % output, plot of numerical range overlayed by delOmega and ||exp(At)||
-%         bounded by K and the value of cif
+%         bounded by K and the value of resNorm
+
+%Depends on:
+%    - numerical_range
+%    - nr_cut_off
+%    - calc_c2_v
+%    - resolvent_norm_integral
 
 %Natalie Wellen
-%1/26/22
+%3/06/23
 
-function [k,cif,c2, cifG, distG, extra_cif] = contDS(A, timestretch)
+function [k,resNorm,c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestretch)
     if nargin == 1
         timestretch = 1;
     end
     %calculate the numerical range and it's derivative
     [nr] = numerical_range(A,200000);
     %find Gamma1 and it's derivative
-    [y1, y2] = nrCutOff(A, 0);
-    [c2, cifG] = calc_c2_v(A, imag(y1), imag(y2));
+    [y1, y2] = nr_cut_off(nr, 0);
+    [c2, GamResNorm] = calc_c2_v(A, imag(y1), imag(y2));
 %    mean_cif = cifG/abs(y2-y1);
 %    mean_c2 = c2/abs(y2-y1);
-    distG = abs(y2-y1);
+    GamDist = abs(y2-y1);
     %define delOmega and it's derivative
     ind1 = real(nr)<0;
     delOm = cat(2, [y1,y2], nr(ind1));
     %calculate k, c1, and c2
     k = c2 + sqrt(1+c2^2);
     %calculate the Cauchy Transform along delOmega
-    extra_cif = cauchyIntFormula(A, nr(ind1));
-    cif = extra_cif + cifG;
+    extraResNorm = resolvent_norm_integral(A, nr(ind1));
+    resNorm = extraResNorm + GamResNorm;
     
     figure()
     opts= {'LineWidth',2};
@@ -72,7 +82,7 @@ function [k,cif,c2, cifG, distG, extra_cif] = contDS(A, timestretch)
     n = 20001;
     m = length(A);
     Gam1 = linspace(y1, y2, n);
-    Gam1_prime = 1i*ones(1,n);
+%    Gam1_prime = 1i*ones(1,n);
     gammas = zeros(1,n);
     rnorms = zeros(1,n);
     for jj = 1:n

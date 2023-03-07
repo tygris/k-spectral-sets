@@ -11,16 +11,16 @@
 % input, delOm_prime, complex vector, the the corresponding 
 %         derivative of delOm. 
 %         Contains elements of the unit circle in the complex plane.
-% input, nr, complex vector, the boundary of W(A) or the numerical range of A
 % input, A, n by n complex double
+% input, nr, complex vector, the boundary of W(A) or the numerical range of A
 % 
 % output, Gam_1, complex vector, the boundary of delOm that lies within nr.
-%
-% Depends on: - delOmega_flipper
+
+% Depends on: - delOm_flipper
 %             - numerical_range
 
 %Natalie Wellen
-%1/10/22
+%3/06/23
 
 function [Gam1, Gam1_prime] = findGam1(delOm, delOm_prime, varargin)
     %parse inputs and check validity
@@ -29,10 +29,10 @@ function [Gam1, Gam1_prime] = findGam1(delOm, delOm_prime, varargin)
         A = varargin{1};
         alpha = length(delOm);
         [nr] = numerical_range(A, alpha);
-    elseif m == 1
+    elseif m == 1 && n > 10
         nr = varargin{1};
     else
-        disp("Error: the third input needs to be either the square matrix A \n or its numerical range.");
+        disp("Error: the third input needs to be either the square matrix A \n or its numerical range as a row vector.");
         return
     end
     m = length(delOm); n = length(delOm_prime);
@@ -49,8 +49,8 @@ function [Gam1, Gam1_prime] = findGam1(delOm, delOm_prime, varargin)
         delOm_prime = delOm_prime(1:m-1);
     end
     %ensure that the numerical range and del_Om are in the expected order
-    [nr] = delOmega_flipper(nr, 1);
-    [delOm, delOm_prime] = delOmega_flipper(delOm, delOm_prime, 1);
+    [nr] = delOm_flipper(nr, 1);
+    [delOm, delOm_prime] = delOm_flipper(delOm, delOm_prime, 1);
     %define Gamma 1 and the derivative of Gamma 1
     in1 = ~ismember(delOm, nr);
     %find where Gamma_1 is not connected
