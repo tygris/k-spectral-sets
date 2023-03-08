@@ -16,7 +16,7 @@
 %  output, resNorm, double, the integral of the resolvent norm along Gam1
 %  output, rnorms, double, the resolvent norm at each point along Gam1
 %  output, gammas, double, absolute value of min(eig(mu(Gam1(s),A))), 
-%          where mu is defined as equation (5) in "K-Spectral Sets"  
+%          where mu is defined by equation (5) in "K-Spectral Sets"  
 
 %Natalie Wellen
 %3/06/23

@@ -1,7 +1,7 @@
 %Function to calculate the K-spectral set and integral of the resolvent norm
 % bounds on growth for a discrete time dynamical system represented as a matrix
 %
-%[k,cif,c2] = discDS(A, timestretch)
+%[k, resNorm, c2] = discDS(A, timestretch)
 % input, A, n by n complex double, the discrete time DS
 % input (opt), timestretch, double, to shorten or widen the time steps and
 %              thus tmax for the second plot
@@ -21,7 +21,7 @@
 %Natalie Wellen
 %3/06/23
 
-function [k,resNorm,c2] = discDS(A, timestretch)
+function [k, resNorm, c2] = discDS(A, timestretch)
     if nargin == 1
         timestretch = 1;
     end
@@ -30,7 +30,7 @@ function [k,resNorm,c2] = discDS(A, timestretch)
     [nr] = numerical_range(A,res);
     %Omega is the intersection of the unit disk and W(A)
     ind1 = abs(nr)<=1; %indices of the numerical range still part of delOm
-    %find Gamma1 and the angles where the disk and nr intersect
+    %find Gam1 and the angles where the disk and nr intersect
     [Gam1, as] = nr_disk_off(nr,1); %I don't use the points where nr extends beyond D(0,radius) 
     if isempty(as) %Use the entire disk boundary instead of a subset
         as = [0, 2*pi];
@@ -43,7 +43,7 @@ function [k,resNorm,c2] = discDS(A, timestretch)
         c2 = c2+c2hold; GamResNorm = GamResNorm+GamResNormHold;
     end
     k = c2 + sqrt(1+c2^2);
-    %calculate the Cauchy Transform along delOmega
+    %calculate the integral of the resolvent norm along delOm
     resNorm = GamResNorm;
     if as == [0, 2*pi]
     else
@@ -58,7 +58,7 @@ function [k,resNorm,c2] = discDS(A, timestretch)
         end
     end
     
-    %plot the numerical range, eigs, and 
+    %plot the numerical range, eigs, and delOm
     opts= {'LineWidth',2};
     figure()
     subplot(2,2,2)
@@ -71,7 +71,7 @@ function [k,resNorm,c2] = discDS(A, timestretch)
     plot(Gam1, '-k', opts{:}), plot(nr_plot, '-k', opts{:})
     title("Numerical Range and Eigenvalues")
     
-    %plot ||A^k|| with K and cif upper bounds
+    %plot ||A^k|| with K and resNorm upper bounds
     subplot(2,2,1)
     % calculate matrix envelope
     iterations = 100*timestretch;
@@ -88,12 +88,12 @@ function [k,resNorm,c2] = discDS(A, timestretch)
     n = 20001;
     m = length(A);
     Gam1 = exp(1i*(linspace(as(1), as(2), n)));
-    Gam1_prime = 1i.*Gam1; %counter-clockwise derivative of the unit disk
+    %Gam1_prime = 1i.*Gam1; %counter-clockwise derivative of the unit disk
     gammas = zeros(1,n);
     rnorms = zeros(1,n);
     for jj = 1:n
-        R = 1/(2*pi)*inv(Gam1(jj)*eye(m) - A); %the matrix s'(sI-A)^-1
-        gammas(jj) = -1*(min(eig(R+R'))); 
+        R = 1/(2*pi)*inv(Gam1(jj)*eye(m) - A); %the matrix resolvent
+        gammas(jj) = -1*(min(eig(1i*Gam1(jj)*R-1i*Gam1(jj)'*R'))); 
         rnorms(jj) = norm(R,2);
     end
     subplot(2,2,4)

@@ -1,6 +1,6 @@
 % Function to fill in gaps on the numerical range that lead to errors when
-%  removing disks. For example, when defining the numerical range for a
-%  block diagonal matrix.
+%  removing disks. This occurs when there is a straight edge on the boundary, 
+%  such as for the numerical range of a block diagonal matrix.
 %
 %[nrNew, nr_primeNew] = nr_gap_fill(nr,nr_prime)
 % input, nr, complex vector, the boundary of the numerical range

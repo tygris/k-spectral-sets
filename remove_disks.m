@@ -1,16 +1,16 @@
 %Function to define a spectral set Omega by removing disks from W(A), then
-%estimate an uppper bound on the value of K for the set Omega.
+% estimate an uppper bound on the value of K for the set Omega.
 %
-%[k, cif, delOm, delOm_prime, c1, c2] = remove_disks(A)
-%  input, A, n by n double, the matrix we wish to define a spectral set for
+%[k, resNorm, delOm, delOm_prime, c1, c2] = remove_disks(A)
+%  input, A, n by n double, the matrix we are defining a spectral set for
 %  
 %  output, k, double, the K value of the spectral set Omega
-%  output, cif, double, the value of the integral of the resolvent norm of A
+%  output, resNorm, double, the value of the integral of the resolvent norm of A
 %  output, delOm, complex double, the boundary of Omega in the complex plane 
 %  output, delOm_prime, complex double, the derivative of delOm in the
 %          counter-clockwise direction
-%  output, c1, double
-%  output, c2, double
+%  output, c1, double, constant used to calculate K
+%  output, c2, double, constant used to calculate K
 
 % Depends on:  - numerical_range
 %              - nr_gap_fill
@@ -27,8 +27,7 @@
 %3/06/23
 
 function [k, resNorm, delOm, delOm_prime, c1, c2] = remove_disks(A)
-    %The resolution of the W(A). Half this value is used for the
-    %disks removed from W(A).
+    %The resolution of W(A). 
     res = 20000;
     %define the starting Omega
     [nr, nr_prime] = numerical_range(A,res);

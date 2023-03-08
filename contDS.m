@@ -1,7 +1,8 @@
-%Function to calculate the spectral set and comparison Cauchy Integral for
-% a continuous time dynamical system represented as a matrix
+%Function to calculate the K value for the spectral set Omega and comparison 
+% upper bound using the integral of the resolvent norm for a continuous time 
+% dynamical system represented as a matrix
 %
-%[k,resNorm,c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestretch)
+%[k, resNorm, c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestretch)
 % input, A, n by n complex double, the continuous time DS
 % input (opt), timestretch, double, to shorten or widen the time steps and
 %              thus tmax for the second plot
@@ -26,24 +27,24 @@
 %Natalie Wellen
 %3/06/23
 
-function [k,resNorm,c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestretch)
+function [k, resNorm, c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestretch)
     if nargin == 1
         timestretch = 1;
     end
     %calculate the numerical range and it's derivative
     [nr] = numerical_range(A,200000);
-    %find Gamma1 and it's derivative
+    %find Gam1 and it's derivative
     [y1, y2] = nr_cut_off(nr, 0);
     [c2, GamResNorm] = calc_c2_v(A, imag(y1), imag(y2));
 %    mean_cif = cifG/abs(y2-y1);
 %    mean_c2 = c2/abs(y2-y1);
     GamDist = abs(y2-y1);
-    %define delOmega and it's derivative
+    %define delOm and it's derivative
     ind1 = real(nr)<0;
     delOm = cat(2, [y1,y2], nr(ind1));
     %calculate k, c1, and c2
     k = c2 + sqrt(1+c2^2);
-    %calculate the Cauchy Transform along delOmega
+    %calculate the integral of the resolvent norm along delOm
     extraResNorm = resolvent_norm_integral(A, nr(ind1));
     resNorm = extraResNorm + GamResNorm;
     
@@ -86,8 +87,8 @@ function [k,resNorm,c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestret
     gammas = zeros(1,n);
     rnorms = zeros(1,n);
     for jj = 1:n
-        R = 1/(2*pi)*inv(Gam1(jj)*eye(m) - A); %the matrix s'(sI-A)^-1
-        gammas(jj) = -1*(min(eig(R+R'))); 
+        R = 1/(2*pi)*inv(Gam1(jj)eye(m) - A); %the resolvent of A at the jj'th point
+        gammas(jj) = -1*(min(eig(1i*R-1i*R'))); 
         rnorms(jj) = norm(R,2);
     end
 %    max_rnorm = max(rnorms);

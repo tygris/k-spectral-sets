@@ -6,22 +6,23 @@
 % 
 % [Gam1, xs] = nr_disk_off(curve, radius)
 % input nrA, complex vector, the boundary of W(A)
-% input radius, double, the radius of a disk centered at zero that we wish to contain 
-%       spectral set Omega within
+% input radius, double, the radius of a disk centered at zero that we wish to intersect 
+%       the spectral set Omega within
 %
 % output, Gam1, complex vector with connected segments separated by
-%         NaN+1i*NaN, the boundary of delOm along the 
+%         NaNs, the boundary of delOm  
 % output, xs, the angle of the intersections of nrA (the boundary of W(A)) 
 %         and a circle with radius absx 
 
 %Natalie Wellen
 %3/06/23
+
 function [Gam1, xs] = nr_disk_off(curve, radius)
     %parse inputs
     if nargin == 1
         radius = 1;
     end
-    %find where the numerical range is beyond the disk with radius absx
+    %find where the numerical range is beyond the disk with radius abs(x)
     loc = abs(curve)<=radius;
     breaks = find(loc(2:end) - loc(1:end-1));
     
@@ -34,7 +35,7 @@ function [Gam1, xs] = nr_disk_off(curve, radius)
     if n == 0
         Gam1 = unitD(linspace(0, 2*pi, 4000));
     else
-    %calculate the angle of intersection on [0, 2*pi]
+    %calculate the angle of intersection, the angle is in [0, 2*pi]
     angley = @(y) (y+2*pi).*(y<0)+y.*(y>=0);
     ys = @(x1,x2) angley(angle(x1+(x2-x1)*(1 - abs(x1))/(abs(x2)-abs(x1))));
     if loc(1)

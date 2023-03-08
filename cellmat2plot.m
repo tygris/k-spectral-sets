@@ -1,11 +1,11 @@
 % Function to convert an m by n cell array into a complex vector
 %
-%[plotter, del_om_vec] = cellmat2plot(delOm_ca, delom_ca, no_plot)
+%[plotter, delomVec] = cellmat2plot(delOm_ca, delom_ca, noPlot)
 % input, delOm_ca, m by n cell array of complex vectors, defines the
 %        spectral set for matrix A
 % optional input, delom_ca, m by n cell array of source of derivative for 
 %        corresponding delOm_ca entries
-% optional input, no_plot. If 1, then no plot is produced. 
+% optional input, noPlot. If 1, then no plot is produced. 
 %
 % output, plotter, complex vector, delOm aka the spectral set boundary as a
 %         complex vector
@@ -42,21 +42,22 @@ function [plotter, delomVec] = cellmat2plot(delOm_ca, delom_ca, noPlot)
     for jj = 2:n
         foo = cell2mat(delOm_ca(1,jj));
         foo2 = cell2mat(delom_ca(1, jj));
-        plotter = cat(2, plotter, NaN+1i*NaN);
+        plotter = cat(2, plotter, NaN);
         plotter = cat(2, plotter, foo);
-        delomVec = cat(2, delomVec, NaN+1i*NaN);
+        delomVec = cat(2, delomVec, NaN);
         delomVec = cat(2, delomVec, foo2);
     end
     for ii = 2:m
         for jj = 1:n
             foo = cell2mat(delOm_ca(ii,jj));
             foo2 = cell2mat(delom_ca(ii, jj));
-            plotter = cat(2, plotter, NaN+1i*NaN);
+            plotter = cat(2, plotter, NaN);
             plotter = cat(2, plotter, foo);
-            delomVec = cat(2, delomVec, NaN+1i*NaN);
+            delomVec = cat(2, delomVec, NaN);
             delomVec = cat(2, delomVec, foo2);
         end
     end
+    %plot the resulting vector from the first input
     if noPlot ~= 1
         %figure()
         plot(real(plotter), imag(plotter), 'b-')

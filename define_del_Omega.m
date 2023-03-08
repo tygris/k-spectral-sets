@@ -1,5 +1,5 @@
-%Function to remove disks from a complex set and define del_Omega as the
-% resulting set.
+%Function to remove disks from a complex set to define a spectral set Om. 
+% See Theorem 2 fin "K-Spectral Sets."
 %
 %[delOm, delom, xs, r1orr2] = define_del_Omega(delOm_0, delom_0, A, zeta, 
 %                                               res, radius)
@@ -10,35 +10,39 @@
 %       from the matrix numerical range, non-zero integers indicate which
 %       disk the arclength refers to in order of removal
 %  input, A, n by n complex double
-%  input, zeta, complex vector, the center of the circles to be removed
-%  input, res, integer, the number of points on the boundary of the circle
-%  input, radius, double vector, optional argument for the radius of the circles 
-%       to be removed. Must be the same length and in the same order as zeta
+%  input, zeta, complex vector, the center of the disks to be removed
+%  input, res, integer, the number of points on the boundary of each disk
+%  input, radius (opt), double vector, the radius of each disk to be removed.
+%         Must be the same length and in the same order as zeta.
 %
-%  output, delOm, cell array of complex vectors, the closed boundary of 
+%  output, delOm, cell array of complex vectors, the boundary of 
 %        the spectral set
-%        - each outer boundary is the first cell in a row, goes in the
+%        - each outer boundary is the first column in a row, and goes in the
 %        counter-clockwise direction from angle zero
-%        - the annuli are subsequent cells in the array, they go in the
+%        - the annuli are subsequent columns in the cell array, they go in the
 %        clockwise direction from angle zero
-%        - the union of all rows forms the spectral set
-%  output, delom, cell array of integer vectors of update to del_omega_0
-%  output, xs, complex matrix of the points part of del_Omega closest
-%       to the intersection disk jj and the rest of del_Omega
-%       -the first row is the intersection counter-clockwise closest to the
-%        abscissa
+%        - the union of all closed curves forms the boundary of the spectral set
+%  output, delom, cell array of integer vectors indicating which disk
+%        removed that boundary point is the result of. The original value delom_0
+%        is all zeros, and the integers of delom are the indices of zeta and 
+%        radius for the corresponding disk removed.
+%  output, xs, complex matrix of the points part of delOm closest
+%       to the intersection disk jj and the rest of delOm
+%       -the first row is the intersection counter-clockwise closest to
+%        angle 0 measured from the disks center
 %       -the second row is the intersection counter-clockwise furthest from
-%        the abscissa
+%        angle 0 measured from the disks center
 %       -each column is a separate disk removed in the same order as the
 %        input zeta
 %       -if the disk removed is an annulus without intersections, then the
 %        corresponding column comntains NaNs
-%  output, r1orr2, vector of 1's and 2's, 1 means the radius is less than the
-%       resolvent norm, 2 means min
-%       ev >= -R/(2*pi). In the same order as zeta.
+%  output, r1orr2, vector of 1's and 2's, 1 means the radius is equal to one over the
+%       resolvent norm, 2 means the radius is equal to one over the numerical radius 
+%       of the resolvent norm. Indices correspond to the same indices as for zeta.
 
 % 1/24: A single annulus curve cannot be split into two (but the outer
 %       boundary can)
+
 % Depends on:
 %    - numerical_range
 %    - cellmat2plot
@@ -57,7 +61,7 @@ function [delOm, delom, xs, r1orr2] = define_del_Omega(delOm_0, delom_0, A, zeta
         assert(length(zeta) == length(radius),...
             "zeta and radius must have the same length")
     end
-    % ensure that del_Omega and del_omega go in the correct directions
+    % ensure that delOm and delom are stored in the correct directions
     %  counter-clokwise in the first column and clockwise in other columns
     [nRows, nCols] = size(delOm_0);
     delOm{nRows, nCols} = []; delom{nRows, nCols} = []; %instantiate the variables
@@ -78,7 +82,6 @@ function [delOm, delom, xs, r1orr2] = define_del_Omega(delOm_0, delom_0, A, zeta
     numRemove = length(zeta);
     r1orr2 = -1*ones(1,numRemove);
     xs = [];
-    %del_omega_plot = ;
     countRemoved = max(cellmat2plot(delom_0,1)); %the number of disks already removed
     for jj = 1:numRemove
         countRemoved = countRemoved +1; %the number of the disks removed after this loop
@@ -88,9 +91,9 @@ function [delOm, delom, xs, r1orr2] = define_del_Omega(delOm_0, delom_0, A, zeta
         else
             [delOm_jj, r1orr2(jj)] = remove_circ(A, zeta(jj), res, radius(jj));
         end
-        %define the new vector to update del_omega with
+        %define the new vector to update delom with
         delom_jj = countRemoved*ones(1,length(delOm_jj));
-        %make sure that del_Omega_jj are in clockwise order
+        %make sure that delOm_jj are in clockwise order
         [delOm_jj, delom_jj] = delOm_flipper(delOm_jj, delom_jj, 0);
         %Now that the disk being removed is defined, determine which simple
         %  closed curves the disk intersects and redefine those curves 
@@ -207,11 +210,12 @@ end
 %
 % output, delOmega_k, vector of complex values, the contour of the removed
 %  circle in the counter-clockwise direction 
-% output, r1orr2, 1 = r1 from Theorem 2 and the radius is equal to 1 over the 
-%       reolvent norm such that the min eigenvalue is >= -R/2pi. 2 = r2.
+% output, r1orr2, vector of 1's and 2's. 1 means the radius is equal to one over the
+%       resolvent norm, 2 means the radius is equal to one over the numerical radius 
+%       of the resolvent norm. Indices correspond to the same indices as for zeta.
 % output, radius, double, the max radius of a removed disk centered at zeta
 %         or the same as the optional input radius.
-% 
+
 % Depends on: 
 %    - r_of_A
 %       - numerical_range
@@ -248,19 +252,19 @@ end
 % input, delOmVec2, complex vector, the boundary of a second simple closed curve
 % input, delomVec2, integer vector, the source for taking the derivative
 %        of delOmVec2
-% input, Gam1, vector of 0s and 1s, 1 indicates del_Om_vec1 lies within or on
+% input, Gam1, vector of 0s and 1s, 1 indicates delOmVec1 lies within or on
 %        the boundary of delOmVec2
-% input, Gam2, vector of 0s and 1s, 1 indicates del_Om_vec2 lies within or on
+% input, Gam2, vector of 0s and 1s, 1 indicates delOmVec2 lies within or on
 %        the boundary of delOmVec1
-% input, ON, vector of 0s and 1s, 1 indicates del_Om_vec1 is on the
+% input, ON, vector of 0s and 1s, 1 indicates delOmVec1 is on the
 %        boundary of delOmVec2 (has an equivalent point)
 % 
 % output, delOmVec, complex vector, the new simple closed curve resulting 
 %          from combining the input curves del_Om_vec1 and del_Om_vec2
 % output, delomVec, integer vector, the source for taking the derivative
-%        of the new del_Om_vec
+%        of the new delOmVec
 % output, xs, complex vector, list of new intersection points 
-%         resulting from combining del_Om_vec1 and del_Om_vec2
+%         resulting from combining delOmVec1 and delOmVec2
 
 %Natalie Wellen
 %3/06/23
@@ -444,17 +448,19 @@ function [delOmVec, delomVec, xs] = curve_combine(outBound, delOmVec1,...
     end
 end
 
-%Sometimes the intersection points are listed as outside del_Omega, which 
+%Sometimes the intersection points are listed as outside delOm, which 
 % causes errors in the rest of the code.
 %This code will remove those extra intersection points cleaning the list
-% while keeping the intersection points as part of the final del_Omega
+% while keeping the intersection points as part of the final delOm
 % output.
 %
-%[cleanFirst, cleanLast] = inter_clean(first, last)
+%[cleanFirst, cleanLast] = inter_clean(first, last, Gam1)
 % input, first, complex vector, when the curve first leaves the other curve
 %         in the clockwise direction
 % input, last, complex vector, when the curve switches back to inside the
 %         curve in the clockwise direction
+% input, Gam1, complex vector, the closed curve the intersection points lie on
+
 % output, cleanFirst, complex vector, 'first' without the single
 %         intersection points included in the list
 % output, cleanLast, complex vector, 'last' without the single

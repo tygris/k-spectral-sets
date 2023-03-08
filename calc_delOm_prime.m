@@ -6,7 +6,7 @@
 %[delOm_prime] = calc_delOm_prime(delOm)
 %  input, delOm, complex vector, the countour of a set boundary in the complex plane
 %        comprised of a union of simple closed curves, each curve separated
-%        by NaN+1i*NaN
+%        by NaN
 % 
 %  output, delOm_prime, complex vector, the derivative of the corresponding
 %          entry of delOm in the direction that the contour is stored. This
@@ -26,7 +26,8 @@ function [delOm_prime] = calc_delOm_prime(delOm)
         %find the derivative
         primer = (curve(3:end) - curve(1:end-2))./...
             (abs(curve(3:end)-curve(2:end-1))+abs(curve(2:end-1)-curve(1:end-2)));
-        delOm_prime = cat(2, delOm_prime, primer, NaN+1i*NaN);
+        delOm_prime = cat(2, delOm_prime, primer, NaN);
     end
+    %remove extra NaN
     delOm_prime = delOm_prime(1:end-1);
 end

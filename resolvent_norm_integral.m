@@ -1,8 +1,9 @@
-% function that calculates the cauchy integral formula for a matrix A
-% along the boundary of a region in the complex plane. The second order
-% trapezoid formula is used to compute the integral.
+%Function that calculates the integral of the resolvent norm for a matrix A.
+% The function is based on using the cauchy integral formula along the boundary 
+% of a spectral set Omega to bound f(A). The second order trapezoid formula is 
+% used to compute the integral.
 %
-%[cif] = cauchyIntFormula(A, Gam1)
+%[resNorm] = resolvent_norm_integral(A, Gam1)
 % input, A, n by n double, goal is to calculate the integral of the
 %        resolvent norm of A
 % input, Gam1, complex double, a subset of the boundary we are calculating
@@ -10,13 +11,12 @@
 %        passed separately. Further, no assumption about equidistant points
 %        is made.
 %
-% output, cif, double, the estimate of the Cauchy Integral Formula bounding
-%         ||f(A)||/||f||_\Omega along Gam1, the integral of the resolvent norm of A
+% output, resNorm, double, the value of the integral of the resolvent norm of A
 
 %Natalie Wellen
 %3/06/23
 
-function cif = resolvent_norm_integral(A, Gam1)
+function resNorm = resolvent_norm_integral(A, Gam1)
     %calculate the norm of the resolvent for points along Gam1
     n = length(Gam1);
     cauchy = zeros(1, n);
@@ -35,10 +35,10 @@ function cif = resolvent_norm_integral(A, Gam1)
     %is Gam1 closed? if yes there are no "boundary points"
     % if no then we need to calculate the endpoints as well
     if Gam1(1) == Gam1(n)
-        cif = sum(midpoints)/(4*pi);
+        resNorm = sum(midpoints)/(4*pi);
     else
         endpointa = abs(Gam1(2)-Gam1(1))*cauchy(1);
         endpointb = abs(Gam1(n) - Gam1(n-1))*cauchy(n);
-        cif = (sum(midpoints)+endpointa+endpointb)/(4*pi);
+        resNorm = (sum(midpoints)+endpointa+endpointb)/(4*pi);
     end
 end

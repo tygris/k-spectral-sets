@@ -1,7 +1,6 @@
-% Function to calculate an upper-bound on c2. First we find the min value of r on a curve 
-% This involves stepping through each value on the contour of del_Omega and
-% comparing the previous minimum of r to the current point
-% This function assumes that for overlapping disks, c2 is calculated by 
+%Function to calculate the upper bound K for a spectral set. 
+% This function calls calc_c1 and calc_c2 seaprately for each closed curve
+% as helper functions to do so.
 % 
 % [k, c1, c2, GamResNorm] = calc_k(A, delOm, delOm_prime, Gam1, Gam1_prime, vhdn)
 %  input, A, square matrix double
@@ -23,7 +22,7 @@
 %          from a sigma_0 traversing the boundary of the spectral-set 
 %  output, c2, double, the value of c2 defining the k-spectral-set
 %  output, GamResNorm, double, the value of the integral of the resolvent norm along Gam1
-%
+
 % Depends on:
 %    - calc_c1
 %       - find_c1
@@ -43,7 +42,7 @@ function [k, c1, c2, GamResNorm] = calc_k(A, delOm, delOm_prime, Gam1, Gam1_prim
     assert(length(breaks)+1 == length(vhdn), ...
         "ERROR: Each connected curve needs to be listed as a vertical line 'v', \n horizontal line 'h', or a general curve 'n'.")
     
-    %calculate c2 for each connected curve and add the total
+    %calculate c2 for each connected curve and add to the total
     breaks = [0, breaks, length(Gam1)+1]; %to include the start and end
     c2 = 0; GamResNorm = 0;
     for ii = 1:length(breaks)-1
