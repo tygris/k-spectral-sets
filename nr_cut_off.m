@@ -24,7 +24,7 @@ function [y1,y2] = nr_cut_off(nr, lineinter, lineslope)
     if lineslope == 'h'
         % find the pts on the numerical range just before y1 and y2
         ind1 = imag(nr) > lineinter;
-        pts = find(ind1(2:20001)-ind1(1:20000));
+        pts = find(ind1(2:end)-ind1(1:end-1));
         %find y1
         x1 = nr(pts(1)); x2 = nr(pts(1)+1);
         y1 = real(x2) + (real(x1)-real(x2))/(imag(x1)-imag(x2))*(lineinter-imag(x2));
@@ -36,7 +36,7 @@ function [y1,y2] = nr_cut_off(nr, lineinter, lineslope)
     else
         % find the pts on the numerical range just before y1 and y2
         ind1 = real(nr) > lineinter;
-        pts = find(ind1(2:20001)-ind1(1:20000));
+        pts = find(ind1(2:end)-ind1(1:end-1));
         %find y1
         x1 = nr(pts(1)); x2 = nr(pts(1)+1);
         y2 = imag(x1) + (imag(x2)-imag(x1))/(real(x2)-real(x1))*(lineinter-real(x1));

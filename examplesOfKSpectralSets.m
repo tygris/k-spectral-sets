@@ -14,11 +14,11 @@ A =  transient_demo(10);
 
 %% Explore different sets for calculating the integral of the resolvent norm
 
-cif_i = cauchyIntFormula(A, 1i*(-10000:0.01:10000))
+cif_i = resolvent_norm_integral(A, 1i*(-10000:0.01:10000))
 
 DU = @(x,r) r*exp(1i*x);
 unitD = DU(0:0.01:2*pi,1);
-cif_ud = cauchyIntFormula(A, unitD)
+cif_ud = resolvent_norm_integral(A, unitD)
 
 %% Now we compare the value of the K to the corresponding pseudospectral
 %   bounds
@@ -285,7 +285,7 @@ plot(numerical_range(A(b1+1:b1+b2,b1+1:b1+b2), res))
 plot(numerical_range(A(b1+b2+1:b1+b2+b3,b1+b2+1:b1+b2+b3), res))
 
 pause
-[k, cif, delOm, delOm_prime] = removeDisks(A);
+[k, cif, delOm, delOm_prime] = remove_disks(A);
 k, cif
 
 
@@ -294,7 +294,7 @@ k, cif
 load('tripleBlock0.mat');
 %omA = [4+1.5i, 3+4i]; omA2 = [4+2i, 3+4i];
 
-[k, cif, delOmA,~,c1, c2] = removeDisks(A);
+[k, cif, delOmA,~,c1, c2] = remove_disks(A);
 c1, c2, k, cif
 
 eigA = eig(A);
@@ -344,8 +344,8 @@ plot(nr, 'b--')
 hold on, axis equal
 plot(evA, 'rx')
 
-%Remove the disks at -9.5 and 10 for optimal
-[k, cif, delOmA, ~, c1, c2] = removeDisks(A);
+%Remove the disks at -9.5 and 10 for optimal K value
+[k, cif, delOmA, ~, c1, c2] = remove_disks(A);
 c1, c2, k, cif
 
 eigA = eig(A);
@@ -427,7 +427,7 @@ end
 %Maybe the min "spanning" disk is a batter way of thinking of it rather
 %than a disk containing W(A)!
 
-%% Single Disk Anne Example
+%% Single Disk Example
 
 rng('default')
 B11 = randn(4);
@@ -441,16 +441,16 @@ eigB = eig(B);
 nr1 = numerical_range(B11,1000);
 nr2 = numerical_range(B22,1000);
 [nr, nrprime]  = numerical_range(B, 1000);
-[nr, nrprime] = nrGapFill(nr, nrprime);
+[nr, nrprime] = nr_gap_fill(nr, nrprime);
 
-om = 3.5;
-[~, r1] = r_of_A(B, n, om);
+zeta = 3.5;
+[~, r1] = r_of_A(B, n, zeta);
 diskwriter =@(r, om, x) r*exp(1i*x) + om;
-d1 = diskwriter(r1, om, linspace(0,2*pi, 100));
+d1 = diskwriter(r1, zeta, linspace(0,2*pi, 100));
 
-[delOmB, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, B, om, 1000, r1);
+[delOmB, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, B, zeta, 1000, r1);
 [delOmB, delomvec] = cellmat2plot(delOmB, delomvec,1);
-[k, cif, delOm_prime, c1, c2] = calc_kRemovedDisk(B, om, nr, nrprime, delOmB, delomvec, xs, r1orr2);
+[k, cif, delOm_prime, c1, c2] = calc_k_removed_disks(B, zeta, nr, nrprime, delOmB, delomvec, xs, r1orr2);
 k, cif, c1, c2
 
 %plot disks
@@ -470,7 +470,7 @@ axis equal
 
 
 
-%% Gracar 100 Anne Example
+%% Gracar 100 Example
 n = 100;
 A = gallery('grcar',n);
 
@@ -479,16 +479,16 @@ eigA = eig(A);
 [n, ~] = size(A);
 
 [nr, nrprime]  = numerical_range(A, 1000);
-[nr, nrprime] = nrGapFill(nr, nrprime);
+[nr, nrprime] = nr_gap_fill(nr, nrprime);
 
-om = 0;
-[~, r1] = r_of_A(A, n, om);
-diskwriter =@(r, om, x) r*exp(1i*x) + om;
-d1 = diskwriter(r1, om, linspace(0,2*pi, 100));
+zeta = 0;
+[~, r1] = r_of_A(A, n, zeta);
+diskwriter =@(r, zeta, x) r*exp(1i*x) + zeta;
+d1 = diskwriter(r1, zeta, linspace(0,2*pi, 100));
 
-[delOmA, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, A, om, 10000, r1);
+[delOmA, delomvec, xs, r1orr2] = define_del_Omega({nr}, {zeros(1, length(nr))}, A, zeta, 10000, r1);
 [delOmA, delomvec] = cellmat2plot(delOmA, delomvec,1);
-[k, cif, delOm_prime] = calc_kRemovedDisk(A, om, nr, nrprime, delOmA, delomvec, xs, r1orr2);
+[k, cif, delOm_prime] = calc_k_removed_disks(A, zeta, nr, nrprime, delOmA, delomvec, xs, r1orr2);
 k, cif
 
 %plot disks
@@ -501,7 +501,7 @@ plot(nr, 'b--')
 plot(delOmA, 'k', 'LineWidth', 1.25)
 axis equal
 
-%% Gracar 32 Anne Example
+%% Gracar 32 Example
 n = 32;
 %For Grchar(32) use epsilon = 10^-3
 %For Grchar(24) use epsilon = 10^-2.2
@@ -528,7 +528,7 @@ breaks = find(isnan(delOmA)); breaks = [0,breaks, length(delOmA)+1];
 c2A = 0; cifA = 0; L = 0;
 for jj = 1:length(breaks)-1
     c2A = c2A + calc_c2_curve(A, delOmA(breaks(jj)+1:breaks(jj+1)-1), delOmAP(breaks(jj)+1:breaks(jj+1)-1));
-    cifA = cifA + cauchyIntFormula(A, delOmA(breaks(jj)+1:breaks(jj+1)-1));
+    cifA = cifA + resolvent_norm_integral(A, delOmA(breaks(jj)+1:breaks(jj+1)-1));
     L = L + sum(abs([delOmA(breaks(jj)+2:breaks(jj+1)-1), delOmA(breaks(jj)+1)]-delOmA(breaks(jj)+1:breaks(jj+1)-1)));
 end
 c2A
@@ -582,9 +582,9 @@ c2A = calc_c2_curve(A, delOmA(1:breaks(1)-1), delOmAP(1:breaks(1)-1))+...
     calc_c2_curve(A, delOmA(breaks(2)+1:end), delOmAP(breaks(2)+1:end));
 kA = c2A + sqrt(c1A + c2A^2)
 % the integral of the resolvent norm
-cifA = cauchyIntFormula(A, delOmA(1:breaks(1)-1))+...
-    cauchyIntFormula(A, delOmA(breaks(1)+1:breaks(2)-1))+...
-    cauchyIntFormula(A, delOmA(breaks(2)+1:end))
+cifA = resolvent_norm_integral(A, delOmA(1:breaks(1)-1))+...
+    resolvent_norm_integral(A, delOmA(breaks(1)+1:breaks(2)-1))+...
+    resolvent_norm_integral(A, delOmA(breaks(2)+1:end))
 %analytic formula for the integral of the resolvent norm 
 L = cat(2, [delOmA(2:breaks(1)-1), delOmA(1)] - delOmA(1:breaks(1)-1),...
     [delOmA(breaks(1)+2:breaks(2)-1), delOmA(breaks(1)+1)]-delOmA(breaks(1)+1:breaks(2)-1), ...
@@ -600,13 +600,13 @@ c2B = calc_c2_curve(B, delOmB(1:breaks(1)-1), delOmBP(1:breaks(1)-1))+...
     calc_c2_curve(B, delOmB(breaks(1)+1:end), delOmBP(breaks(1)+1:end));
 kB = c2B + sqrt(c1B + c2B^2)
 % the integral of the resolvent norm
-cifB = cauchyIntFormula(B, delOmB(1:breaks(1)-1))+...
-    cauchyIntFormula(B, delOmB(breaks(1)+1:end))
+cifB = resolvent_norm_integral(B, delOmB(1:breaks(1)-1))+...
+    resolvent_norm_integral(B, delOmB(breaks(1)+1:end))
 %analytic formula for the integral of the resolvent norm 
 L = cat(2, [delOmB(2:breaks(1)-1), delOmB(1)] - delOmB(1:breaks(1)-1),...
     [delOmB(breaks(1)+2:end), delOmB(breaks(1)+1)]-delOmB(breaks(1)+1:end));
 L = sum(abs(L));
-cifBexact = L/(2*pi)*10^0.35;
+cifBexact = L/(2*pi)*10^0.35
 
 
 %% Tuesday Lake with different types of Omega sets
@@ -619,25 +619,25 @@ T = [-0.9503,0,0.0690,0.0002, 0.0027,0.0034;
          0,0,0,0.0001, 0.0028, -0.0049]; %1986 Tuesday Lake
 [kT,cifT] = contDS(T)
 
-opts.levels = [-1.1, -1.3] ; opts.ax = [-1.06 0.08 -0.14 0.14] ; opts.npts = 1000;
-eigtool(T, opts)
+% opts.levels = [-1.1, -1.3] ; opts.ax = [-1.06 0.08 -0.14 0.14] ; opts.npts = 1000;
+% eigtool(T, opts)
 % export the pseudospectral data from eigtool
-load()
+load("TuesdayPseudospectra.mat")
 GamT1 = pe_contour(xT, yT, ZT, 10.^[-1.1, -1.1], 1);
 GamT2 = pe_contour(xT2,yT2,ZT2, 10.^[-2.35,-2.35],1);
 GamT3 = pe_contour(xT, yT, ZT, 10.^[-1.3, -1.3], 1);
 delOmT1 = GamT1(2:2:end);
 delOmT1 = cellmat2plot(delOmT1, 1);
-delOmT1 = delOmega_flipper(delOmT1,1);
-delOmT1_prime = delOmprime2(delOmT1);
+delOmT1 = delOm_flipper(delOmT1,1);
+delOmT1_prime = calc_delOm_prime(delOmT1);
 delOmT2 = GamT2(2:2:end);
 delOmT2 = cellmat2plot(delOmT2, 1);
-delOmT2 = delOmega_flipper(delOmT2,1);
-delOmT2_prime = delOmprime2(delOmT2);
+delOmT2 = delOm_flipper(delOmT2,1);
+delOmT2_prime = calc_delOm_prime(delOmT2);
 delOmT3 = GamT3(2:2:end);
 delOmT3 = cellmat2plot(delOmT3, 1);
-delOmT3 = delOmega_flipper(delOmT3,1);
-delOmT3_prime = delOmprime2(delOmT3);
+delOmT3 = delOm_flipper(delOmT3,1);
+delOmT3_prime = calc_delOm_prime(delOmT3);
 
 %epsilon = -1.1
 c1T1 = calc_c1(delOmT1, delOmT1_prime);
@@ -647,8 +647,8 @@ c2T1 = calc_c2_curve(T, delOmT1(1:breaks(1)-1), delOmT1_prime(1:breaks(1)-1))+..
     calc_c2_curve(T, delOmT1(breaks(1)+1:end), delOmT1_prime(breaks(1)+1:end));
 kT1 = c2T1 + sqrt(c1T1 + c2T1^2)
 % the integral of the resolvent norm
-cifT1 = cauchyIntFormula(T, delOmT1(1:breaks(1)-1))+...
-    cauchyIntFormula(T, delOmT1(breaks(1)+1:end))
+cifT1 = resolvent_norm_integral(T, delOmT1(1:breaks(1)-1))+...
+    resolvent_norm_integral(T, delOmT1(breaks(1)+1:end))
 %analytic formula for the integral of the resolvent norm 
 L = cat(2, [delOmT1(2:breaks(1)-1), delOmT1(1)] - delOmT1(1:breaks(1)-1),...
     [delOmT1(breaks(1)+2:end), delOmT1(breaks(1)+1)]-delOmT1(breaks(1)+1:end));
@@ -667,10 +667,10 @@ c2T2 = calc_c2_curve(T, delOmT2(1:breaks(1)-1), delOmT2_prime(1:breaks(1)-1))+..
     calc_c2_curve(T, delOmT2(breaks(3)+1:end), delOmT2_prime(breaks(3)+1:end));
 kT2 = c2T2 + sqrt(c1T2 + c2T2^2)
 % the integral of the resolvent norm
-cifT2 = cauchyIntFormula(T, delOmT1(1:breaks(1)-1))+...
-    cauchyIntFormula(T, delOmT2(breaks(1)+1:breaks(2)-1))+...
-    cauchyIntFormula(T, delOmT2(breaks(2)+1:breaks(3)-1))+...
-    cauchyIntFormula(T, delOmT2(breaks(3)+1:end))
+cifT2 = resolvent_norm_integral(T, delOmT1(1:breaks(1)-1))+...
+    resolvent_norm_integral(T, delOmT2(breaks(1)+1:breaks(2)-1))+...
+    resolvent_norm_integral(T, delOmT2(breaks(2)+1:breaks(3)-1))+...
+    resolvent_norm_integral(T, delOmT2(breaks(3)+1:end))
 %analytic formula for the integral of the resolvent norm 
 % L = cat(2, [delOmT1(2:breaks(1)-1), delOmT1(1)] - delOmT1(1:breaks(1)-1),...
 %     [delOmT1(breaks(1)+2:end), delOmT1(breaks(1)+1)]-delOmT1(breaks(1)+1:end));
@@ -685,9 +685,9 @@ c2T3 = calc_c2_curve(T, delOmT3(1:breaks(1)-1), delOmT3_prime(1:breaks(1)-1))+..
     calc_c2_curve(T, delOmT3(breaks(2)+1:end), delOmT3_prime(breaks(2)+1:end));
 kT3 = c2T3 + sqrt(c1T3 + c2T3^2)
 % the integral of the resolvent norm
-cifT3 = cauchyIntFormula(T, delOmT3(1:breaks(1)-1))+...
-    cauchyIntFormula(T, delOmT3(breaks(1)+1:breaks(2)-1))+...
-    cauchyIntFormula(T, delOmT3(breaks(2)+1:end))
+cifT3 = resolvent_norm_integral(T, delOmT3(1:breaks(1)-1))+...
+    resolvent_norm_integral(T, delOmT3(breaks(1)+1:breaks(2)-1))+...
+    resolvent_norm_integral(T, delOmT3(breaks(2)+1:end))
 %analytic formula for the integral of the resolvent norm 
 L = cat(2, [delOmT3(2:breaks(1)-1), delOmT3(1)] - delOmT3(1:breaks(1)-1),...
     [delOmT3(breaks(1)+2:breaks(2)-1), delOmT3(breaks(1)+1)]-delOmT3(breaks(1)+1:breaks(2)-1), ...

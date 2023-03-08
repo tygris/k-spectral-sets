@@ -28,7 +28,7 @@
 
 function [k, resNorm, delOm, delOm_prime, c1, c2] = remove_disks(A)
     %The resolution of W(A). 
-    res = 20000;
+    res = 2000;
     %define the starting Omega
     [nr, nr_prime] = numerical_range(A,res);
     [nr, nr_prime] = nr_gap_fill(nr, nr_prime);

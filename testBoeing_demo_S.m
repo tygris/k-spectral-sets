@@ -4,16 +4,15 @@
 %1/19/22
 
 A = boeing_demo('S');
-
+res = 20001;
 %calculate the numerical range and it's derivative
-[nr, nr_prime] = numerical_range(A,200000);
+[nr, nr_prime] = numerical_range(A,res);
 %find Gamma1 and it's derivative
-[y1, y2] = nrCutOff(A, 0); %find the values on the border of the numerical range Gamma1 runs between
-n = 2000001;
-Gam1 = flip(chebpts(n, [y2, y1]).');
-Gam1 = [y1, Gam1((n-1)/2+2:n-1)+y1, 0, Gam1(2:(n-1)/2)+y2, y2];
-Gam1_prime = 1i*ones(1,n);
-ds = abs(Gam1(2:n)-Gam1(1:n-1));
+[y1, y2] = nr_cut_off(nr, 0); %find the values on the border of the numerical range Gamma1 runs between
+Gam1 = flip(chebpts(res, [y2, y1]).');
+Gam1 = [y1, Gam1((res-1)/2+2:res-1)+y1, 0, Gam1(2:(res-1)/2)+y2, y2];
+Gam1_prime = 1i*ones(1,res);
+ds = abs(Gam1(2:res)-Gam1(1:res-1));
 figure()
 plot(ds)
 %define delOmega and it's derivative
@@ -24,9 +23,9 @@ delOm = cat(2, Gam1, nr(ind1));
 %calculate c2
 %gamma(s) and resolvent norm at each point of Gamma_1
 m = length(A);
-gammas = zeros(1,n);
-rnorms = zeros(1,n);
-for jj = 1:n
+gammas = zeros(1,res);
+rnorms = zeros(1,res);
+for jj = 1:res
     R = Gam1_prime(jj)*inv(Gam1(jj)*eye(m) - A); %the matrix s'(sI-A)^-1
     gammas(jj) = abs(min(eig(1/(2*pi*1i)*(R-R')))); 
     rnorms(jj) = norm(R, 2); %/2*pi
@@ -36,18 +35,18 @@ end
 %Use the trapezoidal rule to estimate the integral of gamma(s)
     %note we assume points are equidistant
 %ds = abs(Gam1(2:n)-Gam1(1:n-1));
-midpoints = gammas(2:n) + gammas(1:n-1); %/2
-midpoints2 = rnorms(2:n) + rnorms(1:n-1); %/2
+midpoints = gammas(2:res) + gammas(1:res-1); %/2
+midpoints2 = rnorms(2:res) + rnorms(1:res-1); %/2
 integral = (sum(midpoints.*ds) +...
-    ds(1)*gammas(1)+ds(n-1)*gammas(n))/2; %endpoints
+    ds(1)*gammas(1)+ds(res-1)*gammas(res))/2; %endpoints
 cifG = (sum(midpoints2.*ds)+...
-    ds(1)*rnorms(1)+ds(n-1)*rnorms(n))/(4*pi);
+    ds(1)*rnorms(1)+ds(res-1)*rnorms(res))/(4*pi);
 %calculate c2 and K
 c2 = 1+real(integral);
 k = c2+sqrt(1+c2);
 
 %calculate the Cauchy Transform along delOmega
-cif = cauchyIntFormula(A, nr(ind1)) + cifG;
+cif = resolvent_norm_integral(A, nr(ind1)) + cifG;
 
 %% plot the numerical range, eigs, and delOmega
 figure()

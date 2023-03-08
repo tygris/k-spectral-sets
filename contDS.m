@@ -87,7 +87,7 @@ function [k, resNorm, c2, GamResNorm, GamDist, extraResNorm] = contDS(A, timestr
     gammas = zeros(1,n);
     rnorms = zeros(1,n);
     for jj = 1:n
-        R = 1/(2*pi)*inv(Gam1(jj)eye(m) - A); %the resolvent of A at the jj'th point
+        R = 1/(2*pi)*inv(Gam1(jj)*eye(m) - A); %the resolvent of A at the jj'th point
         gammas(jj) = -1*(min(eig(1i*R-1i*R'))); 
         rnorms(jj) = norm(R,2);
     end
